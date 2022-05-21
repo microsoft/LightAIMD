@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) Microsoft Corporation.
+ * Licensed under the MIT License.
+ */
+#ifndef CMD_LINE_ARGS_H
+#define CMD_LINE_ARGS_H
+#include "numeric_types.h"
+#include "molecule.h"
+
+extern const u64 JOB_TYPE_SPE; // Single Point Energy
+extern const u64 JOB_TYPE_SPF; // Single Point Forces
+extern const u64 JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
+
+struct cmd_line_args
+{
+    u64 job_type;
+    char *basis_set;
+    struct molecule *mol;
+
+    /* SCF */
+    u64 damping; // flag
+
+    /* DIIS */
+    u64 diis_subspace_size;
+
+    /* DFT related command-line arguments */
+    u64 x_functional_id;
+    u64 c_functional_id;
+    u64 radial_grid_level;
+    u64 lebedev_level;
+
+    /* MD */
+    u64 md_steps;
+    f64 md_delta_t_fs;
+    f64 md_temperature_K;
+    f64 md_thermostat_time_smoothing_factor;
+
+    /* MISC */
+    u64 silent; // flag
+    u64 check_results;
+};
+
+void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args);
+
+#endif
