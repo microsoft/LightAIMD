@@ -139,7 +139,6 @@ void build_K_matrix(struct molecular_grid_desc *mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
@@ -277,7 +276,6 @@ void build_J_matrix(struct molecular_grid_desc *mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
@@ -438,7 +436,6 @@ void build_JK_matrices(struct molecular_grid_desc *mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 

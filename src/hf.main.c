@@ -209,7 +209,6 @@ void build_fock_direct(struct scf_context *ctx)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
