@@ -30,7 +30,7 @@ void mat_add_A_AT(f64 *A, f64 *B, u64 m, u64 n)
         for (u64 j = 0; j < n; ++j)
         {
             u64 ij = in + j;
-            B[ij] = A[ij] + A[j*n + i];
+            B[ij] = A[ij] + A[j * n + i];
         }
     }
 }

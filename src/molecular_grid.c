@@ -36,7 +36,7 @@ struct task_func_bfvalues_derivatives_arg
     u64 i;
 };
 
-void task_func_bfvalues_derivatives(void * p_arg)
+void task_func_bfvalues_derivatives(void *p_arg)
 {
     struct task_func_bfvalues_derivatives_arg *arg = (struct task_func_bfvalues_derivatives_arg *)p_arg;
 
@@ -59,10 +59,10 @@ void task_func_bfvalues_derivatives(void * p_arg)
 
         mgd->bf_values[k * N + i] = basis_funcs_value(bf, glb_coord);
         basis_funcs_first_derivative(bf,
-                                        glb_coord,
-                                        mgd->bf_derivative_x + k * N + i,
-                                        mgd->bf_derivative_y + k * N + i,
-                                        mgd->bf_derivative_z + k * N + i);
+                                     glb_coord,
+                                     mgd->bf_derivative_x + k * N + i,
+                                     mgd->bf_derivative_y + k * N + i,
+                                     mgd->bf_derivative_z + k * N + i);
         mgd->bf_laplacian[k * N + i] = basis_func_laplacian(bf, glb_coord);
         basis_funcs_second_derivative(bf, glb_coord, xx + k * N + i, yy + k * N + i, zz + k * N + i, xy + k * N + i, xz + k * N + i, yz + k * N + i);
     }

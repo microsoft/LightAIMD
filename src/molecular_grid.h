@@ -64,7 +64,7 @@ struct molecular_grid_desc
     f64 xc_energy;
     f64 hyb_coef;
 
-    f64 *XC; /* two-electron exchange-correlation matrix */
+    f64 *XC;    /* two-electron exchange-correlation matrix */
     f64 *VXC_x; /* grid_size X n_basis_func */
     f64 *VXC_y; /* grid_size X n_basis_func */
     f64 *VXC_z; /* grid_size X n_basis_func */
