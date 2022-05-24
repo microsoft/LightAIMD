@@ -92,8 +92,8 @@ void task_func_eri_dwrt_nuc(void *p_arg)
     if (ctx->atom_bf_map[n * N + i])
     {
         cg_electron_repulsion_integral_dwrt_nuc(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                                    ctx->basis_funcs + k, ctx->basis_funcs + l,
-                                                    1, xyz);
+                                                ctx->basis_funcs + k, ctx->basis_funcs + l,
+                                                1, xyz);
         value[0] += xyz[0];
         value[1] += xyz[1];
         value[2] += xyz[2];
@@ -101,8 +101,8 @@ void task_func_eri_dwrt_nuc(void *p_arg)
     if (ctx->atom_bf_map[n * N + j])
     {
         cg_electron_repulsion_integral_dwrt_nuc(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                                    ctx->basis_funcs + k, ctx->basis_funcs + l,
-                                                    2, xyz);
+                                                ctx->basis_funcs + k, ctx->basis_funcs + l,
+                                                2, xyz);
         value[0] += xyz[0];
         value[1] += xyz[1];
         value[2] += xyz[2];
@@ -110,8 +110,8 @@ void task_func_eri_dwrt_nuc(void *p_arg)
     if (ctx->atom_bf_map[n * N + k])
     {
         cg_electron_repulsion_integral_dwrt_nuc(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                                    ctx->basis_funcs + k, ctx->basis_funcs + l,
-                                                    3, xyz);
+                                                ctx->basis_funcs + k, ctx->basis_funcs + l,
+                                                3, xyz);
         value[0] += xyz[0];
         value[1] += xyz[1];
         value[2] += xyz[2];
@@ -119,8 +119,8 @@ void task_func_eri_dwrt_nuc(void *p_arg)
     if (ctx->atom_bf_map[n * N + l])
     {
         cg_electron_repulsion_integral_dwrt_nuc(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                                    ctx->basis_funcs + k, ctx->basis_funcs + l,
-                                                    4, xyz);
+                                                ctx->basis_funcs + k, ctx->basis_funcs + l,
+                                                4, xyz);
         value[0] += xyz[0];
         value[1] += xyz[1];
         value[2] += xyz[2];

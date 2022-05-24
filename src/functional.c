@@ -74,17 +74,17 @@ void functional_lda_c_vwn(f64 const *rho, f64 *exc, f64 *vrho, u64 num_grid_poin
             f64 x_b_c = x_sq + b * x + c;
             f64 x0_b_c = x0 * x0 + b * x0 + c;
             exc[i] = a * (log(x_sq / x_b_c) -
-                           b * (x0 / x0_b_c) * log(pow(x - x0, 2.0) / x_b_c) +
-                           (2.0 * b / c4_bb_sqrt) * (1.0 - (x0 * (2.0 * x0 + b) / x0_b_c)) * atan(c4_bb_sqrt / (2.0 * x + b)));
+                     b * (x0 / x0_b_c) * log(pow(x - x0, 2.0) / x_b_c) +
+                     (2.0 * b / c4_bb_sqrt) * (1.0 - (x0 * (2.0 * x0 + b) / x0_b_c)) * atan(c4_bb_sqrt / (2.0 * x + b)));
 
             f64 x2_b = x * 2.0 + b;
             f64 x2_b_sq = x2_b * x2_b;
             f64 x2_b_sq_c4_bb = x2_b_sq + c4_bb;
             vrho[i] = exc[i] - (x / 6.0) * a *
-                (2.0 / x -
-                x2_b / x_b_c -
-                4.0 * b / x2_b_sq_c4_bb -
-                (b * x0 / x0_b_c) * (2.0 / (x - x0) - x2_b / x_b_c - 4.0 * (2.0 * x0 + b) / x2_b_sq_c4_bb));
+                      (2.0 / x -
+                      x2_b / x_b_c -
+                      4.0 * b / x2_b_sq_c4_bb -
+                      (b * x0 / x0_b_c) * (2.0 / (x - x0) - x2_b / x_b_c - 4.0 * (2.0 * x0 + b) / x2_b_sq_c4_bb));
         }
     }
 }
