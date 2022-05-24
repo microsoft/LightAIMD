@@ -264,19 +264,19 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
     */
 
     printf("%s: energy difference is |%.12e - %.12e| = %.6e (Ref).\n",
-            CC_METHODS[cc_method_idx],
-            value, self_ref_energy_results[cc_method_idx],
-            fabs(value - self_ref_energy_results[cc_method_idx]));
+           CC_METHODS[cc_method_idx],
+           value, self_ref_energy_results[cc_method_idx],
+           fabs(value - self_ref_energy_results[cc_method_idx]));
 
     printf("%s: energy difference is |%.12e - %.12e| = %.6e (PySCF, lvl 3).\n",
-            CC_METHODS[cc_method_idx],
-            value, pyscf_grid_lvl3_energy_11e_results[cc_method_idx],
-            fabs(value - pyscf_grid_lvl3_energy_11e_results[cc_method_idx]));
+           CC_METHODS[cc_method_idx],
+           value, pyscf_grid_lvl3_energy_11e_results[cc_method_idx],
+           fabs(value - pyscf_grid_lvl3_energy_11e_results[cc_method_idx]));
 
     printf("%s: energy difference is |%.12e - %.12e| = %.6e (PySCF, lvl 4).\n",
-            CC_METHODS[cc_method_idx],
-            value, pyscf_grid_lvl4_energy_11e_results[cc_method_idx],
-            fabs(value - pyscf_grid_lvl4_energy_11e_results[cc_method_idx]));
+           CC_METHODS[cc_method_idx],
+           value, pyscf_grid_lvl4_energy_11e_results[cc_method_idx],
+           fabs(value - pyscf_grid_lvl4_energy_11e_results[cc_method_idx]));
 
     return 1;
 }

@@ -37,7 +37,6 @@ void print_numeric_type_sizes()
     printf("sizeof(double _Complex): %lu\n", sizeof(double _Complex));
     printf("sizeof(long double _Complex): %lu\n", sizeof(long double _Complex));
     printf("\n");
-
 }
 
 void print_machine_epsilon()

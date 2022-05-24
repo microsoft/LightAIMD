@@ -17,7 +17,7 @@
  */
 f64 rand_uniform()
 {
-    return (double) rand() / RAND_MAX;
+    return (double)rand() / RAND_MAX;
 }
 
 void rand_standard_normal(f64 *values, u64 count)
