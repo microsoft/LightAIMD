@@ -102,7 +102,7 @@ void print_f64_values_within_bounds(f64 *A, u64 count, f64 lower_bound, f64 uppe
     u64 last_row = count % col_size;
 
     u64 count_threshold = U64_MAX;
-    if(max_count > -1)
+    if (max_count > -1)
     {
         count_threshold = max_count;
     }
@@ -148,19 +148,19 @@ void print_f64_values_within_bounds(f64 *A, u64 count, f64 lower_bound, f64 uppe
     for (u64 j = 0; j < last_row; ++j)
     {
         f64 value = A[nrow * col_size + j];
-        if(value >= lower_bound && value <= upper_bound)
+        if (value >= lower_bound && value <= upper_bound)
         {
             printf("%lu:%*.*e ", nrow * col_size + j, precision + 7, precision, value);
             ++valid_value_count;
             ++total_count;
         }
     }
-    if(valid_value_count)
+    if (valid_value_count)
     {
         printf("\n");
     }
 
-    end:
+end:
     for (u64 j = 0; j < ndash; ++j)
     {
         printf("-");
@@ -168,21 +168,21 @@ void print_f64_values_within_bounds(f64 *A, u64 count, f64 lower_bound, f64 uppe
     printf("\n");
 }
 
-void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const * array_label)
+void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const *array_label)
 {
     printf("checking %s for nan values ...\n", array_label);
 
     u64 count_threshold = U64_MAX;
-    if(max_count > -1)
+    if (max_count > -1)
     {
         count_threshold = max_count;
     }
 
     u64 total_count = 0;
     u64 col_count = 0;
-    for(u64 i = 0; i < count; ++i)
+    for (u64 i = 0; i < count; ++i)
     {
-        if(isnan(A[i]))
+        if (isnan(A[i]))
         {
             printf("%lu:nan ", i);
             ++total_count;
@@ -195,7 +195,7 @@ void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const * ar
             col_count = 0;
         }
 
-        if(total_count >= count_threshold)
+        if (total_count >= count_threshold)
         {
             break;
         }
@@ -205,7 +205,7 @@ void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const * ar
         printf("\n");
     }
 
-    if(total_count == 0)
+    if (total_count == 0)
     {
         printf("No nan has been found.\n");
     }
@@ -231,13 +231,13 @@ f64 *load_f64_array(char const *file_name)
 
 i64 compare_f64_arrays(f64 *A, f64 *B, u64 count)
 {
-    for(u64 i = 0; i < count; ++i)
+    for (u64 i = 0; i < count; ++i)
     {
         if (A[i] < B[i])
         {
             return -1;
         }
-        if(A[i] > B[i])
+        if (A[i] > B[i])
         {
             return 1;
         }
@@ -245,7 +245,7 @@ i64 compare_f64_arrays(f64 *A, f64 *B, u64 count)
     return 0;
 }
 
-void print_f64_diff(f64 value, f64 expected, char const* label)
+void print_f64_diff(f64 value, f64 expected, char const *label)
 {
     printf("---------------------------------\n");
     printf("%s:\n", label);
@@ -263,7 +263,7 @@ int main(void)
     log_dbg_println(0, "%f\n", 3.141592);
 
     f64 A[34];
-    for(i64 i = 0; i < 34; ++i)
+    for (i64 i = 0; i < 34; ++i)
     {
         A[i] = i * 0.1;
         if (i % 3 == 1)
@@ -287,9 +287,9 @@ int main(void)
     /* test dump and load f64 array */
     dump_f64_array(A, 34, "A.bin");
     printf("f64 array has been dumped to A.bin\n");
-    f64 *B =  load_f64_array("A.bin");
+    f64 *B = load_f64_array("A.bin");
     printf("%ld\n", compare_f64_arrays(A, B, 34));
-    if(remove("A.bin") == 0)
+    if (remove("A.bin") == 0)
     {
         printf("A.bin is removed.\n");
     }
