@@ -45,7 +45,6 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
     {
         char *str_end;
         mol->n_atoms = strtoull(buff, &str_end, 10);
-        //printf("n_atoms: %lu\n", mol->n_atoms);
     }
 
     u64 use_unit_angstrom = 1;
@@ -104,7 +103,6 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
             mol->coords[lc].y = y;
             mol->coords[lc].z = z;
         }
-        //printf("%s %.9e %.9e %.9e\n", atom_symbol, x, y, z);
         ++lc;
     }
     mol->n_electrons = (u64)(total_nuclear_charge - molecular_charge);
