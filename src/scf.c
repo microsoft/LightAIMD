@@ -129,7 +129,7 @@ void initialize_density_matrix_with_H_core(struct scf_context *ctx)
      * In theory, we should use the conjugate transpose of COO,
      * for RHF here, COO is a real matrix, we just take its transpose
      * Ref: modern quantum chemistry (Szabo and Ostlund), eq 3.145
-    */
+     */
     transpose(ctx->COO, ctx->COOT, N, nocc);
 
     /*
@@ -563,7 +563,7 @@ void diis_update_fock(struct scf_context *ctx)
 
     for (u64 i = 0; i < ctx->diis_history_size; ++i)
     {
-        for (u64 j =0; j <= i; ++j)
+        for (u64 j = 0; j <= i; ++j)
         {
             u64 idx_i = (diis_ring_buff_tail + i) % ctx->diis_subspace_size;
             u64 idx_j = (diis_ring_buff_tail + j) % ctx->diis_subspace_size;
@@ -591,7 +591,7 @@ void diis_update_fock(struct scf_context *ctx)
 
     memset(ctx->diis_F, 0, ctx->N2_f64);
 
-    for(u64 i = 0; i < ctx->diis_history_size; ++i)
+    for (u64 i = 0; i < ctx->diis_history_size; ++i)
     {
         u64 idx_i = (diis_ring_buff_tail + i) % ctx->diis_subspace_size;
         mat_scalar_multiply(ctx->diis_fock_matrices + idx_i * ctx->N2, ctx->NxN_1, N, N, ctx->diis_coefficients[i]);

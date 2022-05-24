@@ -29,7 +29,7 @@ void sleep_ms(f64 ms)
     modf(ms * 1e-3, &integral_part);
 
     struct timespec ts;
-    ts.tv_sec = (i64) integral_part;
+    ts.tv_sec = (i64)integral_part;
 
     f64 nanosec = ms * 1e6 - (ts.tv_sec * 1e9);
     ts.tv_nsec = (i32)nanosec;

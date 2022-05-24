@@ -88,7 +88,7 @@ struct scf_context
     u64 diis_subspace_size;
     u64 diis_ring_buff_head;
     u64 diis_history_size;
-    f64 *diis_fock_matrices; // ring buffer
+    f64 *diis_fock_matrices;  // ring buffer
     f64 *diis_error_matrices; // ring buffer
     f64 *diis_FPS;
     f64 *diis_SPF;

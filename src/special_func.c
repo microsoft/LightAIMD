@@ -90,9 +90,7 @@ static c64 ln_gamma_f64(f64 x)
          */
         f64 sin_x_pi = sin(M_PI * x);
 
-        result_real = log(M_PI / (
-            x * fabs(sin_x_pi)
-            )) - result_real;
+        result_real = log(M_PI / (x * fabs(sin_x_pi))) - result_real;
 
         if (sin_x_pi > 0)
         {
@@ -334,7 +332,7 @@ f64 boys_func(f64 n, f64 x)
 
 int main(void)
 {
-    if(1)
+    if (1)
     {
         for (f64 z = -10; z < 10; z += 0.323)
         {
