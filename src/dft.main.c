@@ -64,7 +64,7 @@ void calculate_density_matrix(struct dft_context *dft_ctx)
      * In theory, we should use the conjugate transpose of COO,
      * for the case we are dealing with, COO is a real matrix, we just take its transpose
      * Ref: modern quantum chemistry (Szabo and Ostlund), eq 3.145
-    */
+     */
     transpose(tag_conjugate(ctx->COO), ctx->COOT, N, nocc);
 
     /*
@@ -199,17 +199,17 @@ void dft_total_energy(struct dft_context *ctx)
     struct molecular_grid_desc *mgd = ctx->mgd;
     u64 N = scf_ctx->n_basis_funcs;
 
-    f64 single_electron_energy =  einsum_mn_nm(scf_ctx->P, scf_ctx->H, N, N);
-    f64 electronic_repulsion_energy =  einsum_mn_nm(scf_ctx->P, mgd->J, N, N) * 0.5;
+    f64 single_electron_energy = einsum_mn_nm(scf_ctx->P, scf_ctx->H, N, N);
+    f64 electronic_repulsion_energy = einsum_mn_nm(scf_ctx->P, mgd->J, N, N) * 0.5;
 
     ctx->total_energy = single_electron_energy + electronic_repulsion_energy + scf_ctx->nuclear_repulsion_energy + mgd->xc_energy;
     log_tm_print(scf_ctx->silent, "total energy: %.16e = %.16e (core) + %.16e (J) + %.16e (K) + %.16e (XC) + %.16e (NRE)\n\n",
-           ctx->total_energy,
-           single_electron_energy,
-           electronic_repulsion_energy,
-           mgd->hf_exchange_energy,
-           mgd->xc_energy,
-           scf_ctx->nuclear_repulsion_energy);
+                 ctx->total_energy,
+                 single_electron_energy,
+                 electronic_repulsion_energy,
+                 mgd->hf_exchange_energy,
+                 mgd->xc_energy,
+                 scf_ctx->nuclear_repulsion_energy);
 }
 
 void dft_finalize(struct dft_context *ctx)
@@ -314,7 +314,7 @@ void single_point_energy(struct cmd_line_args *args)
     struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
 
     dft_scf_iterate(dft_ctx);
-    if(args->check_results)
+    if (args->check_results)
     {
         check_total_energy(dft_ctx->total_energy, args->check_results);
     }
@@ -330,7 +330,7 @@ void single_point_forces(struct cmd_line_args *args)
 
     dft_scf_iterate(dft_ctx);
     energy_dwrt_nuc(scf_ctx);
-    if(args->check_results)
+    if (args->check_results)
     {
         check_total_energy(dft_ctx->total_energy, args->check_results);
         check_forces((f64 *)(scf_ctx->mol->forces), args->check_results);
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
     {
         single_point_forces(&args);
     }
-    if(args.job_type == JOB_TYPE_BOMD)
+    if (args.job_type == JOB_TYPE_BOMD)
     {
         struct scf_context *ctx = scf_initialize(&args, scf_config_dft);
         u64 n_basis_funcs = ctx->n_basis_funcs;

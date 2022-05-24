@@ -59,7 +59,7 @@ void task_func_build_K(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                  ctx->basis_funcs + k, ctx->basis_funcs + l) *
+                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Exchange */
@@ -139,7 +139,7 @@ void build_K_matrix(struct molecular_grid_desc *mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            //printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
+                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
@@ -203,7 +203,7 @@ void task_func_build_J(void *p_arg)
     u64 kN = k * N;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                  ctx->basis_funcs + k, ctx->basis_funcs + l) *
+                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -277,7 +277,7 @@ void build_J_matrix(struct molecular_grid_desc *mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            //printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
+                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
@@ -347,7 +347,7 @@ void task_func_build_JK(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                  ctx->basis_funcs + k, ctx->basis_funcs + l) *
+                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -375,14 +375,14 @@ void task_func_build_JK(void *p_arg)
     x_free(p_arg);
 }
 
-void build_JK_matrices(struct molecular_grid_desc* mgd)
+void build_JK_matrices(struct molecular_grid_desc *mgd)
 {
-    struct scf_context* ctx = mgd->scf_ctx;
+    struct scf_context *ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
 
-    f64* P = ctx->P;
-    f64* J = mgd->J;
-    f64* K = mgd->K;
+    f64 *P = ctx->P;
+    f64 *J = mgd->J;
+    f64 *K = mgd->K;
     memset(J, 0, N * N * sizeof(f64));
     memset(K, 0, N * N * sizeof(f64));
 
@@ -426,7 +426,7 @@ void build_JK_matrices(struct molecular_grid_desc* mgd)
                         f64 bound = sqrt(ctx->ScreeningMatrix[ij]) * sqrt(ctx->ScreeningMatrix[kl]);
 
                         f64 pmax = 0.0;
-                        f64 ps[] = { fabs(4 * P[i * N + j]), fabs(4 * P[k * N + l]), fabs(P[i * N + k]), fabs(P[i * N + l]), fabs(P[j * N + k]), fabs(P[j * N + l]) };
+                        f64 ps[] = {fabs(4 * P[i * N + j]), fabs(4 * P[k * N + l]), fabs(P[i * N + k]), fabs(P[i * N + l]), fabs(P[j * N + k]), fabs(P[j * N + l])};
 
                         for (u64 t = 0; t < 6; ++t)
                         {
@@ -438,11 +438,11 @@ void build_JK_matrices(struct molecular_grid_desc* mgd)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            //printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
+                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
-                        struct task_func_build_JK_arg* arg = x_malloc(sizeof(struct task_func_build_JK_arg));
+                        struct task_func_build_JK_arg *arg = x_malloc(sizeof(struct task_func_build_JK_arg));
                         arg->ctx = ctx;
                         arg->J = J;
                         arg->K = K;
@@ -463,7 +463,7 @@ void build_JK_matrices(struct molecular_grid_desc* mgd)
 
     threadpool_wait_job_done(ctx->tp_ctx);
 
-    f64* M = ctx->NxN_1;
+    f64 *M = ctx->NxN_1;
     transpose(J, M, N, N);
     mat_add(J, M, M, N, N);
     mat_scalar_multiply(M, J, N, N, 0.25);
@@ -504,7 +504,7 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
     if (mgd->x_functional_id)
     {
         /* built-in x functional */
-        //functional_lda_x(rho, exc_x, vrho_x, mgd->grid_size);
+        // functional_lda_x(rho, exc_x, vrho_x, mgd->grid_size);
 
         get_wall_time(&time_start);
         libxc_exc_vxc(mgd->x_functional_id, mgd->grid_size, rho, sigma, lapl, tau,
@@ -531,7 +531,7 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
     if (mgd->c_functional_id)
     {
         /* built-in c functional */
-        //functional_lda_c_vwn(rho, exc_c, vrho_c, mgd->grid_size);
+        // functional_lda_c_vwn(rho, exc_c, vrho_c, mgd->grid_size);
 
         get_wall_time(&time_start);
         libxc_exc_vxc(mgd->c_functional_id, mgd->grid_size, rho, sigma, lapl, tau,
@@ -651,7 +651,7 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
         }
 
         get_wall_time(&time_start);
-        //einsum_mn_mp__np(mgd->bf_values, bf_v, XC, mgd->grid_size, N, N);
+        // einsum_mn_mp__np(mgd->bf_values, bf_v, XC, mgd->grid_size, N, N);
         einsum_mn_mp__np_parallel(mgd->bf_values, bf_v, XC, mgd->grid_size, N, N, scf_ctx->tp_ctx);
         get_wall_time(&time_end);
         console_printf(scf_ctx->silent, "einsum_mn_mp__np took %.3f ms\n", diff_time_ms(&time_start, &time_end));
@@ -902,7 +902,7 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
         /* derivatives wrt nuclear coordinates end */
 
         // For the LDA case, we adopt the following alternative implementation
-        //einsum_mn_mp_m__np(mgd->bf_values, mgd->bf_values, weighted_vrho, XC, mgd->grid_size, N, N);
+        // einsum_mn_mp_m__np(mgd->bf_values, mgd->bf_values, weighted_vrho, XC, mgd->grid_size, N, N);
 
         /* derivatives wrt nuclear coordinates begin */
         einsum_mn_mp_m__np(mgd->bf_derivative_x, mgd->bf_values, weighted_vrho, mgd->VXC_x, mgd->grid_size, N, N);
@@ -946,7 +946,7 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
             }
         }
 
-        //einsum_mn_mp__np(mgd->bf_values, bf_v, XC, mgd->grid_size, N, N);
+        // einsum_mn_mp__np(mgd->bf_values, bf_v, XC, mgd->grid_size, N, N);
 
         /* derivatives wrt nuclear coordinates begin */
         einsum_mn_mp__np_parallel(mgd->bf_derivative_x, bf_v, mgd->VXC_x, mgd->grid_size, N, N, scf_ctx->tp_ctx);
@@ -960,19 +960,19 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
             {
                 u64 pN_i = pN + i;
                 mgd->bf_v_dx[pN_i] = mgd->bf_derivative_x[pN_i] * weighted_vrho[p] +
-                                                    mgd->bf_derivative_xx[pN_i] * weighted_vsigma_rho_dx[p] +
-                                                    mgd->bf_derivative_xy[pN_i] * weighted_vsigma_rho_dy[p] +
-                                                    mgd->bf_derivative_xz[pN_i] * weighted_vsigma_rho_dz[p];
+                                     mgd->bf_derivative_xx[pN_i] * weighted_vsigma_rho_dx[p] +
+                                     mgd->bf_derivative_xy[pN_i] * weighted_vsigma_rho_dy[p] +
+                                     mgd->bf_derivative_xz[pN_i] * weighted_vsigma_rho_dz[p];
 
                 mgd->bf_v_dy[pN_i] = mgd->bf_derivative_y[pN_i] * weighted_vrho[p] +
-                                                    mgd->bf_derivative_xy[pN_i] * weighted_vsigma_rho_dx[p] +
-                                                    mgd->bf_derivative_yy[pN_i] * weighted_vsigma_rho_dy[p] +
-                                                    mgd->bf_derivative_yz[pN_i] * weighted_vsigma_rho_dz[p];
+                                     mgd->bf_derivative_xy[pN_i] * weighted_vsigma_rho_dx[p] +
+                                     mgd->bf_derivative_yy[pN_i] * weighted_vsigma_rho_dy[p] +
+                                     mgd->bf_derivative_yz[pN_i] * weighted_vsigma_rho_dz[p];
 
                 mgd->bf_v_dz[pN_i] = mgd->bf_derivative_z[pN_i] * weighted_vrho[p] +
-                                                    mgd->bf_derivative_xz[pN_i] * weighted_vsigma_rho_dx[p] +
-                                                    mgd->bf_derivative_yz[pN_i] * weighted_vsigma_rho_dy[p] +
-                                                    mgd->bf_derivative_zz[pN_i] * weighted_vsigma_rho_dz[p];
+                                     mgd->bf_derivative_xz[pN_i] * weighted_vsigma_rho_dx[p] +
+                                     mgd->bf_derivative_yz[pN_i] * weighted_vsigma_rho_dy[p] +
+                                     mgd->bf_derivative_zz[pN_i] * weighted_vsigma_rho_dz[p];
             }
         }
 
@@ -1000,8 +1000,8 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
                     MxN[iN + j] = value * mgd->bf_derivative_x[iN + j];
                 }
             }
-            //einsum_mn_mp__np(mgd->bf_derivative_x, MxN, NxN, mgd->grid_size, N, N);
-            //mat_add(XC, NxN, XC, N, N);
+            // einsum_mn_mp__np(mgd->bf_derivative_x, MxN, NxN, mgd->grid_size, N, N);
+            // mat_add(XC, NxN, XC, N, N);
 
             /* derivatives wrt nuclear coordinates begin */
             einsum_mn_mp__np_parallel(mgd->bf_derivative_xx, MxN, NxN, mgd->grid_size, N, N, scf_ctx->tp_ctx); // partial_{xx}
@@ -1040,8 +1040,8 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
                     MxN[iN + j] = value * mgd->bf_derivative_y[iN + j];
                 }
             }
-            //einsum_mn_mp__np(mgd->bf_derivative_y, MxN, NxN, mgd->grid_size, N, N);
-            //mat_add(XC, NxN, XC, N, N);
+            // einsum_mn_mp__np(mgd->bf_derivative_y, MxN, NxN, mgd->grid_size, N, N);
+            // mat_add(XC, NxN, XC, N, N);
 
             /* derivatives wrt nuclear coordinates begin */
             einsum_mn_mp__np_parallel(mgd->bf_derivative_xy, MxN, NxN, mgd->grid_size, N, N, scf_ctx->tp_ctx); // partial_{xy}
@@ -1080,8 +1080,8 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
                     MxN[iN + j] = value * mgd->bf_derivative_z[iN + j];
                 }
             }
-            //einsum_mn_mp__np(mgd->bf_derivative_z, MxN, NxN, mgd->grid_size, N, N);
-            //mat_add(XC, NxN, XC, N, N);
+            // einsum_mn_mp__np(mgd->bf_derivative_z, MxN, NxN, mgd->grid_size, N, N);
+            // mat_add(XC, NxN, XC, N, N);
 
             /* derivatives wrt nuclear coordinates begin */
             einsum_mn_mp__np_parallel(mgd->bf_derivative_xz, MxN, NxN, mgd->grid_size, N, N, scf_ctx->tp_ctx); // partial_{xz}
