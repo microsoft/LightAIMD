@@ -40,9 +40,9 @@ extern "C"
                                        f64 *xx, f64 *yy, f64 *zz, f64 *xy, f64 *xz, f64 *yz);
     f64 basis_func_laplacian(struct basis_func *bf, struct vec3d *v);
     void basis_funcs_third_derivative(struct basis_func *bf, struct vec3d *v,
-                                  f64 *xxx, f64 *xyy, f64 *xzz,
-                                  f64 *yyy, f64 *yxx, f64 *yzz,
-                                  f64 *zzz, f64 *zxx, f64 *zyy);
+                                      f64 *xxx, f64 *xyy, f64 *xzz,
+                                      f64 *yyy, f64 *yxx, f64 *yzz,
+                                      f64 *zzz, f64 *zxx, f64 *zyy);
     void print_basis_func(struct basis_func *bf);
     void print_basis_funcs_buffer(const char *buffer);
 

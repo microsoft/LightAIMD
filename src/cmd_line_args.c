@@ -8,8 +8,8 @@
 #include "sample.h"
 #include "mm.h"
 
-const u64 JOB_TYPE_SPE = 1; // Single Point Energy
-const u64 JOB_TYPE_SPF = 2; // Single Point Forces
+const u64 JOB_TYPE_SPE = 1;  // Single Point Energy
+const u64 JOB_TYPE_SPF = 2;  // Single Point Forces
 const u64 JOB_TYPE_BOMD = 3; // Born-Oppenheimer Molecular Dynamics
 
 char *get_arg_value_by_key(int argc, char *argv[], char const *key)

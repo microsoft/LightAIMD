@@ -7,8 +7,8 @@
 #include "numeric_types.h"
 #include "molecule.h"
 
-extern const u64 JOB_TYPE_SPE; // Single Point Energy
-extern const u64 JOB_TYPE_SPF; // Single Point Forces
+extern const u64 JOB_TYPE_SPE;  // Single Point Energy
+extern const u64 JOB_TYPE_SPF;  // Single Point Forces
 extern const u64 JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
 
 struct cmd_line_args

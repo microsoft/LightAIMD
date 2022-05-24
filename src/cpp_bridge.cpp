@@ -22,7 +22,7 @@ extern "C"
 {
     u64 num_of_concurrent_threads()
     {
-        return (u64) std::thread::hardware_concurrency();
+        return (u64)std::thread::hardware_concurrency();
     }
 
     void cartesian_shell_pairs(u64 n)
@@ -131,7 +131,7 @@ extern "C"
                                     ++p;
                                 }
                                 ++n_orbitals;
-                                //std::cout << Z << " " << l << m << n << std::endl;
+                                // std::cout << Z << " " << l << m << n << std::endl;
                             }
                         }
                         ++am_index;
@@ -140,7 +140,7 @@ extern "C"
                 *n_orbitals_p = n_orbitals;
             }
         }
-        return (char*)buffer;
+        return (char *)buffer;
     }
 
     void eigh_veconly(f64 *A, f64 *V, u64 N)
