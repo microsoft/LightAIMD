@@ -63,9 +63,9 @@ void build_fock_with_precomputed_eri(struct scf_context *ctx)
                 u64 rN2 = r * N2;
                 for (u64 s = 0; s < N; ++s)
                 {
-                    //u64 sNr = s * N + r;
+                    // u64 sNr = s * N + r;
                     u64 rNs = rN + s;
-                    c += A[pN3_qN2 + rN + s] * P[rNs];    /* Coulombic, assuming P is symmetric */
+                    c += A[pN3_qN2 + rN + s] * P[rNs]; /* Coulombic, assuming P is symmetric */
 
                     /*
                      * Ref: modern quantum chemistry, eq 3.154
@@ -119,7 +119,7 @@ void task_func_eri(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                  ctx->basis_funcs + k, ctx->basis_funcs + l) *
+                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -209,7 +209,7 @@ void build_fock_direct(struct scf_context *ctx)
 
                         if ((bound * pmax) < ctx->JK_screening_threshold)
                         {
-                            //printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
+                            // printf("skipping %lu,%lu,%lu,%lu\n", i, j, k, l);
                             continue;
                         }
 
@@ -283,9 +283,9 @@ void calc_electronic_energy(struct scf_context *ctx)
      */
     u64 N = ctx->n_basis_funcs;
     mat_add(ctx->H, ctx->F, ctx->NxN_1, N, N);
-    //mat_multiply(tag_transpose(ctx->P), ctx->F, ctx->M, N, N);
+    // mat_multiply(tag_transpose(ctx->P), ctx->F, ctx->M, N, N);
 
-    ctx->energy = 0.5 *  einsum_mn_nm(ctx->P, ctx->NxN_1, N, N) + ctx->nuclear_repulsion_energy;
+    ctx->energy = 0.5 * einsum_mn_nm(ctx->P, ctx->NxN_1, N, N) + ctx->nuclear_repulsion_energy;
 }
 
 void hf_scf_iterate(struct scf_context *ctx)
@@ -331,7 +331,7 @@ void hf_scf_iterate(struct scf_context *ctx)
          * Calculating density matrix P from C
          * einsum_mn_np__mp(C_occ, C_occ_T) * 2.0
          * Ref: modern quantum chemistry (Szabo and Ostlund), eq 3.145
-        */
+         */
         einsum_mn_np__mp(ctx->COO, ctx->COOT, ctx->P, N, nocc, N);
         mat_scalar_multiply(ctx->P, ctx->P, N, N, 2.0);
 

@@ -25,19 +25,19 @@ struct libxc_registry
 
 static struct libxc_registry registry;
 
-void print_xc_dimensions(xc_func_type * func)
+void print_xc_dimensions(xc_func_type *func)
 {
-        xc_dimensions *dim = &(func->dim);
-        printf("rho: %d  ", dim->rho);
-        printf("sigma: %d  ", dim->sigma);
-        printf("lapl: %d  ", dim->lapl);
-        printf("tau: %d\n", dim->tau);
+    xc_dimensions *dim = &(func->dim);
+    printf("rho: %d  ", dim->rho);
+    printf("sigma: %d  ", dim->sigma);
+    printf("lapl: %d  ", dim->lapl);
+    printf("tau: %d\n", dim->tau);
 
-        printf("zk: %d  ", dim->zk);
-        printf("vrho: %d  ", dim->vrho);
-        printf("vsigma: %d  ", dim->vsigma);
-        printf("vlapl: %d  ", dim->vlapl);
-        printf("vtau: %d\n", dim->vtau);
+    printf("zk: %d  ", dim->zk);
+    printf("vrho: %d  ", dim->vrho);
+    printf("vsigma: %d  ", dim->vsigma);
+    printf("vlapl: %d  ", dim->vlapl);
+    printf("vtau: %d\n", dim->vtau);
 }
 
 void libxc_initialize(i32 *func_ids, i32 *is_polarized, u64 func_count)
@@ -100,7 +100,7 @@ void libxc_initialize(i32 *func_ids, i32 *is_polarized, u64 func_count)
         }
         console_printf(1, "Functional %d %s has been initialized.\n", func->info->number, func->info->name);
         registry.funcs_initialized[func_id] = 1;
-        //print_xc_dimensions(func);
+        // print_xc_dimensions(func);
     }
 }
 
@@ -192,7 +192,7 @@ int main(void)
      * all the input arrays are of size np (number of points).
      */
     libxc_exc_vxc(1, 5, rho, sigma, lapl, tau,
-        exc, vrho, vsigma, vlapl, vtau);
+                  exc, vrho, vsigma, vlapl, vtau);
     for (u64 i = 0; i < 5; i += 1)
     {
         printf("%.6e %.6e %.6e %.6e %.6e\n", rho[i], sigma[i], exc[i], vrho[i], vsigma[i]);
@@ -201,7 +201,7 @@ int main(void)
     printf("------------------------------------\n");
 
     libxc_exc_vxc(7, 5, rho, sigma, lapl, tau,
-        exc, vrho, vsigma, vlapl, vtau);
+                  exc, vrho, vsigma, vlapl, vtau);
     for (u64 i = 0; i < 5; i += 1)
     {
         printf("%.6e %.6e %.6e %.6e %.6e\n", rho[i], sigma[i], exc[i], vrho[i], vsigma[i]);
