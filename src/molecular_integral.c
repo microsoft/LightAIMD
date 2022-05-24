@@ -161,9 +161,9 @@ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
         for (u64 j = 0; j < b->n_exponents; ++j)
         {
             result += a->normalization_factors[i] * b->normalization_factors[j] *
-                 a->coefficients[i] * b->coefficients[j] *
-                 pg_overlap_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                                     b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0);
+                      a->coefficients[i] * b->coefficients[j] *
+                      pg_overlap_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                          b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0);
         }
     }
 
@@ -173,11 +173,11 @@ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
 /*
  * Overlap derivative integral
  */
-void cg_overlap_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u64 center, f64 *xyz)
+void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
-        u64 axis_mask[3] = { 0, 0, 0 };
+        u64 axis_mask[3] = {0, 0, 0};
         axis_mask[axis_idx] = 1;
         f64 result = 0.0;
         for (u64 i = 0; i < a->n_exponents; ++i)
@@ -185,10 +185,10 @@ void cg_overlap_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u6
             for (u64 j = 0; j < b->n_exponents; ++j)
             {
                 result += a->normalization_factors[i] * b->normalization_factors[j] *
-                    a->coefficients[i] * b->coefficients[j] *
-                    pg_overlap_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                        b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                        axis_mask, center);
+                          a->coefficients[i] * b->coefficients[j] *
+                          pg_overlap_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                       b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                       axis_mask, center);
             }
         }
         xyz[axis_idx] = result;
@@ -202,20 +202,20 @@ f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x
     f64 gexp_b_sq2 = 2 * gexp_b * gexp_b;
 
     f64 t_x = (2 * amn_x_b + 1) * gexp_b * hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b) -
-             gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b) -
-             0.5 * amn_x_b * (amn_x_b - 1) * hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b);
+              gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b) -
+              0.5 * amn_x_b * (amn_x_b - 1) * hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b);
     t_x *= hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, 0, y0_a - y0_b);
     t_x *= hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, 0, z0_a - z0_b);
 
     f64 t_y = (2 * amn_y_b + 1) * gexp_b * hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, 0, y0_a - y0_b) -
-             gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b) -
-             0.5 * amn_y_b * (amn_y_b - 1) * hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b);
+              gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b) -
+              0.5 * amn_y_b * (amn_y_b - 1) * hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b);
     t_y *= hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b);
     t_y *= hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, 0, z0_a - z0_b);
 
     f64 t_z = (2 * amn_z_b + 1) * gexp_b * hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, 0, z0_a - z0_b) -
-             gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b) -
-             0.5 * amn_z_b * (amn_z_b - 1) * hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b);
+              gexp_b_sq2 * hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b) -
+              0.5 * amn_z_b * (amn_z_b - 1) * hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b);
     t_z *= hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b);
     t_z *= hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, 0, y0_a - y0_b);
 
@@ -232,16 +232,16 @@ f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z
     u64 D = (center == 2) ? 1 : 0;
 
     f64 t_x = (2 * amn_x_b + 1) * gexp_b * (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b)) -
-         gexp_b_sq2 * (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b)) -
-         0.5 * amn_x_b * (amn_x_b - 1) * (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b));
+              gexp_b_sq2 * (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b + 2, 0, x0_a - x0_b)) -
+              0.5 * amn_x_b * (amn_x_b - 1) * (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b - 2, 0, x0_a - x0_b));
 
     f64 t_y = (2 * amn_y_b + 1) * gexp_b * (axis_mask[1] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b, 0, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, 0, y0_a - y0_b)) -
-         gexp_b_sq2 * (axis_mask[1] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b)) -
-         0.5 * amn_y_b * (amn_y_b - 1) * (axis_mask[1] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b));
+              gexp_b_sq2 * (axis_mask[1] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b + 2, 0, y0_a - y0_b)) -
+              0.5 * amn_y_b * (amn_y_b - 1) * (axis_mask[1] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b - 2, 0, y0_a - y0_b));
 
     f64 t_z = (2 * amn_z_b + 1) * gexp_b * (axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b, 0, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, 0, z0_a - z0_b)) -
-         gexp_b_sq2 * (axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b)) -
-         0.5 * amn_z_b * (amn_z_b - 1) * (axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b));
+              gexp_b_sq2 * (axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b + 2, 0, z0_a - z0_b)) -
+              0.5 * amn_z_b * (amn_z_b - 1) * (axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b - 2, 0, z0_a - z0_b));
 
     t_y *= (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b));
     t_z *= (axis_mask[0] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b));
@@ -265,20 +265,20 @@ f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
         for (u64 j = 0; j < b->n_exponents; ++j)
         {
             result += a->normalization_factors[i] * b->normalization_factors[j] *
-                 a->coefficients[i] * b->coefficients[j] *
-                 pg_kinetic_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                                     b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0);
+                      a->coefficients[i] * b->coefficients[j] *
+                      pg_kinetic_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                          b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0);
         }
     }
 
     return result;
 }
 
-void cg_kinetic_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u64 center, f64 *xyz)
+void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
-        u64 axis_mask[3] = { 0, 0, 0 };
+        u64 axis_mask[3] = {0, 0, 0};
         axis_mask[axis_idx] = 1;
 
         f64 result = 0.0;
@@ -287,10 +287,10 @@ void cg_kinetic_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u6
             for (u64 j = 0; j < b->n_exponents; ++j)
             {
                 result += a->normalization_factors[i] * b->normalization_factors[j] *
-                    a->coefficients[i] * b->coefficients[j] *
-                    pg_kinetic_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                        b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                        axis_mask, center);
+                          a->coefficients[i] * b->coefficients[j] *
+                          pg_kinetic_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                       b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                       axis_mask, center);
             }
         }
         xyz[axis_idx] = result;
@@ -364,9 +364,9 @@ f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a
             for (i64 v = 0; v < v_upper; ++v)
             {
                 result -= hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, t, x0_a - x0_b) *
-                       hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, u, y0_a - y0_b) *
-                       hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, v, z0_a - z0_b) *
-                       hermite_coulomb_integral(t + axis_mask[0], u + axis_mask[1], v + axis_mask[2], 0, gexp_a_b, gpc_x - x0_c, gpc_y - y0_c, gpc_z - z0_c, separation_gpc_c);
+                          hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, u, y0_a - y0_b) *
+                          hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, v, z0_a - z0_b) *
+                          hermite_coulomb_integral(t + axis_mask[0], u + axis_mask[1], v + axis_mask[2], 0, gexp_a_b, gpc_x - x0_c, gpc_y - y0_c, gpc_z - z0_c, separation_gpc_c);
             }
         }
     }
@@ -411,7 +411,7 @@ f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 
                 f64 term_3 = axis_mask[2] ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b, v, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, v, z0_a - z0_b);
 
                 result += term_1 * term_2 * term_3 *
-                       hermite_coulomb_integral(t, u, v, 0, gexp_a_b, dx_gpc_c, dy_gpc_c, dz_gpc_c, separation_gpc_c);
+                          hermite_coulomb_integral(t, u, v, 0, gexp_a_b, dx_gpc_c, dy_gpc_c, dz_gpc_c, separation_gpc_c);
             }
         }
     }
@@ -430,22 +430,22 @@ f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis_func *b, f
         for (u64 j = 0; j < b->n_exponents; ++j)
         {
             result += a->normalization_factors[i] * b->normalization_factors[j] *
-                 a->coefficients[i] * b->coefficients[j] *
-                 pg_nuclear_attraction_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                                                b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                                                x0_c, y0_c, z0_c);
+                      a->coefficients[i] * b->coefficients[j] *
+                      pg_nuclear_attraction_integral(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                     b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                     x0_c, y0_c, z0_c);
         }
     }
 
     return result;
 }
 
-void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b,
-                                                 f64 x0_c, f64 y0_c, f64 z0_c, f64 *xyz)
+void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b,
+                                             f64 x0_c, f64 y0_c, f64 z0_c, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
-        u64 axis_mask[3] = { 0, 0, 0 };
+        u64 axis_mask[3] = {0, 0, 0};
         axis_mask[axis_idx] = 1;
 
         f64 result = 0.0;
@@ -454,11 +454,11 @@ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func* a, struct basis_
             for (u64 j = 0; j < b->n_exponents; ++j)
             {
                 result += a->normalization_factors[i] * b->normalization_factors[j] *
-                    a->coefficients[i] * b->coefficients[j] *
-                    pg_nuclear_attraction_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                        b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                        x0_c, y0_c, z0_c,
-                        axis_mask);
+                          a->coefficients[i] * b->coefficients[j] *
+                          pg_nuclear_attraction_integral_dwrt_nuc(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                                  b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                                  x0_c, y0_c, z0_c,
+                                                                  axis_mask);
             }
         }
         xyz[axis_idx] = result;
@@ -468,12 +468,12 @@ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func* a, struct basis_
 /*
  * Calculates the derivative of nuclear attraction with respect to the orbital centers
  */
-void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func* a, struct basis_func* b,
-                                                        f64 x0_c, f64 y0_c, f64 z0_c, u64 center, f64 *xyz)
+void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func *a, struct basis_func *b,
+                                                    f64 x0_c, f64 y0_c, f64 z0_c, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
-        u64 axis_mask[3] = { 0, 0, 0 };
+        u64 axis_mask[3] = {0, 0, 0};
         axis_mask[axis_idx] = 1;
 
         f64 result = 0.0;
@@ -482,11 +482,11 @@ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func* a, struct
             for (u64 j = 0; j < b->n_exponents; ++j)
             {
                 result += a->normalization_factors[i] * b->normalization_factors[j] *
-                    a->coefficients[i] * b->coefficients[j] *
-                    pg_nuclear_attraction_integral_dwrt_orb_center(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                        b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                        x0_c, y0_c, z0_c,
-                        axis_mask, center);
+                          a->coefficients[i] * b->coefficients[j] *
+                          pg_nuclear_attraction_integral_dwrt_orb_center(a->exponents[i], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                                         b->exponents[j], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                                         x0_c, y0_c, z0_c,
+                                                                         axis_mask, center);
             }
         }
         xyz[axis_idx] = result;
@@ -608,8 +608,8 @@ f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a
                             f64 term_6 = (axis_mask[2] * B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d);
 
                             result += term_1 * term_2 * term_3 * term_4 * term_5 * term_6 *
-                                   pow(-1, s + t + u) *
-                                   hermite_coulomb_integral(p + s, q + t, r + u, 0, gexp_reduced, dx_gpc, dy_gpc, dz_gpc, gpc_separation);
+                                      pow(-1, s + t + u) *
+                                      hermite_coulomb_integral(p + s, q + t, r + u, 0, gexp_reduced, dx_gpc, dy_gpc, dz_gpc, gpc_separation);
                         }
 
     result *= 2 * pow(M_PI, 2.5) / (gexp_a_b * gexp_c_d * sqrt(gexp_a_b + gexp_c_d));
@@ -630,13 +630,13 @@ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, s
                 for (u64 i4 = 0; i4 < d->n_exponents; ++i4)
                 {
                     result += a->normalization_factors[i1] * b->normalization_factors[i2] *
-                           c->normalization_factors[i3] * d->normalization_factors[i4] *
-                           a->coefficients[i1] * b->coefficients[i2] *
-                           c->coefficients[i3] * d->coefficients[i4] *
-                           pg_electron_repulsion_integral(a->exponents[i1], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                                                          b->exponents[i2], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                                                          c->exponents[i3], c->l, c->m, c->n, c->x0, c->y0, c->z0,
-                                                          d->exponents[i4], d->l, d->m, d->n, d->x0, d->y0, d->z0);
+                              c->normalization_factors[i3] * d->normalization_factors[i4] *
+                              a->coefficients[i1] * b->coefficients[i2] *
+                              c->coefficients[i3] * d->coefficients[i4] *
+                              pg_electron_repulsion_integral(a->exponents[i1], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                             b->exponents[i2], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                             c->exponents[i3], c->l, c->m, c->n, c->x0, c->y0, c->z0,
+                                                             d->exponents[i4], d->l, d->m, d->n, d->x0, d->y0, d->z0);
                 }
             }
         }
@@ -645,11 +645,11 @@ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, s
     return result;
 }
 
-void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, struct basis_func* c, struct basis_func* d, u64 center, f64 *xyz)
+void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
-        u64 axis_mask[3] = { 0, 0, 0 };
+        u64 axis_mask[3] = {0, 0, 0};
         axis_mask[axis_idx] = 1;
 
         f64 result = 0.0;
@@ -662,14 +662,14 @@ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func* a, struct basis_
                     for (u64 i4 = 0; i4 < d->n_exponents; ++i4)
                     {
                         result += a->normalization_factors[i1] * b->normalization_factors[i2] *
-                            c->normalization_factors[i3] * d->normalization_factors[i4] *
-                            a->coefficients[i1] * b->coefficients[i2] *
-                            c->coefficients[i3] * d->coefficients[i4] *
-                            pg_electron_repulsion_integral_dwrt_nuc(a->exponents[i1], a->l, a->m, a->n, a->x0, a->y0, a->z0,
-                                b->exponents[i2], b->l, b->m, b->n, b->x0, b->y0, b->z0,
-                                c->exponents[i3], c->l, c->m, c->n, c->x0, c->y0, c->z0,
-                                d->exponents[i4], d->l, d->m, d->n, d->x0, d->y0, d->z0,
-                                axis_mask, center);
+                                  c->normalization_factors[i3] * d->normalization_factors[i4] *
+                                  a->coefficients[i1] * b->coefficients[i2] *
+                                  c->coefficients[i3] * d->coefficients[i4] *
+                                  pg_electron_repulsion_integral_dwrt_nuc(a->exponents[i1], a->l, a->m, a->n, a->x0, a->y0, a->z0,
+                                                                          b->exponents[i2], b->l, b->m, b->n, b->x0, b->y0, b->z0,
+                                                                          c->exponents[i3], c->l, c->m, c->n, c->x0, c->y0, c->z0,
+                                                                          d->exponents[i4], d->l, d->m, d->n, d->x0, d->y0, d->z0,
+                                                                          axis_mask, center);
                     }
                 }
             }
