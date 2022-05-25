@@ -3,6 +3,7 @@
 | - | Ubuntu 20.04 |
 |---|---|
 |Build|![Build status badge](https://msai.visualstudio.com/LightAIMD/_apis/build/status/LightAIMD-CI)|
+|Sanity Test|![Test status badge](https://msai.visualstudio.com/LightAIMD/_apis/build/status/LightAIMD-CI)|
 
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
@@ -26,7 +27,8 @@ To build the debug version:
 (cd src && make clean && make debug)
 ```
 
-### Tests
+### Sanity Tests
+After building LightAIMD, you can run the sanity tests:
 ```shell
 bash tests/compare-with-ref-energies-forces.sh
 ```
