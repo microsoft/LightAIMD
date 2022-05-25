@@ -28,8 +28,7 @@ To build the debug version:
 
 ### Tests
 ```shell
-bash tests/compare-with-ref-energies.sh
-bash tests/compare-with-ref-forces.sh
+bash tests/compare-with-ref-energies-forces.sh
 ```
 
 ### Run your first simulation
