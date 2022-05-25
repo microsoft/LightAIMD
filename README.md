@@ -27,7 +27,7 @@ To build the debug version:
 (cd src && make clean && make debug)
 ```
 
-### Sanity Tests
+### Sanity tests
 After building LightAIMD, you can run the sanity tests:
 ```shell
 bash tests/compare-with-ref-energies-forces.sh
@@ -44,6 +44,17 @@ or you can run a DFT (Density Functional Theory) based simulation:
 ```
 
 Here, *--bomd* stands for Born-Oppenheimer Molecular Dynamics.
+
+## Features
+
+LightAIMD currently supports Hartree-Fock and Density Functional Theory based quantum chemistry calculations. Given a molecular structure, LightAIMD can calculate single point energy, single point forces (electronic forces on the nuclei), or perform Born-Oppenheimer molecular dynamics simulation.
+
+## Design philosophy
+
+- Minimalist yet generic
+  - Supports all the basis sets on [BSE](https://www.basissetexchange.org/) (Basis Set Exchange)
+  - Supports the following types of functionals provided by [Libxc](https://tddft.org/programs/libxc/): LDA, GGA, Hybrid GGA, MGGA, Hybrid MGGA
+- As self-contained as possible by minimizing external dependency
 
 ## Contributing
 
