@@ -3,6 +3,8 @@ ext/libxc-*
 ext/nlohmann/*
 basis-set/*.gbs
 basis-set/*.json
+bin
+lib
 build
 output
 __pycache__
