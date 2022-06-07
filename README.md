@@ -36,11 +36,11 @@ bash tests/compare-with-ref-energies-forces.sh
 ### Run your first simulation
 You can run an HF (Hartree-Fock) based simulation:
 ```shell
-./hf.exe --bomd --mol sample/h2o.xyz
+bin/lightaimd --hf --bomd --mol sample/h2o.xyz
 ```
 or you can run a DFT (Density Functional Theory) based simulation:
 ```shell
-./dft.exe --bomd --mol sample/h2o.xyz
+bin/lightaimd --dft --bomd --mol sample/h2o.xyz
 ```
 
 Here, *--bomd* stands for Born-Oppenheimer Molecular Dynamics.
