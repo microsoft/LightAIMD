@@ -12,6 +12,9 @@ const u64 JOB_TYPE_SPE = 1;  // Single Point Energy
 const u64 JOB_TYPE_SPF = 2;  // Single Point Forces
 const u64 JOB_TYPE_BOMD = 3; // Born-Oppenheimer Molecular Dynamics
 
+const u64 CC_METHOD_HF = 1;  // Hartree Fock
+const u64 CC_METHOD_DFT = 2; // Density Functional Theory
+
 char *get_arg_value_by_key(int argc, char *argv[], char const *key)
 {
     /* no command-line arguments are provided */
@@ -76,6 +79,34 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
     else
     {
         args->basis_set = "basis-set/sto-3g.json";
+    }
+
+    char *cc_method_value = get_arg_value_by_key(argc, argv, "--cc_method");
+    if (cc_method_value)
+    {
+        if (!strcmp(cc_method_value, "hf"))
+        {
+            args->cc_method = CC_METHOD_HF;
+        }
+
+        if (!strcmp(cc_method_value, "dft"))
+        {
+            args->cc_method = CC_METHOD_DFT;
+        }
+    }
+    else
+    {
+        args->cc_method = CC_METHOD_DFT;
+    }
+
+    if (check_flag(argc, argv, "--hf"))
+    {
+        args->cc_method = CC_METHOD_HF;
+    }
+
+    if (check_flag(argc, argv, "--dft"))
+    {
+        args->cc_method = CC_METHOD_DFT;
     }
 
     args->damping = check_flag(argc, argv, "--damping");

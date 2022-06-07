@@ -11,11 +11,16 @@ extern const u64 JOB_TYPE_SPE;  // Single Point Energy
 extern const u64 JOB_TYPE_SPF;  // Single Point Forces
 extern const u64 JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
 
+extern const u64 CC_METHOD_HF;  // Hartree Fock
+extern const u64 CC_METHOD_DFT; // Density Functional Theory
+
 struct cmd_line_args
 {
     u64 job_type;
     char *basis_set;
     struct molecule *mol;
+
+    u64 cc_method;
 
     /* SCF */
     u64 damping; // flag
