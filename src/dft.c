@@ -31,7 +31,7 @@
 #include "md.h"
 #include "energy_gradient.h"
 
-void calculate_density_matrix(struct dft_context *dft_ctx)
+static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
 {
     struct scf_context *ctx = dft_ctx->scf_ctx;
     struct molecular_grid_desc *mgd = dft_ctx->mgd;
@@ -134,7 +134,7 @@ struct dft_context *dft_initialize(struct scf_context *scf_ctx, struct cmd_line_
     return ctx;
 }
 
-void dft_scf_iterate(struct dft_context *ctx)
+static void dft_scf_iterate(struct dft_context *ctx)
 {
     struct scf_context *scf_ctx = ctx->scf_ctx;
     struct molecular_grid_desc *mgd = ctx->mgd;
@@ -179,9 +179,9 @@ void dft_scf_iterate(struct dft_context *ctx)
         console_printf(scf_ctx->silent, "dft_total_energy took %.3f ms\n", diff_time_ms(&time_start, &time_end));
 
         get_wall_time(&time_start);
-        calculate_density_matrix(ctx);
+        dft_calculate_density_matrix(ctx);
         get_wall_time(&time_end);
-        console_printf(scf_ctx->silent, "calculate_density_matrix took %.3f ms\n", diff_time_ms(&time_start, &time_end));
+        console_printf(scf_ctx->silent, "dft_calculate_density_matrix took %.3f ms\n", diff_time_ms(&time_start, &time_end));
 
         energy_delta = fabs(ctx->total_energy - energy_last);
         if (energy_delta < scf_ctx->converge_threshold)
@@ -299,7 +299,7 @@ void dft_finalize(struct dft_context *ctx)
     libxc_finalize();
 }
 
-void scf_config_dft(struct scf_context *ctx)
+void dft_scf_config(struct scf_context *ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -308,9 +308,9 @@ void scf_config_dft(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_HCORE;
 }
 
-void single_point_energy(struct cmd_line_args *args)
+void dft_single_point_energy(struct cmd_line_args *args)
 {
-    struct scf_context *scf_ctx = scf_initialize(args, scf_config_dft);
+    struct scf_context *scf_ctx = scf_initialize(args, dft_scf_config);
     struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
 
     dft_scf_iterate(dft_ctx);
@@ -323,9 +323,9 @@ void single_point_energy(struct cmd_line_args *args)
     scf_finalize(scf_ctx);
 }
 
-void single_point_forces(struct cmd_line_args *args)
+void dft_single_point_forces(struct cmd_line_args *args)
 {
-    struct scf_context *scf_ctx = scf_initialize(args, scf_config_dft);
+    struct scf_context *scf_ctx = scf_initialize(args, dft_scf_config);
     struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
 
     dft_scf_iterate(dft_ctx);
@@ -340,7 +340,7 @@ void single_point_forces(struct cmd_line_args *args)
     scf_finalize(scf_ctx);
 }
 
-void calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
+void dft_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
 {
     struct scf_context *scf_ctx = NULL;
     if (md_ctx->step > 0)
@@ -350,7 +350,7 @@ void calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx
     }
     else
     {
-        scf_ctx = scf_initialize(args, scf_config_dft);
+        scf_ctx = scf_initialize(args, dft_scf_config);
     }
 
     struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
@@ -362,6 +362,7 @@ void calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx
     scf_finalize(scf_ctx);
 }
 
+#ifdef MODULE_TEST
 int main(int argc, char *argv[])
 {
     struct timespec time_start, time_end;
@@ -377,19 +378,19 @@ int main(int argc, char *argv[])
 
     if (args.job_type == JOB_TYPE_SPE)
     {
-        single_point_energy(&args);
+        dft_single_point_energy(&args);
     }
     if (args.job_type == JOB_TYPE_SPF)
     {
-        single_point_forces(&args);
+        dft_single_point_forces(&args);
     }
     if (args.job_type == JOB_TYPE_BOMD)
     {
-        struct scf_context *ctx = scf_initialize(&args, scf_config_dft);
+        struct scf_context *ctx = scf_initialize(&args, dft_scf_config);
         u64 n_basis_funcs = ctx->n_basis_funcs;
         scf_finalize(ctx);
 
-        struct md_context *md_ctx = md_initialize(&args, calc_forces_on_nuclei, n_basis_funcs, "dft");
+        struct md_context *md_ctx = md_initialize(&args, dft_calc_forces_on_nuclei, n_basis_funcs, "dft");
         md_simulate(&args, md_ctx);
         md_finalize(md_ctx);
     }
@@ -406,3 +407,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif

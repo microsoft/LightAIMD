@@ -26,8 +26,6 @@
 const u64 DENSITY_INIT_SOAD = 1;
 const u64 DENSITY_INIT_HCORE = 2;
 const u64 DENSITY_INIT_USER_PROVIDED = 3;
-const u64 CC_METHOD_HF = 1;
-const u64 CC_METHOD_DFT = 2;
 
 void print_basis_func_struct(struct basis_func *bf)
 {

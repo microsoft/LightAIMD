@@ -30,7 +30,7 @@
 #include "energy_gradient.h"
 
 /* F = h + J - 0.5K */
-void build_fock_with_precomputed_eri(struct scf_context *ctx)
+void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -147,7 +147,7 @@ void task_func_eri(void *p_arg)
 }
 
 /* F = h + (G + G.T) * 0.25 */
-void build_fock_direct(struct scf_context *ctx)
+void hf_build_fock_direct(struct scf_context *ctx)
 {
     /*log_tm_println("starting building fock ...");*/
     f64 *P = ctx->P;
@@ -240,7 +240,7 @@ void build_fock_direct(struct scf_context *ctx)
     /*log_tm_println("fock has been built.");*/
 }
 
-void build_fock(struct scf_context *ctx)
+void hf_build_fock(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -248,21 +248,21 @@ void build_fock(struct scf_context *ctx)
 
     if (ctx->direct_scf)
     {
-        build_fock_direct(ctx);
+        hf_build_fock_direct(ctx);
     }
     else
     {
-        build_fock_with_precomputed_eri(ctx);
+        hf_build_fock_with_precomputed_eri(ctx);
     }
 }
 
 void hf_initialize(struct scf_context *ctx)
 {
-    build_fock(ctx);
+    hf_build_fock(ctx);
     memcpy(ctx->diis_F, ctx->F, ctx->N2_f64);
 }
 
-void scf_config_hf(struct scf_context *ctx)
+void hf_scf_config(struct scf_context *ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -271,7 +271,7 @@ void scf_config_hf(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_SOAD;
 }
 
-void calc_electronic_energy(struct scf_context *ctx)
+void hf_total_energy(struct scf_context *ctx)
 {
     /*
      * E = 0.5 * P_vu * (H_uv + F_uv) + NRE
@@ -304,11 +304,11 @@ void hf_scf_iterate(struct scf_context *ctx)
             ctx->energy_last = ctx->energy;
             if (ctx->direct_scf)
             {
-                build_fock_direct(ctx);
+                hf_build_fock_direct(ctx);
             }
             else
             {
-                build_fock_with_precomputed_eri(ctx);
+                hf_build_fock_with_precomputed_eri(ctx);
             }
             diis_update_fock(ctx);
         }
@@ -334,7 +334,7 @@ void hf_scf_iterate(struct scf_context *ctx)
         einsum_mn_np__mp(ctx->COO, ctx->COOT, ctx->P, N, nocc, N);
         mat_scalar_multiply(ctx->P, ctx->P, N, N, 2.0);
 
-        calc_electronic_energy(ctx);
+        hf_total_energy(ctx);
 
         if (step != 0)
         {
@@ -369,9 +369,9 @@ void hf_scf_iterate(struct scf_context *ctx)
     console_printf(ctx->silent, "SCF took %.3f ms (%.3f ms/step)\n", scf_time, scf_time / (step + 1));
 }
 
-void single_point_energy(struct cmd_line_args *args)
+void hf_single_point_energy(struct cmd_line_args *args)
 {
-    struct scf_context *ctx = scf_initialize(args, scf_config_hf);
+    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
     if (args->check_results)
@@ -381,9 +381,9 @@ void single_point_energy(struct cmd_line_args *args)
     scf_finalize(ctx);
 }
 
-void single_point_forces(struct cmd_line_args *args)
+void hf_single_point_forces(struct cmd_line_args *args)
 {
-    struct scf_context *ctx = scf_initialize(args, scf_config_hf);
+    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
     energy_dwrt_nuc(ctx);
@@ -395,9 +395,9 @@ void single_point_forces(struct cmd_line_args *args)
     scf_finalize(ctx);
 }
 
-void calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
+void hf_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
 {
-    struct scf_context *ctx = scf_initialize(args, scf_config_hf);
+    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
 
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
@@ -406,6 +406,7 @@ void calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx
     scf_finalize(ctx);
 }
 
+#ifdef MODULE_TEST
 int main(int argc, char *argv[])
 {
     struct timespec time_start, time_end;
@@ -421,19 +422,19 @@ int main(int argc, char *argv[])
 
     if (args.job_type == JOB_TYPE_SPE)
     {
-        single_point_energy(&args);
+        hf_single_point_energy(&args);
     }
     if (args.job_type == JOB_TYPE_SPF)
     {
-        single_point_forces(&args);
+        hf_single_point_forces(&args);
     }
     if (args.job_type == JOB_TYPE_BOMD)
     {
-        struct scf_context *ctx = scf_initialize(&args, scf_config_hf);
+        struct scf_context *ctx = scf_initialize(&args, hf_scf_config);
         u64 n_basis_funcs = ctx->n_basis_funcs;
         scf_finalize(ctx);
 
-        struct md_context *md_ctx = md_initialize(&args, calc_forces_on_nuclei, n_basis_funcs, "hf");
+        struct md_context *md_ctx = md_initialize(&args, hf_calc_forces_on_nuclei, n_basis_funcs, "hf");
         md_simulate(&args, md_ctx);
         md_finalize(md_ctx);
     }
@@ -450,3 +451,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif
