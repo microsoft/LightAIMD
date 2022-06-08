@@ -45,7 +45,7 @@ $(BIN_DIR)/hf: $(OBJECTS)
 $(BIN_DIR)/dft: $(OBJECTS)
 	$(CC) -DMODULE_TEST -lm -lstdc++ -lpthread -o $@ dft.c $^
 
-all: $(BIN_DIR)/lightaimd $(BIN_DIR)/hf $(BIN_DIR)/dft $(LIB_DIR)/cpp_bridge $(BIN_DIR)/numeric_types $(BIN_DIR)/special_func $(BIN_DIR)/math_util $(BIN_DIR)/molecular_integral $(BIN_DIR)/elements $(BIN_DIR)/molecule $(BIN_DIR)/thread_pool $(BIN_DIR)/time_util $(BIN_DIR)/spinlock $(BIN_DIR)/functional $(BIN_DIR)/vec3d $(BIN_DIR)/libxc_bridge $(BIN_DIR)/basis_func $(BIN_DIR)/diagnostics $(BIN_DIR)/lebedev_grid $(BIN_DIR)/einsum $(BIN_DIR)/random $(BIN_DIR)/velocity_init $(BIN_DIR)/thermostat $(BIN_DIR)/io
+all: $(BIN_DIR)/lightaimd $(BIN_DIR)/hf $(BIN_DIR)/dft $(LIB_DIR)/cpp_bridge $(BIN_DIR)/numeric_types $(BIN_DIR)/special_func $(BIN_DIR)/math_util $(BIN_DIR)/molecular_integral $(BIN_DIR)/elements $(BIN_DIR)/molecule $(BIN_DIR)/thread_pool $(BIN_DIR)/time_util $(BIN_DIR)/spinlock $(BIN_DIR)/functional $(BIN_DIR)/vec3d $(BIN_DIR)/libxc_bridge $(BIN_DIR)/basis_func $(BIN_DIR)/diagnostics $(BIN_DIR)/lebedev_grid $(BIN_DIR)/einsum $(BIN_DIR)/random $(BIN_DIR)/velocity_init $(BIN_DIR)/thermostat $(BIN_DIR)/io $(BIN_DIR)/cmd_line_args
 	echo "All targets have been made."
 
 .SILENT: all
@@ -77,6 +77,9 @@ $(OBJ_DIR)/special_func.o: special_func.c
 
 $(OBJ_DIR)/cmd_line_args.o: cmd_line_args.c cmd_line_args.h
 	$(CC) -fPIC -c -o $@ $<
+
+$(BIN_DIR)/cmd_line_args: cmd_line_args.c cmd_line_args.h
+	$(CC) -DMODULE_TEST -o $@ $< $(OBJ_DIR)/mm.o $(OBJ_DIR)/spinlock.o $(OBJ_DIR)/sample.o $(OBJ_DIR)/elements.o $(OBJ_DIR)/molecule.o $(OBJ_DIR)/io.o
 
 $(BIN_DIR)/special_func: special_func.c
 	$(CC) -DMODULE_TEST -lm -o $@ $< $(OBJ_DIR)/diagnostics.o $(OBJ_DIR)/mm.o $(OBJ_DIR)/spinlock.o $(OBJ_DIR)/f64_util.o

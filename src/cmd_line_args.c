@@ -81,7 +81,7 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
         args->basis_set = "basis-set/sto-3g.json";
     }
 
-    char *cc_method_value = get_arg_value_by_key(argc, argv, "--cc_method");
+    char *cc_method_value = get_arg_value_by_key(argc, argv, "--cc-method");
     if (cc_method_value)
     {
         if (!strcmp(cc_method_value, "hf"))
@@ -228,3 +228,38 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
         args->check_results = 0;
     }
 }
+
+#ifdef MODULE_TEST
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    struct cmd_line_args args;
+    parse_cmd_line_args(argc, argv, &args);
+
+    printf("job_type: %lu\n", args.job_type);
+    printf("basis_set: %s\n", args.basis_set);
+    printf("cc_method: %lu\n", args.cc_method);
+
+    // SCF
+    printf("damping: %lu\n", args.damping);
+    printf("diis_subspace_size: %lu\n", args.diis_subspace_size);
+
+    // DFT
+    printf("x_functional_id: %lu\n", args.x_functional_id);
+    printf("c_functional_id: %lu\n", args.c_functional_id);
+    printf("radial_grid_level: %lu\n", args.radial_grid_level);
+    printf("lebedev_level: %lu\n", args.lebedev_level);
+
+    printf("md_steps: %lu\n", args.md_steps);
+
+    printf("md_delta_t_fs: %.3e\n", args.md_delta_t_fs);
+    printf("md_temperature_K: %.3e\n", args.md_temperature_K);
+    printf("md_thermostat_time_smoothing_factor: %.3e\n", args.md_thermostat_time_smoothing_factor);
+
+    printf("silent: %lu\n", args.silent);
+    printf("check_results: %lu\n", args.check_results);
+
+    return 0;
+}
+#endif
