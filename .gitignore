@@ -1,6 +1,6 @@
-ext/eigen-*
-ext/libxc-*
-ext/nlohmann/*
+ext/eigen
+ext/libxc
+ext/nlohmann
 basis-set/*.gbs
 basis-set/*.json
 bin
