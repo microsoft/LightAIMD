@@ -12,9 +12,9 @@ BIN_DIR=../bin
 $(info $(shell mkdir -p $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR)))
 
 EXT_INC_DIR=../ext
-EIGEN_INC_DIR=../ext/eigen-3.4.0
-LIBXC_INC_DIR=../ext/libxc-5.2.2/libxc/include
-LIBXC_LIB_FILE=../ext/libxc-5.2.2/libxc/lib/libxc.a
+EIGEN_INC_DIR=../ext/eigen
+LIBXC_INC_DIR=../ext/libxc/include
+LIBXC_LIB_FILE=../ext/libxc/lib/libxc.a
 
 # -fPIC: If supported for the target machine, emit position-independent code,
 # suitable for dynamic linking and avoiding any limit on the size of the global offset table
