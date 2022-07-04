@@ -10,6 +10,7 @@ OBJ_DIR=../obj
 LIB_DIR=../lib
 BIN_DIR=../bin
 $(info $(shell mkdir -p $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR)))
+$(info $(shell bash ../scripts/check-dev-env.sh))
 
 EXT_INC_DIR=../ext
 EIGEN_INC_DIR=../ext/eigen

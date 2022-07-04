@@ -8,7 +8,7 @@ NLOHMANN_JSON_VERSION=3.10.5
 EIGEN_VERSION=3.4.0
 LIBXC_VERSION=5.2.3
 
-set -ex
+set -e
 
 sudo apt-get update
 sudo apt-get install -y \
@@ -16,13 +16,13 @@ sudo apt-get install -y \
      gfortran \
      clang
 
-if [ ! -e $ROOT_DIR/ext/nlohmann ]; then
+if [ ! -d $ROOT_DIR/ext/nlohmann ]; then
   mkdir -p $ROOT_DIR/ext/nlohmann
   wget https://github.com/nlohmann/json/releases/download/v$NLOHMANN_JSON_VERSION/json.hpp \
     -O $ROOT_DIR/ext/nlohmann/json.hpp
 fi
 
-if [ ! -e $ROOT_DIR/ext/eigen ]; then
+if [ ! -d $ROOT_DIR/ext/eigen ]; then
   wget https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VERSION/eigen-$EIGEN_VERSION.tar.gz \
        -O /tmp/eigen-$EIGEN_VERSION.tar.gz
   tar xzf /tmp/eigen-$EIGEN_VERSION.tar.gz -C $ROOT_DIR/ext
@@ -30,7 +30,7 @@ if [ ! -e $ROOT_DIR/ext/eigen ]; then
   rm /tmp/eigen-$EIGEN_VERSION.tar.gz
 fi
 
-if [ ! -e $ROOT_DIR/ext/libxc ]; then
+if [ ! -d $ROOT_DIR/ext/libxc ]; then
   wget http://www.tddft.org/programs/libxc/down.php?file=$LIBXC_VERSION/libxc-$LIBXC_VERSION.tar.gz \
        -O /tmp/libxc-$LIBXC_VERSION.tar.gz
   tar xzf /tmp/libxc-$LIBXC_VERSION.tar.gz -C /tmp
@@ -44,4 +44,6 @@ if [ ! -e $ROOT_DIR/ext/libxc ]; then
   rm -rf /tmp/libxc-$LIBXC_VERSION.tar.gz /tmp/libxc-$LIBXC_VERSION
 fi
 
-wget https://www.basissetexchange.org/api/basis/sto-3g/format/json/ -O basis-set/sto-3g.json
+if [ ! -f $ROOT_DIR/basis-set/sto-3g.json ]; then
+  wget https://www.basissetexchange.org/api/basis/sto-3g/format/json/ -O $ROOT_DIR/basis-set/sto-3g.json
+fi
