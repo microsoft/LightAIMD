@@ -4,9 +4,9 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 ROOT_DIR=$(dirname $SCRIPT_DIR)
 PROCESSOR_COUNT=$(grep -c processor /proc/cpuinfo)
 
-NLOHMANN_JSON_VERSION=3.10.5
+NLOHMANN_JSON_VERSION=3.11.2
 EIGEN_VERSION=3.4.0
-LIBXC_VERSION=5.2.3
+LIBXC_VERSION=6.2.2
 
 set -e
 
