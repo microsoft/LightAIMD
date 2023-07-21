@@ -1,10 +1,22 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
 trigger:
-- main
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - .gitignore
+    - .editorconfig
+    - .github
+    - README.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - SECURITY.md
+    - LICENSE.txt
+    - azure-pipelines.yml
+    - docs
+    - basis-set
 
 pool:
   vmImage: ubuntu-latest
@@ -19,5 +31,5 @@ steps:
 - script: wget https://www.basissetexchange.org/api/basis/sto-3g/format/json/ -O basis-set/sto-3g.json
   displayName: 'Download Basis Set'
 
-- script: tests/sanity-tests.sh
+- script: bash tests/sanity-tests.sh
   displayName: 'Run Sanity Test'
