@@ -1,6 +1,6 @@
 # LightAIMD
 
-| - | Ubuntu 20.04 |
+| - | Ubuntu 22.04 |
 |---|---|
 |Build|![Build status badge](https://msai.visualstudio.com/LightAIMD/_apis/build/status/LightAIMD-CI)|
 |Sanity Test|![Test status badge](https://msai.visualstudio.com/LightAIMD/_apis/build/status/LightAIMD-CI)|
@@ -79,6 +79,6 @@ The repo doesn't contain 3rd party code. It links to the following external libr
 - [Libxc](https://www.tddft.org/programs/libxc/)
 - [Nlohmann/json](https://github.com/nlohmann/json)
 
-Besides the above libraries that LightAIMD communicates with, we've learned a lot from the following projects. Thank you!
+Besides the above libraries that LightAIMD communicates with, the following projects have greatly inspired the design of LightAIMD:
 - [PySCF](https://github.com/pyscf/pyscf)
 - [McMurchie-Davidson](https://github.com/jjgoings/McMurchie-Davidson)
