@@ -6,6 +6,7 @@ from config import *
 from toolchain import *
 from build_targets import *
 from ninja_generator import *
+from sanity_tests import *
 
 def main():
     import argparse
@@ -18,6 +19,8 @@ def main():
     parser.add_argument('--release',dest='release',default=True, required=False, action='store_true')
     #
     parser.add_argument('--run',  dest='run', default=False, required=False, action='store_true')
+    #
+    parser.add_argument('--sanity-test',   dest='sanity_test',  default=False, required=False, action='store_true')
     parser.add_argument('--module-test',   dest='module_test',  default=False, required=False, action='store_true')
     #
     parser.add_argument('--verbose',dest='verbose',default=False, required=False, action='store_true')
@@ -40,6 +43,13 @@ def main():
 
     if args.run:
         run(args)
+
+    if args.sanity_test:
+        passed = run_sanity_tests(args)
+        if passed:
+            print("Sanity tests passed")
+        else:
+            print("Sanity tests failed")
 
     if args.module_test:
         module_test()
