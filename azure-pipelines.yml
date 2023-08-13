@@ -1,4 +1,9 @@
 # https://aka.ms/yaml
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+    architecture: 'x64'
 
 trigger:
   branches:
@@ -22,14 +27,8 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: bash scripts/setup-dev-env.sh
-  displayName: 'Setup development environment'
-
-- script: (cd src && make clean && make all)
+- script: python3 scripts/build.py --build --release --debug
   displayName: 'Build LightAIMD'
 
-- script: wget https://www.basissetexchange.org/api/basis/sto-3g/format/json/ -O basis-set/sto-3g.json
-  displayName: 'Download Basis Set'
-
-- script: bash tests/sanity-tests.sh
+- script: python3 scripts/build.py --sanity-test --release --debug
   displayName: 'Run Sanity Test'
