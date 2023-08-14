@@ -1641,6 +1641,16 @@ u64 lebedev_num_points(u64 level)
     return lebedev_npoints[level];
 }
 
+u64 lebedev_num_points_to_level(u64 num_points)
+{
+    u64 level = 0;
+    while (lebedev_npoints[level] < num_points)
+    {
+        level++;
+    }
+    return level;
+}
+
 void set_lebedev_weight(f64 *weight_buff, f64 weight, u64 count)
 {
     for (u64 i = 0; i < count; ++i)
