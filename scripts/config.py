@@ -20,6 +20,7 @@ config = {
     'CC' : '',
     'CXX' : '',
     'NVCC' : '',
+    'NVCC_FLAGS' : '',
     'CUDA' : '',
     'CUDA_LIB' : '',
     'MODULE_TEST' : '-DMODULE_TEST',

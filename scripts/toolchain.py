@@ -27,7 +27,7 @@ def find_nvcc():
         config['CUDA'] = '-DUSE_CUDA -I/usr/local/cuda/include'
         config['CUDA_LIB'] = '-L/usr/local/cuda/lib64 -lcudart -lcuda'
         config['MODULE_TEST'] += f"{config['CUDA']} {config['CUDA_LIB']}"
-        config['NVCC'] += f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
+        config['NVCC_FLAGS'] = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
 
     return config['NVCC']
 
@@ -95,7 +95,7 @@ def check_third_parties(use_cuda=False):
         #subprocess.run(["autoreconf", "-i"], cwd=libxc_src_dir, shell=False, check=True)
 
         if use_cuda:
-            subprocess.run([f'CC="/usr/local/cuda/bin/nvcc -x cu -ccbin clang --allow-unsupported-compiler" CFLAGS="--generate-code=arch=compute_80,code=[compute_80,sm_80] --generate-code=arch=compute_70,code=[compute_70,sm_70] -O3 --std=c++14 --compiler-options -Wall,-Wfatal-errors,-Wno-unused-variable,-Wno-unused-but-set-variable" CCLD="/usr/local/cuda/bin/nvcc -ccbin clang --allow-unsupported-compiler" ./configure --enable-cuda --prefix={libxc_dir}'], cwd=libxc_src_dir, shell=True, check=True)
+            subprocess.run([f'CC="{config["NVCC"]} -x cu -ccbin clang --allow-unsupported-compiler" CFLAGS="--generate-code=arch=compute_80,code=[compute_80,sm_80] --generate-code=arch=compute_70,code=[compute_70,sm_70] -O3 --std=c++14 --compiler-options -Wall,-Wfatal-errors,-Wno-unused-variable,-Wno-unused-but-set-variable" CCLD="/usr/local/cuda/bin/nvcc -ccbin clang --allow-unsupported-compiler" ./configure --enable-cuda --prefix={libxc_dir}'], cwd=libxc_src_dir, shell=True, check=True)
             subprocess.run(["make", "-j", f"{os.cpu_count()}"], cwd=libxc_src_dir, shell=False, check=True)
         else:
             subprocess.run([f"{os.path.join(libxc_src_dir, 'configure')}", f"--prefix={libxc_dir}"], cwd=libxc_src_dir, shell=False, check=True)
@@ -138,3 +138,4 @@ def setup_toolchain():
 
 if __name__ == "__main__":
     setup_toolchain()
+    print_config()
