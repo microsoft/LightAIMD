@@ -19,6 +19,8 @@
 #include "radial_grid.h"
 #include "einsum.h"
 #include "thread_pool.h"
+#include "standard_grid.h"
+#include "cmd_line_args.h"
 
 /*
  * In what follows, we use the following prefixes to indicate different types of variables:
@@ -257,6 +259,62 @@ void task_func_calc_integration_weights(void *p_arg)
     x_free(p_arg);
 }
 
+void task_func_calc_integration_weights_standard_grid(void *p_arg)
+{
+    struct task_func_calc_integration_weights_arg *arg = (struct task_func_calc_integration_weights_arg *)p_arg;
+    struct atomic_grid_desc *gd = arg->gd;
+    u64 ag_offset = arg->ag_offset;
+    struct molecular_grid_desc *mgd = gd->mgd;
+
+    f64 pi_n_1 = M_PI / (f64)(gd->num_radial_points + 1);
+    u64 grid_point_idx = 0;
+    for (i64 i = 1; i <= gd->num_radial_points; ++i)
+    {
+        /*
+         * Calculates the abscissa of the Gauss-Chebyshev integration
+         * Ref: Handbook of mathematical functions, p889, 25.4.40
+         * x_i is in [-1, 1]
+         *
+         * Ref: An adaptive numerical integrator for molecular integrals, JCP 108, 1998
+         */
+
+        f64 x1 = i * pi_n_1;
+        f64 sin_x1 = sin(x1);
+        f64 xi = (gd->num_radial_points - 1.0 - (i - 1.0) * 2) / (gd->num_radial_points + 1.0) + (1 + 2.0 / 3.0 * sin_x1 * sin_x1) * sin(2 * x1) / M_PI;
+        f64 r = 1 - log(1 + xi) * ONE_OVER_LN2;
+
+        /*
+         * An adaptive numerical integrator for molecular integrals, eq 10
+         */
+        f64 radial_weight = 16.0 / 3.0 / (gd->num_radial_points + 1.0) * pow(sin_x1, 4.0) * ONE_OVER_LN2 / (xi + 1) * 4 * M_PI * r * r;
+
+        u64 num_angular_points = get_standard_grid_angular_point_num_by_radial_point_idx(gd->atomic_num, mgd->grid_scheme, i-1);
+        u64 lebedev_level = lebedev_num_points_to_level(num_angular_points);
+        f64 *lebedev_grid = x_malloc(num_angular_points * 3 * sizeof(f64));
+        f64 *lebedev_weights = x_malloc(num_angular_points * sizeof(f64));
+        lebedev_gen_grid(lebedev_grid, lebedev_weights, lebedev_level);
+        for (u64 a = 0; a < num_angular_points; ++a)
+        {
+            struct vec3d *local_coord = mgd->local_coords + ag_offset + grid_point_idx;
+            struct vec3d *global_coord = mgd->global_coords + ag_offset + grid_point_idx;
+            local_coord->x = lebedev_grid[a * 3 + 0] * r;
+            local_coord->y = lebedev_grid[a * 3 + 1] * r;
+            local_coord->z = lebedev_grid[a * 3 + 2] * r;
+
+            global_coord->x = local_coord->x + gd->nucleus_coord.x;
+            global_coord->y = local_coord->y + gd->nucleus_coord.y;
+            global_coord->z = local_coord->z + gd->nucleus_coord.z;
+
+            mgd->weights[ag_offset + grid_point_idx] = radial_weight * lebedev_weights[a];
+            ++grid_point_idx;
+        }
+        x_free(lebedev_grid);
+        x_free(lebedev_weights);
+    }
+
+    x_free(p_arg);
+}
+
 struct task_func_calc_becke_weights_arg
 {
     struct atomic_grid_desc *gd;
@@ -360,20 +418,30 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
          * In theory, each gd can have its own num_radial_points, num_angular_points, and max_angular_number
          * We will implement and improve the atomic adjustments later.
          */
-        gd->num_radial_points = get_num_radial_points(mgd->radial_grid_level, mol->atomic_nums[i]);
-        gd->num_angular_points = mgd->num_angular_points;
-        gd->grid_size = gd->num_radial_points * gd->num_angular_points;
+        gd->atomic_num = mol->atomic_nums[i];
+
+        if (mgd->grid_scheme == GRID_SCHEME_FULL)
+        {
+            gd->num_radial_points = get_num_radial_points(mgd->radial_grid_level, mol->atomic_nums[i]);
+            gd->num_angular_points = mgd->num_angular_points;
+            gd->grid_size = gd->num_radial_points * gd->num_angular_points;
+        }
+
+        if (mgd->grid_scheme == GRID_SCHEME_SG2 || mgd->grid_scheme == GRID_SCHEME_SG3)
+        {
+            gd->num_radial_points = get_standard_grid_radial_point_num(gd->atomic_num, mgd->grid_scheme);
+            gd->grid_size = get_standard_grid_point_num(gd->atomic_num, mgd->grid_scheme);
+        }
 
         struct vec3d *nucleus_coord = mol->coords + i;
         gd->nucleus_coord.x = nucleus_coord->x;
         gd->nucleus_coord.y = nucleus_coord->y;
         gd->nucleus_coord.z = nucleus_coord->z;
 
-        // TODO: replace 1.0 with the real bragg_slater_radius
-        gd->bragg_slater_radius = 1.0;
-
         mgd->grid_size += gd->grid_size;
     }
+
+    console_printf(mgd->scf_ctx->silent, "Molecular grid size: %lu\n", mgd->grid_size);
 
     u64 M = mgd->grid_size;
     u64 N = scf_ctx->n_basis_funcs;
@@ -438,7 +506,14 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
         struct task_func_calc_integration_weights_arg *arg = x_malloc(sizeof(struct task_func_calc_integration_weights_arg));
         arg->gd = gd;
         arg->ag_offset = ag_offset;
-        threadpool_add_task(scf_ctx->tp_ctx, n % (scf_ctx->tp_ctx->n_workers), task_func_calc_integration_weights, arg);
+        if (mgd->grid_scheme == GRID_SCHEME_FULL)
+        {
+            threadpool_add_task(scf_ctx->tp_ctx, n % (scf_ctx->tp_ctx->n_workers), task_func_calc_integration_weights, arg);
+        }
+        if (mgd->grid_scheme == GRID_SCHEME_SG2 || mgd->grid_scheme == GRID_SCHEME_SG3)
+        {
+            threadpool_add_task(scf_ctx->tp_ctx, n % (scf_ctx->tp_ctx->n_workers), task_func_calc_integration_weights_standard_grid, arg);
+        }
 
         ag_offset += gd->grid_size;
     }

@@ -13,7 +13,7 @@ struct atomic_grid_desc
     u64 grid_size;
     u64 num_radial_points;
     u64 num_angular_points;
-    f64 bragg_slater_radius;
+    u64 atomic_num;
 
     struct molecular_grid_desc *mgd;
 };
@@ -21,6 +21,7 @@ struct atomic_grid_desc
 struct molecular_grid_desc
 {
     struct atomic_grid_desc *atomic_grid_descs;
+    u64 grid_scheme;
     u64 num_angular_points;
     u64 num_radial_points;
 
