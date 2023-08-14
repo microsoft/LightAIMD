@@ -34,7 +34,7 @@ executable_targets = {
     "lebedev_grid": (['lebedev_grid.c', 'diagnostics.o', 'f64_util.o', 'mm.o', 'spinlock.o'], "-DMODULE_TEST -lm"),
     "velocity_init": (['velocity_init.c', 'mm.o', 'random.o', 'spinlock.o', 'molecule.o', 'elements.o', 'thermostat.o', 'io.o'], "-DMODULE_TEST -lm"),
     "thermostat": (['thermostat.c', 'mm.o', 'random.o', 'spinlock.o', 'molecule.o', 'elements.o', 'velocity_init.o', 'io.o'], "-DMODULE_TEST -lm"),
-    #"standard_grid": (['standard_grid.c', 'cmd_line_args.o', 'mm.o', 'spinlock.o', 'sample.o', 'elements.o', 'molecule.o', 'io.o'], "-DMODULE_TEST -lm"),
+    "standard_grid": (['standard_grid.c', 'cmd_line_args.o', 'mm.o', 'spinlock.o', 'sample.o', 'elements.o', 'molecule.o', 'io.o'], "-DMODULE_TEST -lm"),
     "special_func": (['special_func.c', 'diagnostics.o', 'mm.o', 'spinlock.o', 'f64_util.o'], "-DMODULE_TEST -lm"),
 
     # -DMODULE_TEST -lm -lstdc++ -lpthread

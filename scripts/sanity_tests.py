@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import subprocess
 
 from config import *
@@ -41,16 +40,16 @@ def sanity_tests():
     passed = True
     for cmd in energies_comparison:
         cmd = cmd.format(active_build_dir=config['active_build_dir'])
-        output = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
+        output = subprocess.run(cmd, cwd=config['root_dir'], shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
+        print(output)
         if 'Failed' in output:
-            print(output)
             passed = False
 
     for cmd in energies_forces_comparison:
         cmd = cmd.format(active_build_dir=config['active_build_dir'])
-        output = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
+        output = subprocess.run(cmd, cwd=config['root_dir'], shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
+        print(output)
         if 'Failed' in output:
-            print(output)
             passed = False
 
     return passed
