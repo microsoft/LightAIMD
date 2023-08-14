@@ -62,7 +62,7 @@ def check_third_parties(use_cuda=False):
     nlohmann_version_file = os.path.join(nlohmann_dir, config['NLOHMANN_JSON_VERSION'])
     if not os.path.exists(nlohmann_version_file):
         os.makedirs(nlohmann_dir, exist_ok=True)
-        subprocess.run(["wget", f"https://github.com/nlohmann/json/releases/download/v{config['NLOHMANN_JSON_VERSION']}/json.hpp", "-O", os.path.join(nlohmann_dir, "json.hpp")], shell=False, check=True)
+        subprocess.run(["curl", "-fsSL", f"https://github.com/nlohmann/json/releases/download/v{config['NLOHMANN_JSON_VERSION']}/json.hpp", "--output", os.path.join(nlohmann_dir, "json.hpp")], shell=False, check=True)
         create_version_file(nlohmann_dir, config['NLOHMANN_JSON_VERSION'])
     print('nlohmann json installed')
 
@@ -71,7 +71,7 @@ def check_third_parties(use_cuda=False):
     if not os.path.exists(eigen_version_file):
         os.makedirs(config['tmp_dir'], exist_ok=True)
         downloaded_file_path = os.path.join(config['tmp_dir'], f"eigen-{config['EIGEN_VERSION']}.tar.gz")
-        subprocess.run(["wget", f"https://gitlab.com/libeigen/eigen/-/archive/{config['EIGEN_VERSION']}/eigen-{config['EIGEN_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
+        subprocess.run(["curl", "-fsSL", f"https://gitlab.com/libeigen/eigen/-/archive/{config['EIGEN_VERSION']}/eigen-{config['EIGEN_VERSION']}.tar.gz", "--output", downloaded_file_path], shell=False, check=True)
         subprocess.run(["tar", "xzf", downloaded_file_path, "-C", config['ext_dir']], shell=False, check=True)
         subprocess.run(["mv", os.path.join(config['ext_dir'], f"eigen-{config['EIGEN_VERSION']}"), eigen_dir], shell=False, check=True)
         subprocess.run(["rm", downloaded_file_path], shell=False, check=True)
@@ -84,8 +84,8 @@ def check_third_parties(use_cuda=False):
         os.makedirs(config['tmp_dir'], exist_ok=True)
         downloaded_file_path = os.path.join(config['tmp_dir'], f"libxc-{config['LIBXC_VERSION']}.tar.gz")
         # The package downloaded from gitlab doesn't contain the configure script
-        #subprocess.run(["wget", f"https://gitlab.com/libxc/libxc/-/archive/{config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
-        subprocess.run(["wget", f"http://www.tddft.org/programs/libxc/down.php?file={config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
+        #subprocess.run(["curl", "-fsSL", f"https://gitlab.com/libxc/libxc/-/archive/{config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "--output", downloaded_file_path], shell=False, check=True)
+        subprocess.run(["curl", "-fsSL", f"http://www.tddft.org/programs/libxc/down.php?file={config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "--output", downloaded_file_path], shell=False, check=True)
         subprocess.run(["tar", "xzf", downloaded_file_path, "-C", config['tmp_dir']], shell=False, check=True)
 
         libxc_src_dir = os.path.join(config['tmp_dir'], f"libxc-{config['LIBXC_VERSION']}")
@@ -110,7 +110,7 @@ def check_third_parties(use_cuda=False):
 
     sto_3g_file = os.path.join(config['root_dir'], 'basis-set', 'sto-3g.json')
     if not os.path.exists(sto_3g_file):
-        subprocess.run(["wget", "https://www.basissetexchange.org/api/basis/sto-3g/format/json/", "-O", sto_3g_file], shell=False, check=True)
+        subprocess.run(["curl", "-fsSL", "https://www.basissetexchange.org/api/basis/sto-3g/format/json/", "--output", sto_3g_file], shell=False, check=True)
     print('sto-3g downloaded')
 
     return 0
