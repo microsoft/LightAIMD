@@ -83,7 +83,9 @@ def check_third_parties(use_cuda=False):
     if not os.path.exists(libxc_version_file):
         os.makedirs(config['tmp_dir'], exist_ok=True)
         downloaded_file_path = os.path.join(config['tmp_dir'], f"libxc-{config['LIBXC_VERSION']}.tar.gz")
-        subprocess.run(["wget", f"https://gitlab.com/libxc/libxc/-/archive/{config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
+        # The package downloaded from gitlab doesn't contain the configure script
+        #subprocess.run(["wget", f"https://gitlab.com/libxc/libxc/-/archive/{config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
+        subprocess.run(["wget", f"http://www.tddft.org/programs/libxc/down.php?file={config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz", "-O", downloaded_file_path], shell=False, check=True)
         subprocess.run(["tar", "xzf", downloaded_file_path, "-C", config['tmp_dir']], shell=False, check=True)
 
         libxc_src_dir = os.path.join(config['tmp_dir'], f"libxc-{config['LIBXC_VERSION']}")
