@@ -30,6 +30,7 @@
 #include "thermostat.h"
 #include "md.h"
 #include "energy_gradient.h"
+#include "cuda_helper.h"
 
 static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
 {
@@ -107,6 +108,7 @@ struct dft_context *dft_initialize(struct scf_context *scf_ctx, struct cmd_line_
     ctx->mgd = mgd;
     ctx->scf_ctx = scf_ctx;
     scf_ctx->dft_ctx = ctx;
+    mgd->grid_scheme = args->grid_scheme;
     mgd->radial_grid_level = args->radial_grid_level;
     mgd->lebedev_level = args->lebedev_level;
     mgd->scf_ctx = scf_ctx;
@@ -365,6 +367,10 @@ void dft_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md
 #ifdef MODULE_TEST
 int main(int argc, char *argv[])
 {
+#ifdef USE_CUDA
+    cuda_configure();
+#endif
+
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 

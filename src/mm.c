@@ -3,8 +3,10 @@
  * Licensed under the MIT License.
  */
 #include <stdio.h>
+#include <string.h>
 #include "mm.h"
 #include "spinlock.h"
+#include "cuda_helper.h"
 
 static u64 total_allocated_memory = 0;
 // static u64 total_freed_memory = 0;
@@ -22,16 +24,32 @@ void *x_malloc(u64 size)
     ++malloc_count;
     total_allocated_memory += size;
     spinlock_unlock(&mm_malloc_lock);
+
+#ifdef USE_CUDA
+    void *ptr;
+    cudaMallocManaged(&ptr, size, cudaMemAttachGlobal);
+    return ptr;
+#else
     return malloc(size);
+#endif
 }
 
 void *x_calloc(u64 count, u64 size)
 {
+    u64 _size = count * size;
     spinlock_lock(&mm_calloc_lock);
     ++calloc_count;
-    total_allocated_memory += count * size;
+    total_allocated_memory += _size;
     spinlock_unlock(&mm_calloc_lock);
+
+#ifdef USE_CUDA
+    void *ptr;
+    cudaMallocManaged(&ptr, _size, cudaMemAttachGlobal);
+    memset(ptr, 0, _size);
+    return ptr;
+#else
     return calloc(count, size);
+#endif
 }
 
 void x_free(void *ptr)
@@ -45,7 +63,11 @@ void x_free(void *ptr)
         printf("Warning: NULL pointer is being freed.\n");
     }
 
+#ifdef USE_CUDA
+    cudaFree(ptr);
+#else
     free(ptr);
+#endif
 }
 
 void print_mm_status()

@@ -28,6 +28,7 @@
 #include "thermostat.h"
 #include "md.h"
 #include "energy_gradient.h"
+#include "cuda_helper.h"
 
 /* F = h + J - 0.5K */
 void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
@@ -304,17 +305,25 @@ void hf_scf_iterate(struct scf_context *ctx)
             ctx->energy_last = ctx->energy;
             if (ctx->direct_scf)
             {
+                log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, start\n", step);
                 hf_build_fock_direct(ctx);
+                log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, end\n", step);
             }
             else
             {
+                log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, start\n", step);
                 hf_build_fock_with_precomputed_eri(ctx);
+                log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, end\n", step);
             }
+            log_dbg_print(ctx->silent, "DIIS update fock, step %lu, start\n", step);
             diis_update_fock(ctx);
+            log_dbg_print(ctx->silent, "DIIS update fock, step %lu, end\n", step);
         }
 
         /* Solving FC = eSC */
+        log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, start\n", step);
         generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
+        log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, end\n", step);
 
         u64 nocc = ctx->mol->n_electrons >> 1;
         matslice(ctx->C, ctx->COO, N, N, nocc);
@@ -371,6 +380,7 @@ void hf_scf_iterate(struct scf_context *ctx)
 
 void hf_single_point_energy(struct cmd_line_args *args)
 {
+    log_dbg_print(args->silent, "HF single point energy calculation\n");
     struct scf_context *ctx = scf_initialize(args, hf_scf_config);
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
@@ -409,6 +419,10 @@ void hf_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_
 #ifdef MODULE_TEST
 int main(int argc, char *argv[])
 {
+#ifdef USE_CUDA
+    cuda_configure();
+#endif
+
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 

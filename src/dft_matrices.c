@@ -21,6 +21,7 @@
 #include "mm.h"
 #include "einsum.h"
 #include "time_util.h"
+#include "cuda_helper.h"
 
 struct task_func_build_K_arg
 {
@@ -375,14 +376,19 @@ void task_func_build_JK(void *p_arg)
 
 void build_JK_matrices(struct molecular_grid_desc *mgd)
 {
+#ifdef USE_CUDA
+    return build_JK_matrices_cuda(mgd);
+#endif
+
     struct scf_context *ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
+    u64 N2 = N * N;
 
     f64 *P = ctx->P;
     f64 *J = mgd->J;
     f64 *K = mgd->K;
-    memset(J, 0, N * N * sizeof(f64));
-    memset(K, 0, N * N * sizeof(f64));
+    memset(J, 0, N2 * sizeof(f64));
+    memset(K, 0, N2 * sizeof(f64));
 
     for (u64 i = 0; i < N; ++i)
     {
@@ -470,6 +476,148 @@ void build_JK_matrices(struct molecular_grid_desc *mgd)
     mat_add(K, M, M, N, N);
     mat_scalar_multiply(M, K, N, N, 0.5);
 }
+
+#ifdef USE_CUDA
+static void update_JK_with_eri(f64 *J, f64 *K, f64 *P, u64 N, u32 *basis_func_index_buff, u64 cuda_task_index, f64 *eri_output_buff)
+{
+    for (u64 t = 0; t < cuda_task_index; ++t)
+    {
+        u32 i = basis_func_index_buff[t * 4];
+        u32 j = basis_func_index_buff[t * 4 + 1];
+        u32 k = basis_func_index_buff[t * 4 + 2];
+        u32 l = basis_func_index_buff[t * 4 + 3];
+        f64 i_j = 2.0;
+        if (i == j)
+        {
+            i_j = 1.0;
+        }
+        f64 k_l = 2.0;
+        if (k == l)
+        {
+            k_l = 1.0;
+        }
+        f64 ij_kl = 2.0;
+        if (i == k && j == l)
+        {
+            ij_kl = 1.0;
+        }
+        u64 iN = i * N;
+        u64 jN = j * N;
+        u64 kN = k * N;
+
+        f64 val = eri_output_buff[t] * i_j * k_l * ij_kl;
+        u64 iNj = iN + j;
+        u64 iNk = iN + k;
+        u64 jNk = jN + k;
+        u64 kNj = kN + j;
+
+        /* Coulomb */
+        J[iNj] += val * P[kN + l];
+        J[kN + l] += val * P[iNj];
+
+        /* Exchange */
+        K[iNk] += val * P[jN + l] * 0.25;
+        K[jN + l] += val * P[iNk] * 0.25;
+        K[iN + l] += val * P[jNk] * 0.25;
+        K[kNj] += val * P[iN + l] * 0.25;
+    }
+}
+
+void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
+{
+    struct scf_context *ctx = mgd->scf_ctx;
+    u64 N = ctx->n_basis_funcs;
+    u64 N2 = N * N;
+
+    f64 *P = ctx->P;
+    f64 *J = mgd->J;
+    f64 *K = mgd->K;
+    memset(J, 0, N2 * sizeof(f64));
+    memset(K, 0, N2 * sizeof(f64));
+
+    u64 cuda_task_count = (N2 + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK * THREAD_PER_BLOCK;
+    u64 minimum_task_count = 64 * 1024 * 1024 * cuda_get_device_count();
+
+    if (cuda_task_count < minimum_task_count)
+    {
+        cuda_task_count = minimum_task_count;
+    }
+
+    u32 *basis_func_index_buff = x_malloc(sizeof(u32) * cuda_task_count * 4);
+    f64 *eri_output_buff = x_malloc(sizeof(f64) * cuda_task_count);
+    u64 cuda_task_index = 0;
+
+    for (u64 i = 0; i < N; ++i)
+    {
+        for (u64 j = 0; j <= i; ++j)
+        {
+            /* ij gives a total order for iterating i and j (i<N and j<=i) */
+            u64 ij = ((i * (i + 1)) >> 1) + j;
+            for (u64 k = 0; k < N; ++k)
+            {
+                for (u64 l = 0; l <= k; ++l)
+                {
+                    /* kl gives a total order for iterating k and l (k<N and l<=k) */
+                    u64 kl = ((k * (k + 1)) >> 1) + l;
+
+                    if (ij >= kl)
+                    {
+                        f64 bound = sqrt(ctx->ScreeningMatrix[ij]) * sqrt(ctx->ScreeningMatrix[kl]);
+
+                        f64 pmax = 0.0;
+                        f64 ps[] = {fabs(4 * P[i * N + j]), fabs(4 * P[k * N + l]), fabs(P[i * N + k]), fabs(P[i * N + l]), fabs(P[j * N + k]), fabs(P[j * N + l])};
+
+                        for (u64 t = 0; t < 6; ++t)
+                        {
+                            if (ps[t] > pmax)
+                            {
+                                pmax = ps[t];
+                            }
+                        }
+
+                        if ((bound * pmax) < ctx->JK_screening_threshold)
+                        {
+                            continue;
+                        }
+
+                        basis_func_index_buff[cuda_task_index * 4] = i;
+                        basis_func_index_buff[cuda_task_index * 4 + 1] = j;
+                        basis_func_index_buff[cuda_task_index * 4 + 2] = k;
+                        basis_func_index_buff[cuda_task_index * 4 + 3] = l;
+                        ++cuda_task_index;
+
+                        if (cuda_task_index == cuda_task_count)
+                        {
+                            cg_electron_repulsion_integral_cuda(ctx->basis_funcs, basis_func_index_buff, cuda_task_index, eri_output_buff);
+                            update_JK_with_eri(J, K, P, N, basis_func_index_buff, cuda_task_index, eri_output_buff);
+                            cuda_task_index = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (cuda_task_index > 0)
+    {
+        cg_electron_repulsion_integral_cuda(ctx->basis_funcs, basis_func_index_buff, cuda_task_index, eri_output_buff);
+        update_JK_with_eri(J, K, P, N, basis_func_index_buff, cuda_task_index, eri_output_buff);
+    }
+
+    x_free(basis_func_index_buff);
+    x_free(eri_output_buff);
+
+    f64 *M = ctx->NxN_1;
+    transpose(J, M, N, N);
+    mat_add(J, M, M, N, N);
+    mat_scalar_multiply(M, J, N, N, 0.25);
+
+    M = ctx->NxN_1;
+    transpose(K, M, N, N);
+    mat_add(K, M, M, N, N);
+    mat_scalar_multiply(M, K, N, N, 0.5);
+}
+#endif
 
 void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
 {

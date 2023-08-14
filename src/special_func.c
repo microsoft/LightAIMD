@@ -5,10 +5,28 @@
 #include <math.h>
 #include <float.h>
 #include <complex.h>
-#include <stdio.h>
 
 #include "numeric_types.h"
 #include "constants.h"
+#include "special_func.h"
+
+#ifdef __NVCC__
+#include <cuComplex.h>
+#define C64 cuDoubleComplex
+
+__device__ C64 cuCexp(C64 z)
+{
+    C64 result;
+    sincos(z.y, &result.y, &result.x);
+    double d = exp(z.x);
+    result.x *= d;
+    result.y *= d;
+    return result;
+}
+
+#else
+#define C64 c64
+#endif
 
 u64 factorial(u64 n)
 {
@@ -28,12 +46,16 @@ u64 factorial(u64 n)
  * Calculates the natural logarithm of the gamma function for a real number: ln[Г(x)]
  * Ref: computation of special functions
  */
-static c64 ln_gamma_f64(f64 x)
+__device__ static C64 ln_gamma_f64(f64 x)
 {
     // z is zero or negative integer
     if (x == ((i64)x) && x <= 0.0)
     {
+        #ifdef __NVCC__
+        return make_cuDoubleComplex(F64_QUASI_INFINITY, 0.0);
+        #else
         return F64_QUASI_INFINITY;
+        #endif
     }
 
     u64 negative = 0;
@@ -98,14 +120,18 @@ static c64 ln_gamma_f64(f64 x)
         }
     }
 
+#ifdef __NVCC__
+    return make_cuDoubleComplex(result_real, result_imag);
+#else
     return result_real + result_imag * I;
+#endif
 }
 
 /*
  * This is the factorial with every second value skipped.
  * For example, 7!! = 7 * 5 * 3 * 1
  */
-i64 double_factorial(i64 n)
+__device__ i64 double_factorial(i64 n)
 {
     if (n < -1)
     {
@@ -129,14 +155,18 @@ i64 double_factorial(i64 n)
  * ref: https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.factorial2.html
  * ref: https://mpmath.org/doc/0.19/functions/gamma.html
  */
-f64 approximate_double_factorial(i64 n)
+__device__ f64 approximate_double_factorial(i64 n)
 {
     if (n < 10)
     {
         return (f64)double_factorial(n);
     }
     f64 nd2 = (f64)n / 2.0;
+#ifdef __NVCC__
+    f64 result = cuCreal(cuCexp(ln_gamma_f64(nd2 + 1)));
+#else
     f64 result = creal(cexp(ln_gamma_f64(nd2 + 1)));
+#endif
 
     if (n % 2 == 0)
     {
@@ -155,7 +185,7 @@ f64 approximate_double_factorial(i64 n)
  * Ref: computation of special functions, figure 12.10, p397
  * Ref: NIST handbook of mathematical functions
  */
-static f64 hypergeometric1f1_b_ne_npint(f64 a, f64 b, f64 x)
+__device__ static f64 hypergeometric1f1_b_ne_npint(f64 a, f64 b, f64 x)
 {
     f64 a_original = a;
     f64 x_original = x;
@@ -214,9 +244,9 @@ static f64 hypergeometric1f1_b_ne_npint(f64 a, f64 b, f64 x)
         else
         {
             // Ref: NIST handbook of mathematical functions, eq 13.7.2
-            c64 lg_a = ln_gamma_f64(a);
-            c64 lg_b = ln_gamma_f64(b);
-            c64 lg_ba = ln_gamma_f64(b - a);
+            C64 lg_a = ln_gamma_f64(a);
+            C64 lg_b = ln_gamma_f64(b);
+            C64 lg_ba = ln_gamma_f64(b - a);
 
             f64 multiplicative_accumulator_1 = 1.0;
             f64 multiplicative_accumulator_2 = 1.0;
@@ -232,13 +262,23 @@ static f64 hypergeometric1f1_b_ne_npint(f64 a, f64 b, f64 x)
 
             if (x_original >= 0.0)
             {
+#ifdef __NVCC__
+                result = cuCreal(cuCexp(cuCadd(cuCsub(lg_b, lg_a), make_cuDoubleComplex(x, 0)))) * pow(x, a - b) * term_1 +
+                         cuCreal(cuCexp(cuCsub(lg_b, lg_ba))) * pow(x, -a) * cos(M_PI * a) * term_2;
+#else
                 result = creal(cexp(lg_b - lg_a + x)) * pow(x, a - b) * term_1 +
                          creal(cexp(lg_b - lg_ba)) * pow(x, -a) * cos(M_PI * a) * term_2;
+#endif
             }
             else
             {
+#ifdef __NVCC__
+                result = cuCreal(cuCexp(cuCsub(lg_b, lg_a))) * pow(x, a - b) * term_1 +
+                         cuCreal(cuCexp(cuCadd(cuCsub(lg_b, lg_ba), make_cuDoubleComplex(x_original, 0)))) * pow(x, -a) * cos(M_PI * a) * term_2;
+#else
                 result = creal(cexp(lg_b - lg_a)) * pow(x, a - b) * term_1 +
                          creal(cexp(lg_b - lg_ba + x_original)) * pow(x, -a) * cos(M_PI * a) * term_2;
+#endif
             }
         }
 
@@ -274,7 +314,7 @@ static f64 hypergeometric1f1_b_ne_npint(f64 a, f64 b, f64 x)
 /*
  * Kummer confluent hypergeometric function M(a, b, x) with a > 0 and b > 0
  */
-static f64 hypergeometric1f1_a_b_gt_0(f64 a, f64 b, f64 x)
+__device__ static f64 hypergeometric1f1_a_b_gt_0(f64 a, f64 b, f64 x)
 {
     // Ref: NIST handbook of mathematical functions, eq 13.2.2
     if (x == 0)
@@ -322,16 +362,47 @@ static f64 hypergeometric1f1_a_b_gt_0(f64 a, f64 b, f64 x)
  * The Boys function of order n
  * Ref: Molecular electronic structure theory (purple book), eq 9.8.39
  */
-f64 boys_func(f64 n, f64 x)
+__device__ f64 boys_func(f64 n, f64 x)
 {
     return hypergeometric1f1_a_b_gt_0(n + 0.5, n + 1.5, -x) / (2.0 * n + 1.0);
 }
 
 #ifdef MODULE_TEST
+#include <stdio.h>
 #include "diagnostics.h"
+
+#ifdef __NVCC__
+__global__ static void boys_func_cuda_kernel(f64 *input, f64 *output, i32 count)
+{
+    i32 tid = threadIdx.x;
+    i32 i = blockIdx.x * blockDim.x + tid;
+    if (i >= count)
+        return;
+    output[i] = boys_func(input[i], 0.5);
+}
+#endif
 
 int main(void)
 {
+#ifdef __NVCC__
+    f64 *input;
+    f64 *output;
+    int count = 3;
+
+    cudaMallocManaged(&input, sizeof(f64) * count, cudaMemAttachGlobal);
+    cudaMallocManaged(&output, sizeof(f64) * count, cudaMemAttachGlobal);
+
+    input[0] = 0.0;
+    input[1] = 1.0;
+    input[2] = 2.0;
+
+    boys_func_cuda_kernel<<<1, 3>>>(input, output, count);
+    cudaDeviceSynchronize();
+    printf("%.16e %.16e %.16e\n", output[0], output[1], output[2]);
+
+    cudaFree(input);
+    cudaFree(output);
+#else
     if (1)
     {
         for (f64 z = -10; z < 10; z += 0.323)
@@ -339,7 +410,7 @@ int main(void)
             c64 d = ln_gamma_f64(z);
             if (cimag(d) != 0.0)
             {
-                printf("ln_gamma(%.3f) = (%.8e + %.8e I)\n", z, creal(d), cimag(d));
+                printf("ln_gamma(%.6f) = (%.16e + %.16e I)\n", z, creal(d), cimag(d));
             }
         }
     }
@@ -389,6 +460,14 @@ int main(void)
         }
     }
 
+    if (1)
+    {
+        for (f64 i = 0; i < 10; ++i)
+        {
+            printf("boys_func(%.3e, 0.5) = %.16e\n", i, boys_func(i, 0.5));
+        }
+    }
+#endif
     return 0;
 }
 #endif

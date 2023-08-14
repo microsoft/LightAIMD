@@ -9,6 +9,7 @@
 #include "constants.h"
 #include "scf.h"
 #include "special_func.h"
+#include "molecular_integral.h"
 
 /*
  * This file contains the routines for calculating integrals based on Cartesian Gaussians.
@@ -33,7 +34,7 @@
  * num_nodes : the number of nodes in the Hermite Gaussian
  * relative_separation : the separation between the two Gaussian centers, integral chapter, eq 63; purple book eq 9.2.14
  */
-static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation)
+__device__ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation)
 {
     // integral chapter, eq 64; purple book, eq 9.2.11
     f64 gexp_a_b = gexp_a + gexp_b;
@@ -62,7 +63,7 @@ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_no
     return (1 / (2 * gexp_a_b)) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes - 1, relative_separation) + (gexp_reduced * relative_separation / gexp_b) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes, relative_separation) + (num_nodes + 1) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes + 1, relative_separation);
 }
 
-static f64 hermite_coef_dwrt_nuc(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation, i64 q, i64 r)
+__device__ static f64 hermite_coef_dwrt_nuc(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation, i64 q, i64 r)
 {
     if (q == 1)
     {
@@ -84,7 +85,7 @@ static f64 hermite_coef_dwrt_nuc(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i
  * due to a Gaussian charge distribution centered at P.
  * Ref: purple book, eq 9.9.9
  */
-static f64 hermite_coulomb_integral(i64 t, i64 u, i64 v, i64 order, f64 p, f64 PCx, f64 PCy, f64 PCz, f64 separation_pc)
+__device__ static f64 hermite_coulomb_integral(i64 t, i64 u, i64 v, i64 order, f64 p, f64 PCx, f64 PCy, f64 PCz, f64 separation_pc)
 {
     f64 result = 0.0;
     if ((t == 0) && (u == 0) && (v == 0))
@@ -125,7 +126,7 @@ static f64 hermite_coulomb_integral(i64 t, i64 u, i64 v, i64 order, f64 p, f64 P
 }
 
 /* Overlap integral for two primitive Gaussian functions */
-static f64 pg_overlap_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ static f64 pg_overlap_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b)
 {
     return hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, 0, x0_a - x0_b) *
@@ -137,7 +138,7 @@ static f64 pg_overlap_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a
 /*
  * The axis_mask array is used to select the axis along which the derivative is calculated.
  */
-f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                  f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                  u64 *axis_mask, u64 center)
 {
@@ -152,7 +153,7 @@ f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z
 }
 
 /* Calculates overlap S between two contracted Gaussian functions */
-f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
+__device__ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
 {
     f64 result = 0.0;
 
@@ -173,7 +174,7 @@ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
 /*
  * Overlap derivative integral
  */
-void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
+__device__ void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -196,7 +197,7 @@ void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u6
 }
 
 /* Calculates kinetic energy integral between two primitive Gaussian functions */
-f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                         f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b)
 {
     f64 gexp_b_sq2 = 2 * gexp_b * gexp_b;
@@ -222,7 +223,7 @@ f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x
     return (t_x + t_y + t_z) * pow(M_PI / (gexp_a + gexp_b), 1.5);
 }
 
-f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                  f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                  u64 *axis_mask, u64 center)
 {
@@ -256,7 +257,7 @@ f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z
 }
 
 /* Calculates kinetic energy between two contracted Gaussian functions */
-f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
+__device__ f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
 {
     f64 result = 0.0;
 
@@ -274,7 +275,7 @@ f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
     return result;
 }
 
-void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
+__device__ void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -298,7 +299,7 @@ void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u6
 }
 
 /* Calculates nuclear attraction integral with respect to a center C (usually the nucleus) */
-f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                    f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                    f64 x0_c, f64 y0_c, f64 z0_c)
 {
@@ -335,7 +336,7 @@ f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn
     return result;
 }
 
-f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                             f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                             f64 x0_c, f64 y0_c, f64 z0_c,
                                             u64 *axis_mask)
@@ -375,7 +376,7 @@ f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a
     return result;
 }
 
-f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                                    f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                                    f64 x0_c, f64 y0_c, f64 z0_c,
                                                    u64 *axis_mask, u64 center)
@@ -421,7 +422,7 @@ f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 
 }
 
 /* Calculates nuclear-electron attraction V */
-f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis_func *b, f64 x0_c, f64 y0_c, f64 z0_c)
+__device__ f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis_func *b, f64 x0_c, f64 y0_c, f64 z0_c)
 {
     f64 result = 0.0;
 
@@ -440,7 +441,7 @@ f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis_func *b, f
     return result;
 }
 
-void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b,
+__device__ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b,
                                              f64 x0_c, f64 y0_c, f64 z0_c, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
@@ -468,7 +469,7 @@ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, struct basis_
 /*
  * Calculates the derivative of nuclear attraction with respect to the orbital centers
  */
-void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func *a, struct basis_func *b,
+__device__ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func *a, struct basis_func *b,
                                                     f64 x0_c, f64 y0_c, f64 z0_c, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
@@ -494,7 +495,7 @@ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func *a, struct
 }
 
 /* Calculates electron-electron repulsion integral */
-f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                    f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                    f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
                                    f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d)
@@ -551,7 +552,7 @@ f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn
     return result;
 }
 
-f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+__device__ f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                             f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                             f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
                                             f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
@@ -617,7 +618,7 @@ f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a
 }
 
 /* Calculates electron repulsion integrals */
-f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d)
+__device__ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d)
 {
     f64 result = 0.0;
 
@@ -645,7 +646,7 @@ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, s
     return result;
 }
 
-void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d, u64 center, f64 *xyz)
+__device__ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d, u64 center, f64 *xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -679,10 +680,56 @@ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, struct basis_
 }
 
 #ifdef MODULE_TEST
+
+#ifdef __NVCC__
+__global__ static void pg_electron_repulsion_integral_kernel(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                             f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                             f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
+                                                             f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
+                                                             f64 *output)
+{
+    *output = pg_electron_repulsion_integral(gexp_a, amn_x_a, amn_y_a, amn_z_a, x0_a, y0_a, z0_a,
+                                             gexp_b, amn_x_b, amn_y_b, amn_z_b, x0_b, y0_b, z0_b,
+                                             gexp_c, amn_x_c, amn_y_c, amn_z_c, x0_c, y0_c, z0_c,
+                                             gexp_d, amn_x_d, amn_y_d, amn_z_d, x0_d, y0_d, z0_d);
+}
+#endif
+
 int main(void)
 {
+#ifdef __CUDACC__
+printf("__CUDACC__ defined\n");
+#endif
+
+#ifdef __NVCC__
+    size_t pValue;
+    cudaDeviceGetLimit(&pValue, cudaLimitStackSize);
+    printf("cudaDeviceGetLimit(cudaLimitStackSize) = %zu\n", pValue);
+
+    cudaDeviceSetLimit(cudaLimitStackSize, 8 * 1024);
+
+    cudaDeviceGetLimit(&pValue, cudaLimitStackSize);
+    printf("cudaDeviceGetLimit(cudaLimitStackSize) = %zu\n", pValue);
+
+    f64 *output;
+    cudaMallocManaged(&output, 32, cudaMemAttachGlobal);
+
+    pg_electron_repulsion_integral_kernel<<<1, 1>>>(1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    output);
+    cudaDeviceSynchronize();
+    printf("output = %.16e\n", *output);
+    cudaFree(output);
+#else
     printf("%.16e\n", hermite_coef(130.70932, 130.70932, 0, 0, 0, 0.0));
     printf("%.16e\n", hermite_coef(0.623914, 1.169596, 0, 0, 0, 1.494187));
     printf("%.16e\n", hermite_coef(0.623914, 1.169596, 0, 0, 0, -1.494187));
+    printf("%.16e\n", pg_electron_repulsion_integral(1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0,
+                                                    1.0, 0, 0, 0, 0.0, 0.0, 0.0));
+#endif
 }
 #endif

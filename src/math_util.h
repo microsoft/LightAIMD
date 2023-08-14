@@ -34,12 +34,12 @@ void submatprint(f64 *A, u64 n_cols, u64 m, u64 n);
  * we need to take.
  */
 
-inline f64 *tag_conjugate(f64 *A)
+static inline f64 *tag_conjugate(f64 *A)
 {
     return A;
 }
 
-inline f64 *tag_transpose(f64 *A)
+static inline f64 *tag_transpose(f64 *A)
 {
     return A;
 }

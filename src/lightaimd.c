@@ -11,6 +11,7 @@
 #include "md.h"
 #include "mm.h"
 #include "diagnostics.h"
+#include "cuda_helper.h"
 
 void scf_config_hf(struct scf_context *ctx)
 {
@@ -32,6 +33,10 @@ void scf_config_dft(struct scf_context *ctx)
 
 int main(int argc, char *argv[])
 {
+#ifdef USE_CUDA
+    cuda_configure();
+#endif
+
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
