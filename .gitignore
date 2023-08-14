@@ -5,9 +5,13 @@ basis-set/*.gbs
 basis-set/*.json
 bin
 lib
+obj
+tmp
 build
 output
 __pycache__
+build.ninja
+.ninja_*
 .cproject
 .project
 .settings
@@ -17,4 +21,3 @@ __pycache__
 *.so
 *.exe
 a.out
-obj
