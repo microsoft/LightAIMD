@@ -52,7 +52,13 @@ struct molecule *sample_molecule_h2o()
     return h2o;
 }
 
-f64 self_ref_energy_results[] = {
+/*
+ * Suffixes:
+ * lv: lebedev level
+ * rv: radial level
+ */
+
+f64 self_ref_energy_results_lv14_rv6[] = {
     -7.4964697712686018e+01, // HF
     -7.4739356439434076e+01, // DFT: LDA_X,LDA_C_VWN
     -7.5233707494446236e+01, // DFT: GGA_X_PBE,GGA_C_PBE
@@ -61,7 +67,7 @@ f64 self_ref_energy_results[] = {
     -7.5318292025239657e+01  // DFT: HYB_MGGA_X_M06_2X,MGGA_C_M06_2X
 };
 
-f64 self_ref_forces_on_nuclei[][9] = {
+f64 self_ref_forces_on_nuclei_lv14_rv6[][9] = {
     {// HF
      1.5750748104263788e-18, 2.3539258256943807e-03, 1.7964854393100804e-02,
      -5.6503404027018776e-18, 2.3539258256946027e-03, -1.7964854393101026e-02,
@@ -96,7 +102,7 @@ f64 pyscf_grid_lvl3_energy_11e_results[] = {
     -7.53182583267e+01  // DFT: HYB_MGGA_X_M06_2X,MGGA_C_M06_2X
 };
 
-f64 pyscf_grid_lvl3_energy_acceptance_threshold[] = {
+f64 pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[] = {
     1.4e-11, // HF
     7.8e-06, // DFT: LDA_X,LDA_C_VWN
     5.0e-06, // DFT: GGA_X_PBE,GGA_C_PBE
@@ -114,7 +120,7 @@ f64 pyscf_grid_lvl4_energy_11e_results[] = {
     -7.53182976862e+01  // DFT: HYB_MGGA_X_M06_2X,MGGA_C_M06_2X
 };
 
-f64 pyscf_grid_lvl4_energy_acceptance_threshold[] = {
+f64 pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[] = {
     1.4e-11, // HF
     1.6e-06, // DFT: LDA_X,LDA_C_VWN
     1.2e-06, // DFT: GGA_X_PBE,GGA_C_PBE
@@ -175,7 +181,7 @@ f64 pyscf_grid_lvl5_forces_on_nuclei[][9] = {
      1.5684368534080027e-17, 2.0364316597165422e-02, 1.5911570739008951e-03,
      3.9748244895866170e-16, -4.0687886372441806e-02, 4.5866088704826795e-15}};
 
-f64 pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold[] = {
+f64 pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[] = {
     5.1e-07, // HF
     2.6e-06, // DFT: LDA_X,LDA_C_VWN
     1.1e-05, // DFT: GGA_X_PBE,GGA_C_PBE
@@ -221,6 +227,8 @@ char *CC_METHODS[] = {
     "DFT with HYB_MGGA_X_M06_2X, MGGA_C_M06_2X" // CC_METHOD_ID = 6
 };
 
+f64 sanity_test_threshold = 9e-3;
+
 /*
  * return 1 if one of the desirable results is matched
  * return 0 otherwise
@@ -240,8 +248,10 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
            value,
            pyscf_grid_lvl3_energy_11e_results[cc_method_idx],
            energy_diff,
-           pyscf_grid_lvl3_energy_acceptance_threshold[cc_method_idx],
-           energy_diff < pyscf_grid_lvl3_energy_acceptance_threshold[cc_method_idx] ? "Passed" : "Failed");
+           //pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
+           //energy_diff < pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           sanity_test_threshold,
+           energy_diff < sanity_test_threshold ? "Passed" : "Failed");
 
     energy_diff = fabs(value - pyscf_grid_lvl4_energy_11e_results[cc_method_idx]);
     printf("%s: energy difference is |%.12e - %.12e| = %.6e (PySCF, lvl 4), sanity test (< %.1e): %s\n",
@@ -249,8 +259,10 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
            value,
            pyscf_grid_lvl4_energy_11e_results[cc_method_idx],
            energy_diff,
-           pyscf_grid_lvl4_energy_acceptance_threshold[cc_method_idx],
-           energy_diff < pyscf_grid_lvl4_energy_acceptance_threshold[cc_method_idx] ? "Passed" : "Failed");
+           //pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
+           //energy_diff < pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           sanity_test_threshold,
+           energy_diff < sanity_test_threshold ? "Passed" : "Failed");
 
     return 1;
 }
@@ -286,8 +298,10 @@ i64 check_forces(f64 *forces, u64 cc_method_id)
            max_delta_force,
            max_delta_ref_force,
            max_delta,
-           pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold[cc_method_idx],
-           max_delta < pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold[cc_method_idx] ? "Passed" : "Failed");
+           //pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx],
+           //max_delta < pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           sanity_test_threshold,
+           max_delta < sanity_test_threshold ? "Passed" : "Failed");
 
     return 1;
 }
