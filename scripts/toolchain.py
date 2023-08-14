@@ -26,7 +26,7 @@ def find_nvcc():
         print('Info: nvcc found, CUDA support is enabled')
         config['CUDA'] = '-DUSE_CUDA -I/usr/local/cuda/include'
         config['CUDA_LIB'] = '-L/usr/local/cuda/lib64 -lcudart -lcuda'
-        config['MODULE_TEST'] += f"{config['CUDA']} {config['CUDA_LIB']}"
+        config['MODULE_TEST'] += f" {config['CUDA']} {config['CUDA_LIB']}"
         config['NVCC_FLAGS'] = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
 
     return config['NVCC']

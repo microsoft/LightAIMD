@@ -65,7 +65,7 @@ def reset():
         shutil.rmtree(config['build_root_dir'])
 
 def clean():
-    subprocess.run(['ninja', '-t', 'clean'], cwd=config['src_dir'], check=True)
+    subprocess.run(['ninja', '-t', 'clean'], cwd=config['active_build_dir'], check=True)
 
 def build_release():
     config['active_build_dir'] = config['build_release_dir']
