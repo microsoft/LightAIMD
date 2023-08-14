@@ -48,8 +48,10 @@ def main():
         passed = run_sanity_tests(args)
         if passed:
             print("Sanity tests passed")
+            return 0
         else:
             print("Sanity tests failed")
+            return 1
 
     if args.module_test:
         module_test()
