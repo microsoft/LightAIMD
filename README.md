@@ -8,39 +8,42 @@
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
 ## Getting started
-You can use the *scripts/setup-dev-env.sh* script to set up the development environment. The script should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the script for other Linux distributions.
+You can use the *scripts/build.py* script to set up the development environment and build LightAIMD. The script should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the script for other Linux distributions.
 
-```shell
-bash scripts/setup-dev-env.sh
-```
-
-If it doesn't work, you can set up the environment manually by following these [instructions](docs/setup-dev-env.md).
-
-### Compile LightAIMD
 To build LightAIMD, simply run (don't omit the parentheses):
 ```shell
-(cd src && make clean && make all)
+python3 scripts/build.py --build --release
 ```
 
 To build the debug version:
 ```shell
-(cd src && make clean && make debug)
+python3 scripts/build.py --build --debug
+```
+
+You can also build the release version and the debug version at the same time:
+```shell
+python3 scripts/build.py --build --release --debug
 ```
 
 ### Sanity tests
 After building LightAIMD, you can run the sanity tests:
 ```shell
-bash tests/compare-with-ref-energies-forces.sh
+python3 scripts/build.py --sanity-test --release
+```
+
+You can run the sanity tests for both the release version and the debug version if you have built both versions:
+```shell
+python3 scripts/build.py --sanity-test --release --debug
 ```
 
 ### Run your first simulation
 You can run an HF (Hartree-Fock) based simulation:
 ```shell
-bin/lightaimd --hf --bomd --mol sample/h2o.xyz
+./build/release/bin/lightaimd --hf --bomd --mol sample/h2o.xyz
 ```
 or you can run a DFT (Density Functional Theory) based simulation:
 ```shell
-bin/lightaimd --dft --bomd --mol sample/h2o.xyz
+./build/release/bin/lightaimd --dft --bomd --mol sample/h2o.xyz
 ```
 
 Here, *--bomd* stands for Born-Oppenheimer Molecular Dynamics.
