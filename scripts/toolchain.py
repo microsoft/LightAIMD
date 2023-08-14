@@ -91,7 +91,8 @@ def check_third_parties(use_cuda=False):
         libxc_src_dir = os.path.join(config['tmp_dir'], f"libxc-{config['LIBXC_VERSION']}")
         os.makedirs(libxc_dir, exist_ok=True)
 
-        subprocess.run(["autoreconf", "-i"], cwd=libxc_src_dir, shell=False, check=True)
+        # The gitlab version requires running autoreconf
+        #subprocess.run(["autoreconf", "-i"], cwd=libxc_src_dir, shell=False, check=True)
 
         if use_cuda:
             subprocess.run([f'CC="/usr/local/cuda/bin/nvcc -x cu -ccbin clang --allow-unsupported-compiler" CFLAGS="--generate-code=arch=compute_80,code=[compute_80,sm_80] --generate-code=arch=compute_70,code=[compute_70,sm_70] -O3 --std=c++14 --compiler-options -Wall,-Wfatal-errors,-Wno-unused-variable,-Wno-unused-but-set-variable" CCLD="/usr/local/cuda/bin/nvcc -ccbin clang --allow-unsupported-compiler" ./configure --enable-cuda --prefix={libxc_dir}'], cwd=libxc_src_dir, shell=True, check=True)
