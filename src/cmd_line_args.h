@@ -14,6 +14,10 @@ extern const u64 JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
 extern const u64 CC_METHOD_HF;  // Hartree Fock
 extern const u64 CC_METHOD_DFT; // Density Functional Theory
 
+extern const u64 GRID_SCHEME_FULL;
+extern const u64 GRID_SCHEME_SG2;
+extern const u64 GRID_SCHEME_SG3;
+
 struct cmd_line_args
 {
     u64 job_type;
@@ -33,6 +37,7 @@ struct cmd_line_args
     u64 c_functional_id;
     u64 radial_grid_level;
     u64 lebedev_level;
+    u64 grid_scheme;
 
     /* MD */
     u64 md_steps;

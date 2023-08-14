@@ -15,6 +15,10 @@ const u64 JOB_TYPE_BOMD = 3; // Born-Oppenheimer Molecular Dynamics
 const u64 CC_METHOD_HF = 1;  // Hartree Fock
 const u64 CC_METHOD_DFT = 2; // Density Functional Theory
 
+const u64 GRID_SCHEME_FULL = 1;
+const u64 GRID_SCHEME_SG2 = 2;
+const u64 GRID_SCHEME_SG3 = 3;
+
 char *get_arg_value_by_key(int argc, char *argv[], char const *key)
 {
     /* no command-line arguments are provided */
@@ -165,7 +169,7 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
     }
     else
     {
-        args->radial_grid_level = 6;
+        args->radial_grid_level = 3;
     }
 
     char *lebedev_level_value = get_arg_value_by_key(argc, argv, "--lebedev-level");
@@ -175,7 +179,7 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
     }
     else
     {
-        args->lebedev_level = 14;
+        args->lebedev_level = 13;
     }
 
     char *md_steps_value = get_arg_value_by_key(argc, argv, "--md-steps");
@@ -227,6 +231,8 @@ void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args)
     {
         args->check_results = 0;
     }
+
+    args->grid_scheme = GRID_SCHEME_SG2;
 }
 
 #ifdef MODULE_TEST
