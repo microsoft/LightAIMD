@@ -10,7 +10,7 @@ LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation prog
 ## Getting started
 You can use the *scripts/build.py* script to set up the development environment and build LightAIMD. The script should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the script for other Linux distributions.
 
-To build LightAIMD, simply run (don't omit the parentheses):
+To build LightAIMD, simply run (python3 is required):
 ```shell
 python3 scripts/build.py --build --release
 ```
