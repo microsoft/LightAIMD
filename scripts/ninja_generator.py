@@ -116,7 +116,7 @@ def generate_ninja_script(debug=False):
 
     def ninja_make_executables(writer):
         for target, (files, flags) in executable_targets.items():
-            if target in cuda_executable_targets:
+            if (config["USE_CUDA"] == "YES") and (target in cuda_executable_targets):
                 continue
 
             input_files = []
