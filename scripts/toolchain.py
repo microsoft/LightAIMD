@@ -45,10 +45,11 @@ def find_nvcc():
             config['gpu_compute_capability'] = '0'
 
     if config['NVCC'] == '':
+        config['USE_CUDA'] = 'NO'
         print('Warning: nvcc cannot be found, CUDA support is disabled. In order to use CUDA, please set the NVCC environment variable to the path of the nvcc.')
     else:
-        print('Info: nvcc found, CUDA support is enabled')
         config['USE_CUDA'] = 'YES'
+        print('Info: nvcc found, CUDA support is enabled')
 
     return config['NVCC']
 
