@@ -8,7 +8,8 @@ __all__ = ['setup_toolchain', 'remove_installed_third_parties']
 
 def install_build_tools():
     print("Installing build tools...")
-    subprocess.run(["sudo", "apt", "install", "-y", "build-essential", "gfortran", "clang", "ninja-build"], check=True)
+    subprocess.run(["sudo", "apt", "update", "-qq"], check=True)
+    subprocess.run(["sudo", "apt", "install", "-qq", "-y", "build-essential", "gfortran", "clang", "ninja-build"], check=True)
     print("Build tools installed")
 
 def find_compilers():
@@ -24,10 +25,7 @@ def find_nvcc():
         print('Warning: nvcc cannot be found, CUDA support is disabled. In order to use CUDA, please set the NVCC environment variable to the path of the nvcc.')
     else:
         print('Info: nvcc found, CUDA support is enabled')
-        config['CUDA'] = '-DUSE_CUDA -I/usr/local/cuda/include'
-        config['CUDA_LIB'] = '-L/usr/local/cuda/lib64 -lcudart -lcuda'
-        config['MODULE_TEST'] += f" {config['CUDA']} {config['CUDA_LIB']}"
-        config['NVCC_FLAGS'] = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
+        config['USE_CUDA'] = 'YES'
 
     return config['NVCC']
 

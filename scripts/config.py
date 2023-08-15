@@ -19,10 +19,8 @@ test_release_dir = os.path.join(build_release_dir, 'test')
 config = {
     'CC' : '',
     'CXX' : '',
+    'USE_CUDA' : 'NO',
     'NVCC' : '',
-    'NVCC_FLAGS' : '',
-    'CUDA' : '',
-    'CUDA_LIB' : '',
     'MODULE_TEST' : '-DMODULE_TEST',
     #
     'NLOHMANN_JSON_VERSION' : '3.11.2',

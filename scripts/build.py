@@ -4,7 +4,6 @@ import subprocess
 
 from config import *
 from toolchain import *
-from build_targets import *
 from ninja_generator import *
 from sanity_tests import *
 
@@ -80,7 +79,7 @@ def build(debug=False):
     config['lib_dir'] = os.path.join(config['active_build_dir'], 'lib')
     config['obj_dir'] = os.path.join(config['active_build_dir'], 'obj')
 
-    generate_ninja_script(object_targets=object_targets, executable_targets=executable_targets, debug=debug)
+    generate_ninja_script(debug=debug)
     subprocess.run(['ninja', '-f', os.path.join(config['active_build_dir'], 'build.ninja')], cwd=config['active_build_dir'], check=True)
 
 def run(args):

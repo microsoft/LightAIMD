@@ -2,13 +2,21 @@
 import os
 from config import *
 
-# 'target_name': 'compilation_flags'
+# 'target_name': ('input_file', 'compilation_flags')
 object_targets = {
     'libxc_bridge.o': "-I${ext_dir}/libxc/include",
     'cpp_bridge.o': "-I${ext_dir} -I${ext_dir}/eigen"
 }
 
-# 'target_name': (['source_file1', 'source_file2', ...], 'compilation_flags')
+# 'target_name': ('input_file', 'compilation_flags')
+cuda_object_targets = {
+    "special_func.cuda.o" : ("special_func.c", ""),
+    "molecular_integral.cuda.o" : ("molecular_integral.c", ""),
+    "dft_matrices.cuda.o" : ("dft_matrices.cu", ""),
+    "molecular_integral.main.cuda.o" : ("molecular_integral.c", "-DMODULE_TEST"),
+}
+
+# 'target_name': (['input_file1', 'input_file2', ...], 'compilation_flags')
 executable_targets = {
     # -DMODULE_TEST
     "numeric_types": (['numeric_types.c'], "-DMODULE_TEST"),
@@ -51,4 +59,20 @@ executable_targets = {
 
     # -lm -lstdc++ -lpthread
     "lightaimd": (['lightaimd.o', 'hf.o', 'dft.o', 'cpp_bridge.o', 'numeric_types.o', 'mm.o', 'scf.o', 'energy_gradient.o', 'special_func.o', 'math_util.o', 'molecular_integral.o', 'elements.o', 'molecule.o', 'f64_util.o', 'sample.o', 'time_util.o', 'soad.o', 'basis_func.o', 'thread_pool.o', 'spinlock.o', 'vec3d.o', 'functional.o', 'cmd_line_args.o', 'diagnostics.o', 'radial_grid.o', 'einsum.o', 'random.o', 'velocity_init.o', 'thermostat.o', 'md.o', 'io.o', 'dft_matrices.o', 'lebedev_grid.o', 'molecular_grid.o', 'libxc_bridge.o', 'cuda_helper.o', 'standard_grid.o', '${ext_dir}/libxc/lib/libxc.a'], "-lm -lstdc++ -lpthread"),
+}
+
+# 'target_name': (['input_file1', 'input_file2', ...], 'compilation_flags')
+cuda_executable_targets = {
+    # -lm -lstdc++ -lpthread
+    "lightaimd": (['lightaimd.o', 'hf.o', 'dft.o', 'cpp_bridge.o', 'numeric_types.o', 'mm.o', 'scf.o', 'energy_gradient.o', 'special_func.o', 'math_util.o', 'molecular_integral.o', 'elements.o', 'molecule.o', 'f64_util.o', 'sample.o', 'time_util.o', 'soad.o', 'basis_func.o', 'thread_pool.o', 'spinlock.o', 'vec3d.o', 'functional.o', 'cmd_line_args.o', 'diagnostics.o', 'radial_grid.o', 'einsum.o', 'random.o', 'velocity_init.o', 'thermostat.o', 'md.o', 'io.o', 'dft_matrices.o', 'lebedev_grid.o', 'molecular_grid.o', 'libxc_bridge.o', 'cuda_helper.o', 'standard_grid.o', 'special_func.cuda.o', 'molecular_integral.cuda.o', 'dft_matrices.cuda.o', '${ext_dir}/libxc/lib/libxc.a'], "-lm -lstdc++ -lpthread"),
+
+    "hf": (['hf.c', 'cpp_bridge.o', 'numeric_types.o', 'mm.o', 'scf.o', 'energy_gradient.o', 'special_func.o', 'math_util.o', 'molecular_integral.o', 'elements.o', 'molecule.o', 'f64_util.o', 'sample.o', 'time_util.o', 'soad.o', 'basis_func.o', 'thread_pool.o', 'spinlock.o', 'vec3d.o', 'functional.o', 'cmd_line_args.o', 'diagnostics.o', 'radial_grid.o', 'einsum.o', 'random.o', 'velocity_init.o', 'thermostat.o', 'md.o', 'io.o', 'dft_matrices.o', 'lebedev_grid.o', 'molecular_grid.o', 'libxc_bridge.o', 'cuda_helper.o', 'standard_grid.o', 'special_func.cuda.o', 'molecular_integral.cuda.o', 'dft_matrices.cuda.o', '${ext_dir}/libxc/lib/libxc.a'], "-DMODULE_TEST -lm -lstdc++ -lpthread"),
+
+    "dft": (['dft.c', 'cpp_bridge.o', 'numeric_types.o', 'mm.o', 'scf.o', 'energy_gradient.o', 'special_func.o', 'math_util.o', 'molecular_integral.o', 'elements.o', 'molecule.o', 'f64_util.o', 'sample.o', 'time_util.o', 'soad.o', 'basis_func.o', 'thread_pool.o', 'spinlock.o', 'vec3d.o', 'functional.o', 'cmd_line_args.o', 'diagnostics.o', 'radial_grid.o', 'einsum.o', 'random.o', 'velocity_init.o', 'thermostat.o', 'md.o', 'io.o', 'dft_matrices.o', 'lebedev_grid.o', 'molecular_grid.o', 'libxc_bridge.o', 'cuda_helper.o', 'standard_grid.o', 'special_func.cuda.o', 'molecular_integral.cuda.o', 'dft_matrices.cuda.o', '${ext_dir}/libxc/lib/libxc.a'], "-DMODULE_TEST -lm -lstdc++ -lpthread"),
+
+    "libxc_bridge": (['libxc_bridge.c', 'diagnostics.o', 'mm.o', 'spinlock.o', 'f64_util.o', '${ext_dir}/libxc/lib/libxc.a'], "-DMODULE_TEST -I${ext_dir}/libxc/include -lm"),
+
+    "special_func.cuda": (['special_func.c'], "-DMODULE_TEST -x cu -lm"),
+
+    "molecular_integral.cuda": (['molecular_integral.main.cuda.o', 'special_func.cuda.o'], "-DMODULE_TEST -lm"),
 }
