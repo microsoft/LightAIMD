@@ -28,11 +28,11 @@ def run_sanity_tests(args):
     debug_result = True
     release_result = True
     if args.debug:
-        config["active_test_dir"] = config["test_debug_dir"]
+        config["active_build_dir"] = config["build_debug_dir"]
         debug_result = sanity_tests()
 
     if args.release:
-        config["active_test_dir"] = config["test_release_dir"]
+        config["active_build_dir"] = config["build_release_dir"]
         release_result = sanity_tests()
 
     return debug_result and release_result
