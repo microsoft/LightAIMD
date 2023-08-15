@@ -17,12 +17,6 @@ test_debug_dir = os.path.join(build_debug_dir, 'test')
 test_release_dir = os.path.join(build_release_dir, 'test')
 
 config = {
-    'CC' : '',
-    'CXX' : '',
-    'USE_CUDA' : 'NO',
-    'NVCC' : '',
-    'MODULE_TEST' : '-DMODULE_TEST',
-    #
     'NLOHMANN_JSON_VERSION' : '3.11.2',
     'EIGEN_VERSION' : '3.4.0',
     'LIBXC_VERSION' : '6.2.2',

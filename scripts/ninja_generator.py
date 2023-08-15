@@ -122,7 +122,6 @@ def generate_ninja_script(debug=False):
                 writer.write(f"  compiler = $cppcompiler\n")
 
     def ninja_make_cuda_executables(writer):
-        cuda_bin_dir = os.path.join(config['bin_dir'], 'cuda')
         for target, (files, flags) in cuda_executable_targets.items():
             input_files = []
             for f in files:
@@ -133,7 +132,7 @@ def generate_ninja_script(debug=False):
                 else:
                     input_files.append(os.path.join(config['src_dir'], f))
 
-            writer.write(f"build {os.path.join(cuda_bin_dir, target)}: nvcc_link {' '.join(input_files)}\n")
+            writer.write(f"build {os.path.join(config['bin_dir'], target)}: nvcc_link {' '.join(input_files)}\n")
             writer.write(f"  extra_link_flags = {flags}\n")
 
     def walk_src(src_dir, extensions):
