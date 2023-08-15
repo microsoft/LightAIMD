@@ -16,9 +16,9 @@ extra_compile_flags =
 link_flags = -O3 -Wall{cuda_link_flags}{debug_flags}
 extra_link_flags =
 nvcc_flags = {nvcc_flags}
-nvcc_compile_flags = {nvcc_compile_flags}
+nvcc_compile_flags = {nvcc_compile_flags}{nvcc_debug_flags}
 nvcc_extra_compile_flags =
-nvcc_link_flags = {nvcc_link_flags}
+nvcc_link_flags = {nvcc_link_flags}{nvcc_debug_flags}
 nvcc_extra_link_flags =
 
 rule compile_c
@@ -42,6 +42,7 @@ def generate_ninja_script(debug=False):
         nvcc_flags = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
 
         debug_flags = ' -g' if debug else ''
+        nvcc_debug_flags = ' -g -G' if debug else ''
         cuda_compile_flags = ' -DUSE_CUDA -I/usr/local/cuda/include' if config['USE_CUDA'] == 'YES' else ''
         cuda_link_flags = ' -L/usr/local/cuda/lib64 -lcudart -lcuda' if config['USE_CUDA'] == 'YES' else ''
         writer.write(ninja_preamble.format(cc=config['CC'],
@@ -53,7 +54,8 @@ def generate_ninja_script(debug=False):
                                            nvcc_flags=nvcc_flags,
                                            nvcc_compile_flags=cuda_compile_flags,
                                            nvcc_link_flags=cuda_link_flags,
-                                           debug_flags=debug_flags))
+                                           debug_flags=debug_flags,
+                                           nvcc_debug_flags=nvcc_debug_flags))
         writer.write("\n")
 
     def expand_string(s):

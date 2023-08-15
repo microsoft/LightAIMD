@@ -10,21 +10,21 @@ from sanity_tests import *
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--build',  dest='build', default=False, required=False, action='store_true')
-    parser.add_argument('--clean',  dest='clean', default=False, required=False, action='store_true')
-    parser.add_argument('--reset',  dest='reset', default=False, required=False, action='store_true')
+    parser.add_argument('--build',  dest='build', default=False, required=False, action='store_true', help="Build the project")
+    parser.add_argument('--clean',  dest='clean', default=False, required=False, action='store_true', help="Clean the project")
+    parser.add_argument('--reset',  dest='reset', default=False, required=False, action='store_true', help="Reset the project: remove all build files and the installed third party libraries")
     #
-    parser.add_argument('--debug',  dest='debug', default=False, required=False, action='store_true')
-    parser.add_argument('--release',dest='release',default=True, required=False, action='store_true')
+    parser.add_argument('--debug',  dest='debug', default=False, required=False, action='store_true', help="Build the debug version of the project")
+    parser.add_argument('--release',dest='release',default=True, required=False, action='store_true', help="Build the release version of the project")
     #
-    parser.add_argument('--run',  dest='run', default=False, required=False, action='store_true')
+    parser.add_argument('--run',  dest='run', default=False, required=False, action='store_true', help="Run the project")
     #
-    parser.add_argument('--sanity-test',   dest='sanity_test',  default=False, required=False, action='store_true')
-    parser.add_argument('--module-test',   dest='module_test',  default=False, required=False, action='store_true')
+    parser.add_argument('--sanity-test',   dest='sanity_test',  default=False, required=False, action='store_true', help="Run the sanity tests")
+    parser.add_argument('--module-test',   dest='module_test',  default=False, required=False, action='store_true', help="Run the module tests")
     #
-    parser.add_argument('--verbose',dest='verbose',default=False, required=False, action='store_true')
-    parser.add_argument('--quiet',  dest='quiet',  default=False, required=False, action='store_true')
-    parser.add_argument('--dry-run',dest='dry_run',default=False, required=False, action='store_true')
+    parser.add_argument('--verbose',dest='verbose',default=False, required=False, action='store_true', help="Verbose output")
+    parser.add_argument('--quiet',  dest='quiet',  default=False, required=False, action='store_true', help="Quiet output")
+    parser.add_argument('--dry-run',dest='dry_run',default=False, required=False, action='store_true', help="Dry run")
     args = parser.parse_args()
 
     if args.clean:
