@@ -75,6 +75,6 @@
 
 #endif
 
-#endif
-
 void print_numeric_type_sizes();
+
+#endif

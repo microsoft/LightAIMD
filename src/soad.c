@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License.
  */
-#include "stdio.h"
+#include <stdio.h>
 #include "numeric_types.h"
 
 u64 element_shell_count [] = {
