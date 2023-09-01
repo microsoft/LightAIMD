@@ -15,30 +15,66 @@ build_release_dir = os.path.join(root_dir, "build", "release")
 test_debug_dir = os.path.join(build_debug_dir, "test")
 test_release_dir = os.path.join(build_release_dir, "test")
 
-config = {
-    "NLOHMANN_JSON_VERSION": "3.11.2",
-    "EIGEN_VERSION": "3.4.0",
-    "LIBXC_VERSION": "6.2.2",
-    #
-    "script_dir": script_dir,
-    "root_dir": root_dir,
-    "src_dir": src_dir,
-    "ext_dir": ext_dir,
-    "tmp_dir": tmp_dir,
-    #
-    "build_root_dir": build_root_dir,
-    "build_debug_dir": build_debug_dir,
-    "build_release_dir": build_release_dir,
-    "active_build_dir": build_release_dir,
-    #
-    "test_debug_dir": test_debug_dir,
-    "test_release_dir": test_release_dir,
-    "active_test_dir": test_release_dir,
-    #
-    "bin_dir": os.path.join(build_release_dir, "bin"),
-    "lib_dir": os.path.join(build_release_dir, "lib"),
-    "obj_dir": os.path.join(build_release_dir, "obj"),
-}
+
+class Configuration:
+    def __init__(self):
+        self.user_settings = {
+            # library versions
+            "NLOHMANN_JSON_VERSION": "3.11.2",
+            "EIGEN_VERSION": "3.4.0",
+            "LIBXC_VERSION": "6.2.2",
+            # build system related
+            "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
+            "RUNTIME_DEFINED_SYMS": ["__dso_handle", "__cudaRegisterLinkedBinary_"],
+            "STATIC_LIBS": [os.path.join(root_dir, "ext/libxc/lib/libxc.a")],
+            "SRC_EXTENSIONS": ["c", "cpp", "cu", "h", "hpp"],
+            # cuda related
+            "DISABLE_CUDA": False,
+            "CUDA_SHARED_LIBS": ["cuda", "cudart"],
+            "CUDA_INC_DIR": "/usr/local/cuda/include",
+            "CUDA_LIB_DIR": "/usr/local/cuda/lib64",
+        }
+
+        self.runtime_settings = {
+            "script_dir": script_dir,
+            "root_dir": root_dir,
+            "src_dir": src_dir,
+            "ext_dir": ext_dir,
+            "tmp_dir": tmp_dir,
+            #
+            "build_root_dir": build_root_dir,
+            "build_debug_dir": build_debug_dir,
+            "build_release_dir": build_release_dir,
+            "active_build_dir": build_release_dir,
+            #
+            "test_debug_dir": test_debug_dir,
+            "test_release_dir": test_release_dir,
+            "active_test_dir": test_release_dir,
+            #
+            "bin_dir": os.path.join(build_release_dir, "bin"),
+            "lib_dir": os.path.join(build_release_dir, "lib"),
+            "obj_dir": os.path.join(build_release_dir, "obj"),
+        }
+
+    def __getitem__(self, key):
+        if key in self.user_settings:
+            return self.user_settings[key]
+        elif key in self.runtime_settings:
+            return self.runtime_settings[key]
+        else:
+            raise KeyError(f"Key {key} not found in config")
+
+    def __setitem__(self, key, value):
+        if key in self.user_settings:
+            self.user_settings[key] = value
+        else:
+            self.runtime_settings[key] = value
+
+    def items(self):
+        return {**self.user_settings, **self.runtime_settings}.items()
+
+
+config = Configuration()
 
 
 def print_config():

@@ -8,7 +8,12 @@ __all__ = ["setup_toolchain", "remove_installed_third_parties"]
 
 def install_build_tools():
     print("Installing build tools...")
-    subprocess.run(["sudo", "apt", "update", "-qq"], check=True)
+    subprocess.run(
+        ["sudo", "apt", "update", "-qq"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=True,
+    )
     subprocess.run(
         [
             "sudo",
@@ -40,7 +45,6 @@ def find_nvcc():
         .stdout.decode("utf-8")
         .strip()
     )
-    print(f"NVCC: '{config['NVCC']}'")
 
     nvidia_smi = (
         subprocess.run(
@@ -74,13 +78,18 @@ def find_nvcc():
             config["gpu_compute_capability"] = "0"
 
     if config["NVCC"] == "":
-        config["USE_CUDA"] = "NO"
-        print(
-            "Warning: nvcc cannot be found, CUDA support is disabled. In order to use CUDA, please set the NVCC environment variable to the path of the nvcc."
-        )
+        config["use_cuda"] = False
+        print("Info: nvcc cannot be found. CUDA support is disabled.")
     else:
-        config["USE_CUDA"] = "YES"
-        print("Info: nvcc found, CUDA support is enabled")
+        if config["DISABLE_CUDA"]:
+            config["use_cuda"] = False
+            print(
+                "Info: nvcc found, but CUDA support is disabled in the configuration."
+            )
+        else:
+            config["use_cuda"] = True
+            print("Info: nvcc found, CUDA support is enabled.")
+            print(f"NVCC: '{config['NVCC']}'")
 
     return config["NVCC"]
 
@@ -290,8 +299,3 @@ def setup_toolchain():
     install_build_tools()
     find_compilers()
     check_third_parties(use_cuda=False)
-
-
-if __name__ == "__main__":
-    setup_toolchain()
-    print_config()

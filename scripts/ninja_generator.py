@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import os
+import subprocess
 from config import *
 from toolchain import *
-from targets import *
+from symbols import *
+from object_targets import *
 
 __all__ = ["generate_ninja_script"]
 
@@ -16,7 +18,7 @@ extra_compile_flags =
 link_flags = -O3 -Wall{cuda_link_flags}{debug_flags}
 extra_link_flags =
 nvcc_flags = {nvcc_flags}
-nvcc_compile_flags = {nvcc_compile_flags}{nvcc_debug_flags}
+compile_cu_flags = {compile_cu_flags}{nvcc_debug_flags}
 nvcc_extra_compile_flags =
 nvcc_link_flags = {nvcc_link_flags}{nvcc_debug_flags}
 nvcc_extra_link_flags =
@@ -27,11 +29,11 @@ rule compile_c
 rule compile_cpp
   command = $cppcompiler $compile_flags $extra_compile_flags -c $in -o $out
 
-rule make_executable
+rule link_objects
   command = $compiler $link_flags $extra_link_flags -o $out $in
 
-rule nvcc_compile
-  command = $nvcc $nvcc_flags $nvcc_compile_flags $extra_compile_flags -x cu -dc -o $out $in
+rule compile_cu
+  command = $nvcc $nvcc_flags $compile_cu_flags $extra_compile_flags -x cu -dc -o $out $in
 
 rule nvcc_link
   command = $nvcc $nvcc_flags $nvcc_link_flags $extra_link_flags -o $out $in
@@ -41,18 +43,13 @@ rule nvcc_link
 def generate_ninja_script(debug=False):
     def write_ninja_preamble(writer):
         nvcc_flags = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
-
         debug_flags = " -g" if debug else ""
         nvcc_debug_flags = " -g -G" if debug else ""
         cuda_compile_flags = (
-            " -DUSE_CUDA -I/usr/local/cuda/include"
-            if config["USE_CUDA"] == "YES"
-            else ""
+            f" -DUSE_CUDA -I{config['CUDA_INC_DIR']}" if config["use_cuda"] else ""
         )
         cuda_link_flags = (
-            " -L/usr/local/cuda/lib64 -lcudart -lcuda"
-            if config["USE_CUDA"] == "YES"
-            else ""
+            f" -L{config['CUDA_LIB_DIR']} -lcudart -lcuda" if config["use_cuda"] else ""
         )
         writer.write(
             ninja_preamble.format(
@@ -63,7 +60,7 @@ def generate_ninja_script(debug=False):
                 cuda_compile_flags=cuda_compile_flags,
                 cuda_link_flags=cuda_link_flags,
                 nvcc_flags=nvcc_flags,
-                nvcc_compile_flags=cuda_compile_flags,
+                compile_cu_flags=cuda_compile_flags,
                 nvcc_link_flags=cuda_link_flags,
                 debug_flags=debug_flags,
                 nvcc_debug_flags=nvcc_debug_flags,
@@ -71,111 +68,192 @@ def generate_ninja_script(debug=False):
         )
         writer.write("\n")
 
-    def expand_string(s):
-        if "${" in s:
-            for k, v in config.items():
-                s = s.replace("${" + k + "}", v)
-        return s
-
-    def expand_strings(ss):
-        return [expand_string(s) for s in ss]
-
-    for k, v in object_targets.items():
-        object_targets[k] = expand_string(v)
-
-    for k, v in cuda_object_targets.items():
-        cuda_object_targets[k] = (expand_string(v[0]), expand_string(v[1]))
-
-    for k, v in executable_targets.items():
-        executable_targets[k] = (expand_strings(v[0]), expand_string(v[1]))
-
-    for k, v in cuda_executable_targets.items():
-        cuda_executable_targets[k] = (expand_strings(v[0]), expand_string(v[1]))
-
-    def ninja_compile_objects(writer, extensions):
-        for f in walk_src(config["src_dir"], extensions):
-            basename = os.path.basename(f)
-            stem, ext = os.path.splitext(basename)
-
-            obj = os.path.join(config["obj_dir"], f"{stem}.o")
-            writer.write(f"build {obj}: compile_{ext[1:]} {f}\n")
-
-            if os.path.basename(obj) in object_targets:
-                writer.write(
-                    f"  extra_compile_flags = {object_targets[os.path.basename(obj)]}\n"
-                )
+    def ninja_compile_objects(writer, object_targets):
+        for ot in object_targets:
+            obj = os.path.join(config["obj_dir"], ot.target)
+            input_file = os.path.join(config["src_dir"], ot.src)
+            extra_flags = ot.include_dirs + ot.flags
+            if config["use_cuda"]:
+                extra_flags.append("-DUSE_CUDA")
+            if ".cuda." in ot.target:
+                if config["use_cuda"]:
+                    writer.write(f"build {obj}: compile_cu {input_file}\n")
+                    if len(extra_flags) > 0:
+                        writer.write(
+                            f"  extra_compile_flags = {' '.join(extra_flags)}\n"
+                        )
+            elif ot.cpp:
+                writer.write(f"build {obj}: compile_cpp {input_file}\n")
+                if len(extra_flags) > 0:
+                    writer.write(f"  extra_compile_flags = {' '.join(extra_flags)}\n")
+            else:
+                writer.write(f"build {obj}: compile_c {input_file}\n")
+                if len(extra_flags) > 0:
+                    writer.write(f"  extra_compile_flags = {' '.join(extra_flags)}\n")
         writer.write("\n")
 
-    def ninja_compile_cuda_objects(writer):
-        for target, (input_file, flags) in cuda_object_targets.items():
-            writer.write(
-                f"build {os.path.join(config['obj_dir'], target)}: nvcc_compile {os.path.join(config['src_dir'], input_file)}\n"
-            )
-            if flags != "":
-                writer.write(f"  extra_compile_flags = {flags}\n")
-
-    def ninja_make_executables(writer):
-        for target, (files, flags) in executable_targets.items():
-            if (config["USE_CUDA"] == "YES") and (target in cuda_executable_targets):
+    def ninja_link_objects(
+        writer,
+        obj2linkdeps,
+        obj2libsyms,
+        sym2lib,
+        sym2staticlib,
+        staticlib2undefined_sym,
+    ):
+        for obj in obj2linkdeps.keys():
+            if not obj.endswith(".main.o"):
                 continue
 
+            cuda_obj = True if ".cuda." in obj else False
+
+            if cuda_obj:
+                if not config["use_cuda"]:
+                    continue
+
+            deps = bfs(obj2linkdeps, obj)
+
+            target = obj[: -len(".main.o")]
+
             input_files = []
-            cpp = False
-            for f in files:
-                if "/" in f:
-                    input_files.append(f)
-                elif f.endswith(".o"):
-                    input_files.append(os.path.join(config["obj_dir"], f))
-                else:
-                    input_files.append(os.path.join(config["src_dir"], f))
-                if f.endswith(".cpp"):
-                    cpp = True
+            for dep in deps:
+                input_files.append(os.path.join(config["obj_dir"], dep))
+                if ".cuda." in dep:
+                    cuda_obj = True
 
-            writer.write(
-                f"build {os.path.join(config['bin_dir'], target)}: make_executable {' '.join(input_files)}\n"
-            )
-            writer.write(f"  extra_link_flags = {flags}\n")
-            if cpp:
-                writer.write(f"  compiler = $cppcompiler\n")
+            libs = set()
+            static_libs = set()
+            undefined = set()
+            for dep in deps:
+                for uf in obj2libsyms.get(dep, []):
+                    if uf in sym2lib:
+                        libs |= sym2lib[uf]
+                    elif uf in sym2staticlib:
+                        static_libs.add(sym2staticlib[uf])
+                    else:
+                        undefined.add(uf)
 
-    def ninja_make_cuda_executables(writer):
-        for target, (files, flags) in cuda_executable_targets.items():
-            input_files = []
-            for f in files:
-                if "/" in f:
-                    input_files.append(f)
-                elif f.endswith(".o"):
-                    input_files.append(os.path.join(config["obj_dir"], f))
-                else:
-                    input_files.append(os.path.join(config["src_dir"], f))
+            if len(static_libs) > 0:
+                input_files.extend(static_libs)
+                for staticlib in static_libs:
+                    for uf in staticlib2undefined_sym[staticlib]:
+                        if uf in sym2lib:
+                            libs |= sym2lib[uf]
+                        else:
+                            undefined.add(uf)
 
-            writer.write(
-                f"build {os.path.join(config['bin_dir'], target)}: nvcc_link {' '.join(input_files)}\n"
-            )
-            writer.write(f"  extra_link_flags = {flags}\n")
+            extra_flags = [f"-l{lib}" for lib in libs]
 
-    def walk_src(src_dir, extensions):
-        for root, dirs, files in os.walk(src_dir):
-            for f in files:
-                if f.split(".")[-1] in extensions:
-                    yield os.path.join(root, f)
+            if cuda_obj and config["use_cuda"]:
+                writer.write(
+                    f"build {os.path.join(config['bin_dir'], 'cuda', target)}: nvcc_link {' '.join(input_files)}\n"
+                )
+            else:
+                writer.write(
+                    f"build {os.path.join(config['bin_dir'], 'cpu', target)}: link_objects {' '.join(input_files)}\n"
+                )
 
-    def write_ninja_file(ninja_file, extensions):
+            if len(extra_flags) > 0:
+                writer.write(f"  extra_link_flags = {' '.join(extra_flags)}\n")
+
+    def write_ninja_file_obj_targets(ninja_file, object_targets):
         os.makedirs(os.path.dirname(ninja_file), exist_ok=True)
         with open(ninja_file, "w", newline="", encoding="utf-8") as writer:
             write_ninja_preamble(writer)
-            ninja_compile_objects(writer, extensions)
-            ninja_make_executables(writer)
-            if config["USE_CUDA"] == "YES":
-                ninja_compile_cuda_objects(writer)
-                ninja_make_cuda_executables(writer)
-        print(f"Generated {ninja_file}")
+            ninja_compile_objects(writer, object_targets)
+        print(f"Ninja script generation, pass 1: generated {ninja_file}")
+        subprocess.run(["ninja", "-f", ninja_file], check=True)
 
-    write_ninja_file(
-        os.path.join(config["active_build_dir"], "build.ninja"), ["c", "cpp"]
+    def write_ninja_file_exe_targets(
+        ninja_file,
+        object_targets,
+        obj2linkdeps,
+        obj2libsyms,
+        sym2lib,
+        sym2staticlib,
+        staticlib2undefined_sym,
+    ):
+        os.makedirs(os.path.dirname(ninja_file), exist_ok=True)
+        with open(ninja_file, "w", newline="", encoding="utf-8") as writer:
+            write_ninja_preamble(writer)
+            ninja_compile_objects(writer, object_targets)
+            ninja_link_objects(
+                writer,
+                obj2linkdeps,
+                obj2libsyms,
+                sym2lib,
+                sym2staticlib,
+                staticlib2undefined_sym,
+            )
+        print(f"Ninja script generation, pass 2: generated {ninja_file}")
+
+    object_targets = generate_object_targets()
+    write_ninja_file_obj_targets(
+        os.path.join(config["active_build_dir"], "build.ninja"), object_targets
     )
 
+    sym2obj = {}
+    undefined2obj = {}
+    obj2undefined = {}
+    for ot in object_targets:
+        obj_path = os.path.join(config["obj_dir"], ot.target)
+        defined_funcs, undefined_funcs = extract_symbols(obj_path)
+        obj2undefined[ot.target] = undefined_funcs
+        for df in defined_funcs:
+            sym2obj[df] = ot.target
+        for uf in undefined_funcs:
+            if uf not in undefined2obj:
+                undefined2obj[uf] = []
+            undefined2obj[uf].append(ot.target)
 
-if __name__ == "__main__":
-    setup_toolchain()
-    generate_ninja_script()
+    obj2linkdeps = {}
+    obj2libsyms = {}
+
+    for obj, ufs in obj2undefined.items():
+        for uf in ufs:
+            if uf not in sym2obj:
+                if obj not in obj2libsyms:
+                    obj2libsyms[obj] = set()
+                obj2libsyms[obj].add(uf)
+
+            else:
+                if obj not in obj2linkdeps:
+                    obj2linkdeps[obj] = set()
+                obj2linkdeps[obj].add(sym2obj[uf])
+
+    sym2staticlib = {}
+    staticlib2undefined_sym = {}
+    for static_lib in config["STATIC_LIBS"]:
+        defined_static_lib_funcs, undefined_static_lib_funcs = extract_symbols(
+            static_lib
+        )
+        for static_sym in defined_static_lib_funcs:
+            sym2staticlib[static_sym] = static_lib
+        staticlib2undefined_sym[static_lib] = undefined_static_lib_funcs
+
+    if config["use_cuda"]:
+        sym2lib = build_sym2lib_graph(
+            config["SHARED_LIBS"] + config["CUDA_SHARED_LIBS"]
+        )
+    else:
+        sym2lib = build_sym2lib_graph(config["SHARED_LIBS"])
+
+    for obj, libsyms in obj2libsyms.items():
+        for libsym in libsyms:
+            if libsym not in sym2lib and libsym not in defined_static_lib_funcs:
+                matched = False
+                for rds in config["RUNTIME_DEFINED_SYMS"]:
+                    if rds in libsym:
+                        matched = True
+                        break
+                if not matched:
+                    print(f"Error: {libsym} not found a matching library")
+
+    write_ninja_file_exe_targets(
+        os.path.join(config["active_build_dir"], "build.ninja"),
+        object_targets,
+        obj2linkdeps,
+        obj2libsyms,
+        sym2lib,
+        sym2staticlib,
+        staticlib2undefined_sym,
+    )
