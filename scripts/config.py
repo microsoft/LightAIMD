@@ -54,6 +54,10 @@ class Configuration:
             "bin_dir": os.path.join(build_release_dir, "bin"),
             "lib_dir": os.path.join(build_release_dir, "lib"),
             "obj_dir": os.path.join(build_release_dir, "obj"),
+            #
+            "verbose": False,
+            "quiet": False,
+            "dry_run": False
         }
 
     def __getitem__(self, key):

@@ -7,7 +7,8 @@ __all__ = ["setup_toolchain", "remove_installed_third_parties"]
 
 
 def install_build_tools():
-    print("Installing build tools...")
+    if not config["quiet"]:
+        print("Installing build tools...")
     subprocess.run(
         ["sudo", "apt", "update", "-qq"],
         stdout=subprocess.DEVNULL,
@@ -28,7 +29,8 @@ def install_build_tools():
         ],
         check=True,
     )
-    print("Build tools installed")
+    if not config["quiet"]:
+        print("Build tools installed")
 
 
 def find_compilers():
@@ -79,17 +81,20 @@ def find_nvcc():
 
     if config["NVCC"] == "":
         config["use_cuda"] = False
-        print("Info: nvcc cannot be found. CUDA support is disabled.")
+        if not config["quiet"]:
+            print("Info: nvcc cannot be found. CUDA support is disabled.")
     else:
         if config["DISABLE_CUDA"]:
             config["use_cuda"] = False
-            print(
-                "Info: nvcc found, but CUDA support is disabled in the configuration."
-            )
+            if not config["quiet"]:
+                print(
+                    "Info: nvcc found, but CUDA support is disabled in the configuration."
+                )
         else:
             config["use_cuda"] = True
-            print("Info: nvcc found, CUDA support is enabled.")
-            print(f"NVCC: '{config['NVCC']}'")
+            if not config["quiet"]:
+                print("Info: nvcc found, CUDA support is enabled.")
+                print(f"NVCC: '{config['NVCC']}'")
 
     return config["NVCC"]
 

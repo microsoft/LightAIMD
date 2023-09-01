@@ -106,6 +106,15 @@ def main():
     )
     args = parser.parse_args()
 
+    if args.verbose:
+        config["verbose"] = True
+
+    if args.quiet:
+        config["quiet"] = True
+
+    if args.dry_run:
+        config["dry_run"] = True
+
     if args.clean:
         clean()
 

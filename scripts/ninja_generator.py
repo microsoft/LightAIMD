@@ -145,11 +145,11 @@ def generate_ninja_script(debug=False):
 
             if cuda_obj and config["use_cuda"]:
                 writer.write(
-                    f"build {os.path.join(config['bin_dir'], 'cuda', target)}: nvcc_link {' '.join(input_files)}\n"
+                    f"build {os.path.join(config['bin_dir'], target)}: nvcc_link {' '.join(input_files)}\n"
                 )
             else:
                 writer.write(
-                    f"build {os.path.join(config['bin_dir'], 'cpu', target)}: link_objects {' '.join(input_files)}\n"
+                    f"build {os.path.join(config['bin_dir'], target)}: link_objects {' '.join(input_files)}\n"
                 )
 
             if len(extra_flags) > 0:
