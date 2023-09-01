@@ -123,6 +123,7 @@ def main():
         run(args)
 
     if args.sanity_test:
+        setup_toolchain()
         passed = run_sanity_tests(args)
         if passed:
             print("Sanity tests passed")
