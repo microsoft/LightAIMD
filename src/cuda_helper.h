@@ -2,6 +2,8 @@
  * Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License.
  */
+#ifndef CUDA_HELPER_H
+#define CUDA_HELPER_H
 #include "numeric_types.h"
 
 #ifndef __host__
@@ -16,13 +18,12 @@
 #define __global__
 #endif
 
+#ifdef USE_CUDA
+
 #define MAX_GPU_COUNT 128
 #define THREAD_PER_BLOCK 128
-
-#ifdef USE_CUDA
 #include <cuda_runtime.h>
 #include <cuda.h>
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -36,3 +37,6 @@ void cuda_sync_all();
 #ifdef __cplusplus
 }
 #endif
+
+#endif // USE_CUDA
+#endif // CUDA_HELPER_H
