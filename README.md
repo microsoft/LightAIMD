@@ -8,7 +8,7 @@
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
 ## Getting started
-You can use the *scripts/build.py* script to set up the development environment and build LightAIMD. The script should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the script for other Linux distributions.
+You can use the *scripts/build.py* script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the scripts for other Linux distributions.
 
 To build LightAIMD, simply run (python3 is required):
 ```shell
@@ -85,3 +85,5 @@ The repo doesn't contain 3rd party code. It links to the following external libr
 Besides the above libraries that LightAIMD communicates with, the following projects have greatly inspired the design of LightAIMD:
 - [PySCF](https://github.com/pyscf/pyscf)
 - [McMurchie-Davidson](https://github.com/jjgoings/McMurchie-Davidson)
+
+To understand the theory behind LightAIMD, you may refer to this [tutorial](https://www.binshao.info/download/tutorials/CQC101.pdf).
