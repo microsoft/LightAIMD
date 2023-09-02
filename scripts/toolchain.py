@@ -7,8 +7,10 @@ __all__ = ["setup_toolchain", "remove_installed_third_parties"]
 
 
 def install_build_tools():
-    if not config["quiet"]:
-        print("Installing build tools...")
+    if is_package_installed("build-essential") and is_package_installed("gfortran") and is_package_installed("clang") and is_package_installed("ninja-build"):
+        return
+
+    print("Installing build tools...")
     subprocess.run(
         ["sudo", "apt", "update", "-qq"],
         stdout=subprocess.DEVNULL,
@@ -27,11 +29,20 @@ def install_build_tools():
             "clang",
             "ninja-build",
         ],
+        stdout=subprocess.DEVNULL if config["quiet"] else None,
+        stderr=subprocess.DEVNULL if config["quiet"] else None,
         check=True,
     )
-    if not config["quiet"]:
-        print("Build tools installed")
+    print("Build tools installed")
 
+def is_package_installed(package_name):
+    output = subprocess.run(
+        ["apt", "-qq", "list", "--installed", package_name],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=True,
+    ).stdout.decode("utf-8")
+    return "[installed]" in output
 
 def find_compilers():
     find_CC()
@@ -304,3 +315,6 @@ def setup_toolchain():
     install_build_tools()
     find_compilers()
     check_third_parties(use_cuda=False)
+
+if __name__ == "__main__":
+    setup_toolchain()
