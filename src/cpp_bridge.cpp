@@ -6,6 +6,7 @@
 #include <thread>
 #include <fstream>
 #include <iostream>
+#include <regex>
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/LU>
@@ -38,7 +39,8 @@ extern "C"
 
     char *load_basis_set(char const *basis_set_filename, u64 n_elements, u64 *elements)
     {
-        std::ifstream fs_json(basis_set_filename);
+        std::string sanitized_file_path = std::regex_replace(std::string(basis_set_filename), std::regex("\\*"), "_st_");
+        std::ifstream fs_json(sanitized_file_path);
         auto basis_set = nlohmann::json::parse(fs_json);
 
         u64 bc = sizeof(u64); /* byte count, initial value: space for number of elements */
