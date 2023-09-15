@@ -30,13 +30,13 @@ rule compile_cpp
   command = $cppcompiler $compile_flags $extra_compile_flags -c $in -o $out
 
 rule link_objects
-  command = $compiler $link_flags $extra_link_flags -o $out $in
+  command = $compiler -o $out $in $link_flags $extra_link_flags
 
 rule compile_cu
   command = $nvcc $nvcc_flags $compile_cu_flags $extra_compile_flags -x cu -dc -o $out $in
 
 rule nvcc_link
-  command = $nvcc $nvcc_flags $nvcc_link_flags $extra_link_flags -o $out $in
+  command = $nvcc $nvcc_flags -o $out $in $nvcc_link_flags $extra_link_flags
 """
 
 

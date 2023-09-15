@@ -45,7 +45,13 @@
 #define c128 long double _Complex
 
 #ifndef __STDC_NO_ATOMICS__
+
+#ifdef __cplusplus
+#include <atomic>
+#define _Atomic(X) std::atomic<X>
+#else
 #include <stdatomic.h>
+#endif
 
 #ifdef PREFER_FAST_TYPE
 

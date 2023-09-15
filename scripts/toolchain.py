@@ -7,7 +7,12 @@ __all__ = ["setup_toolchain", "remove_installed_third_parties"]
 
 
 def install_build_tools():
-    if is_package_installed("build-essential") and is_package_installed("gfortran") and is_package_installed("clang") and is_package_installed("ninja-build"):
+    if (
+        is_package_installed("build-essential")
+        and is_package_installed("gfortran")
+        and is_package_installed("clang")
+        and is_package_installed("ninja-build")
+    ):
         return
 
     print("Installing build tools...")
@@ -35,6 +40,7 @@ def install_build_tools():
     )
     print("Build tools installed")
 
+
 def is_package_installed(package_name):
     output = subprocess.run(
         ["apt", "-qq", "list", "--installed", package_name],
@@ -43,6 +49,7 @@ def is_package_installed(package_name):
         check=True,
     ).stdout.decode("utf-8")
     return "[installed]" in output
+
 
 def find_compilers():
     find_CC()
@@ -111,35 +118,67 @@ def find_nvcc():
 
 
 def find_CC():
-    config["CC"] = (
-        subprocess.run(
-            ["which", "clang"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+    if config["COMPILER"] == "clang":
+        config["CC"] = (
+            subprocess.run(
+                ["which", "clang"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
         )
-        .stdout.decode("utf-8")
-        .strip()
-    )
-    print(f"CC: '{config['CC']}'")
+        print(f"CC: '{config['CC']}'")
 
-    if config["CC"] == "":
-        print("Critical: C compiler cannot be found")
+        if config["CC"] == "":
+            print("Critical: C compiler cannot be found")
 
-    return config["CC"]
+        return config["CC"]
+
+    if config["COMPILER"] == "gcc":
+        config["CC"] = (
+            subprocess.run(
+                ["which", "gcc"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
+        print(f"CC: '{config['CC']}'")
+
+        if config["CC"] == "":
+            print("Critical: C compiler cannot be found")
+
+        return config["CC"]
 
 
 def find_CXX():
-    config["CXX"] = (
-        subprocess.run(
-            ["which", "clang++"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+    if config["COMPILER"] == "clang":
+        config["CXX"] = (
+            subprocess.run(
+                ["which", "clang++"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
         )
-        .stdout.decode("utf-8")
-        .strip()
-    )
-    print(f"CXX: '{config['CXX']}'")
+        print(f"CXX: '{config['CXX']}'")
 
-    if config["CXX"] == "":
-        print("Critical: C++ compiler cannot be found")
+        if config["CXX"] == "":
+            print("Critical: C++ compiler cannot be found")
 
-    return config["CXX"]
+        return config["CXX"]
+
+    if config["COMPILER"] == "gcc":
+        config["CXX"] = (
+            subprocess.run(
+                ["which", "g++"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
+        print(f"CXX: '{config['CXX']}'")
+
+        if config["CXX"] == "":
+            print("Critical: C++ compiler cannot be found")
+
+        return config["CXX"]
 
 
 def create_version_file(data_dir, version):
@@ -315,6 +354,7 @@ def setup_toolchain():
     install_build_tools()
     find_compilers()
     check_third_parties(use_cuda=False)
+
 
 if __name__ == "__main__":
     setup_toolchain()

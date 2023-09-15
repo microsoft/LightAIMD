@@ -13,6 +13,14 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--compiler",
+        dest="compiler",
+        default="clang",
+        required=False,
+        choices=["clang", "gcc"],
+        help="Compiler to use",
+    )
+    parser.add_argument(
         "--build",
         dest="build",
         default=False,
@@ -114,6 +122,9 @@ def main():
 
     if args.dry_run:
         config["dry_run"] = True
+
+    if args.compiler:
+        config["COMPILER"] = args.compiler
 
     if args.clean:
         clean()

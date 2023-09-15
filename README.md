@@ -25,6 +25,12 @@ You can also build the release version and the debug version at the same time:
 python3 scripts/build.py --build --release --debug
 ```
 
+The supported compilers include GCC and Clang. You can specify the compiler by using "--compiler" option. For example, to use gcc:
+```shell
+python3 scripts/build.py --build --release --compiler gcc
+```
+The default compiler is clang.
+
 ### Sanity tests
 After building LightAIMD, you can run the sanity tests:
 ```shell
@@ -81,9 +87,5 @@ The repo doesn't contain 3rd party code. It links to the following external libr
 - [Eigen](https://eigen.tuxfamily.org)
 - [Libxc](https://www.tddft.org/programs/libxc/)
 - [Nlohmann/json](https://github.com/nlohmann/json)
-
-Besides the above libraries that LightAIMD communicates with, the following projects have greatly inspired the design of LightAIMD:
-- [PySCF](https://github.com/pyscf/pyscf)
-- [McMurchie-Davidson](https://github.com/jjgoings/McMurchie-Davidson)
 
 To understand the theory behind LightAIMD, you may refer to this [tutorial](https://www.binshao.info/download/tutorials/CQC101.pdf).

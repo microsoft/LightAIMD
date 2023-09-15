@@ -33,6 +33,8 @@ class Configuration:
             "CUDA_SHARED_LIBS": ["cuda", "cudart"],
             "CUDA_INC_DIR": "/usr/local/cuda/include",
             "CUDA_LIB_DIR": "/usr/local/cuda/lib64",
+            # compiler related
+            "COMPILER": "clang",  # possible values: "clang", "gcc"
         }
 
         self.runtime_settings = {
@@ -57,7 +59,7 @@ class Configuration:
             #
             "verbose": False,
             "quiet": False,
-            "dry_run": False
+            "dry_run": False,
         }
 
     def __getitem__(self, key):
