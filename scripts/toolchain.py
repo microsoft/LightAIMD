@@ -126,12 +126,6 @@ def find_CC():
             .stdout.decode("utf-8")
             .strip()
         )
-        print(f"CC: '{config['CC']}'")
-
-        if config["CC"] == "":
-            print("Critical: C compiler cannot be found")
-
-        return config["CC"]
 
     if config["COMPILER"] == "gcc":
         config["CC"] = (
@@ -141,12 +135,22 @@ def find_CC():
             .stdout.decode("utf-8")
             .strip()
         )
-        print(f"CC: '{config['CC']}'")
 
-        if config["CC"] == "":
-            print("Critical: C compiler cannot be found")
+    if config["COMPILER"] == "icx":
+        config["CC"] = (
+            subprocess.run(
+                ["which", "icx"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
 
-        return config["CC"]
+    print(f"CC: '{config['CC']}'")
+
+    if config["CC"] == "":
+        print("Critical: C compiler cannot be found")
+
+    return config["CC"]
 
 
 def find_CXX():
@@ -158,12 +162,6 @@ def find_CXX():
             .stdout.decode("utf-8")
             .strip()
         )
-        print(f"CXX: '{config['CXX']}'")
-
-        if config["CXX"] == "":
-            print("Critical: C++ compiler cannot be found")
-
-        return config["CXX"]
 
     if config["COMPILER"] == "gcc":
         config["CXX"] = (
@@ -173,12 +171,22 @@ def find_CXX():
             .stdout.decode("utf-8")
             .strip()
         )
-        print(f"CXX: '{config['CXX']}'")
 
-        if config["CXX"] == "":
-            print("Critical: C++ compiler cannot be found")
+    if config["COMPILER"] == "icx":
+        config["CXX"] = (
+            subprocess.run(
+                ["which", "icpx"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
 
-        return config["CXX"]
+    print(f"CXX: '{config['CXX']}'")
+
+    if config["CXX"] == "":
+        print("Critical: C++ compiler cannot be found")
+
+    return config["CXX"]
 
 
 def create_version_file(data_dir, version):

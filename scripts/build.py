@@ -17,7 +17,7 @@ def main():
         dest="compiler",
         default="clang",
         required=False,
-        choices=["clang", "gcc"],
+        choices=["clang", "gcc", "icx"],
         help="Compiler to use",
     )
     parser.add_argument(

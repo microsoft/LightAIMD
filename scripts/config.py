@@ -25,7 +25,7 @@ class Configuration:
             "LIBXC_VERSION": "6.2.2",
             # build system related
             "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
-            "RUNTIME_DEFINED_SYMS": ["__dso_handle", "__cudaRegisterLinkedBinary_"],
+            "RUNTIME_DEFINED_SYMS": ["__dso_handle", "__cudaRegisterLinkedBinary_", "_intel_fast_mem", "__svml_"],
             "STATIC_LIBS": [os.path.join(root_dir, "ext/libxc/lib/libxc.a")],
             "SRC_EXTENSIONS": ["c", "cpp", "cu", "h", "hpp"],
             # cuda related
@@ -34,7 +34,7 @@ class Configuration:
             "CUDA_INC_DIR": "/usr/local/cuda/include",
             "CUDA_LIB_DIR": "/usr/local/cuda/lib64",
             # compiler related
-            "COMPILER": "clang",  # possible values: "clang", "gcc"
+            "COMPILER": "clang",  # possible values: "clang", "gcc", "icx"
         }
 
         self.runtime_settings = {

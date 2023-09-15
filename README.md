@@ -25,7 +25,7 @@ You can also build the release version and the debug version at the same time:
 python3 scripts/build.py --build --release --debug
 ```
 
-The supported compilers include GCC and Clang. You can specify the compiler by using "--compiler" option. For example, to use gcc:
+The supported compilers include Clang, GCC, and Intel® C/C++ compiler (icx/icpx). You can specify the compiler by using "--compiler" option, with the following choices: "clang", "gcc", and "icx". For example, to use gcc:
 ```shell
 python3 scripts/build.py --build --release --compiler gcc
 ```
