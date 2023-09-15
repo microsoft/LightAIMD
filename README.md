@@ -8,7 +8,7 @@
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
 ## Getting started
-You can use the *scripts/build.py* script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the scripts for other Linux distributions.
+You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the scripts for other Linux distributions.
 
 To build LightAIMD, simply run (python3 is required):
 ```shell
@@ -29,7 +29,10 @@ The supported compilers include Clang, GCC, and Intel® C/C++ compiler (icx/icpx
 ```shell
 python3 scripts/build.py --build --release --compiler gcc
 ```
-The default compiler is clang.
+The default compiler is clang. To use the icx/icpx compiler, you need to install the [Intel® oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html) and configure the local environment variables using the `setvars.sh` script, which can be found in the installation directory, for example:
+```shell
+source /opt/intel/oneapi/setvars.sh
+```
 
 ### Sanity tests
 After building LightAIMD, you can run the sanity tests:
