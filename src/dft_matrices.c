@@ -547,6 +547,8 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
     f64 *eri_output_buff = x_malloc(sizeof(f64) * cuda_task_count);
     u64 cuda_task_index = 0;
 
+    struct timespec time_start, time_end;
+
     for (u64 i = 0; i < N; ++i)
     {
         for (u64 j = 0; j <= i; ++j)
@@ -588,8 +590,16 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
 
                         if (cuda_task_index == cuda_task_count)
                         {
+                            get_wall_time(&time_start);
                             cg_electron_repulsion_integral_cuda(ctx->basis_funcs, basis_func_index_buff, cuda_task_index, eri_output_buff);
+                            get_wall_time(&time_end);
+                            console_printf(ctx->silent, "cg_electron_repulsion_integral_cuda took %.3f ms\n", diff_time_ms(&time_start, &time_end));
+
+                            get_wall_time(&time_start);
                             update_JK_with_eri(J, K, P, N, basis_func_index_buff, cuda_task_index, eri_output_buff);
+                            get_wall_time(&time_end);
+                            console_printf(ctx->silent, "update_JK_with_eri took %.3f ms\n", diff_time_ms(&time_start, &time_end));
+
                             cuda_task_index = 0;
                         }
                     }
@@ -600,8 +610,15 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
 
     if (cuda_task_index > 0)
     {
+        get_wall_time(&time_start);
         cg_electron_repulsion_integral_cuda(ctx->basis_funcs, basis_func_index_buff, cuda_task_index, eri_output_buff);
+        get_wall_time(&time_end);
+        console_printf(ctx->silent, "cg_electron_repulsion_integral_cuda took %.3f ms\n", diff_time_ms(&time_start, &time_end));
+
+        get_wall_time(&time_start);
         update_JK_with_eri(J, K, P, N, basis_func_index_buff, cuda_task_index, eri_output_buff);
+        get_wall_time(&time_end);
+        console_printf(ctx->silent, "update_JK_with_eri took %.3f ms\n", diff_time_ms(&time_start, &time_end));
     }
 
     x_free(basis_func_index_buff);
