@@ -12,6 +12,25 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser()
+
+    cuda_group = parser.add_mutually_exclusive_group()
+    cuda_group.add_argument(
+        "--enable-cuda",
+        dest="enable_cuda",
+        default=True,
+        required=False,
+        action="store_true",
+        help="Enable CUDA",
+    )
+    cuda_group.add_argument(
+        "--disable-cuda",
+        dest="disable_cuda",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Disable CUDA",
+    )
+
     parser.add_argument(
         "--compiler",
         dest="compiler",
@@ -125,6 +144,12 @@ def main():
 
     if args.compiler:
         config["COMPILER"] = args.compiler
+
+    if args.enable_cuda:
+        config["DISABLE_CUDA"] = False
+
+    if args.disable_cuda:
+        config["DISABLE_CUDA"] = True
 
     if args.clean:
         clean()
