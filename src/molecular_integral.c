@@ -601,12 +601,12 @@ __device__ f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, 
                     for (u64 t = 0; t < t_upper + axis_mask[1] * B; ++t)
                         for (u64 u = 0; u < u_upper + axis_mask[2] * B; ++u)
                         {
-                            f64 term_1 = (axis_mask[0] * A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b, p, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, p, x0_a - x0_b);
-                            f64 term_2 = (axis_mask[1] * A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b, q, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, q, y0_a - y0_b);
-                            f64 term_3 = (axis_mask[2] * A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b, r, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, r, z0_a - z0_b);
-                            f64 term_4 = (axis_mask[0] * B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_x_c, amn_x_d, s, x0_c - x0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_x_c, amn_x_d, s, x0_c - x0_d);
-                            f64 term_5 = (axis_mask[1] * B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_y_c, amn_y_d, t, y0_c - y0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_y_c, amn_y_d, t, y0_c - y0_d);
-                            f64 term_6 = (axis_mask[2] * B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d);
+                            f64 term_1 = (axis_mask[0] & A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_x_a, amn_x_b, p, x0_a - x0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_x_a, amn_x_b, p, x0_a - x0_b);
+                            f64 term_2 = (axis_mask[1] & A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_y_a, amn_y_b, q, y0_a - y0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_y_a, amn_y_b, q, y0_a - y0_b);
+                            f64 term_3 = (axis_mask[2] & A) ? hermite_coef_dwrt_nuc(gexp_a, gexp_b, amn_z_a, amn_z_b, r, z0_a - z0_b, C, D) : hermite_coef(gexp_a, gexp_b, amn_z_a, amn_z_b, r, z0_a - z0_b);
+                            f64 term_4 = (axis_mask[0] & B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_x_c, amn_x_d, s, x0_c - x0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_x_c, amn_x_d, s, x0_c - x0_d);
+                            f64 term_5 = (axis_mask[1] & B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_y_c, amn_y_d, t, y0_c - y0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_y_c, amn_y_d, t, y0_c - y0_d);
+                            f64 term_6 = (axis_mask[2] & B) ? hermite_coef_dwrt_nuc(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d, C, D) : hermite_coef(gexp_c, gexp_d, amn_z_c, amn_z_d, u, z0_c - z0_d);
 
                             result += term_1 * term_2 * term_3 * term_4 * term_5 * term_6 *
                                       pow(-1, s + t + u) *

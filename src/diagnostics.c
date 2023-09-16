@@ -223,9 +223,20 @@ f64 *load_f64_array(char const *file_name)
 {
     FILE *fp = fopen(file_name, "rb");
     u64 count;
-    fread(&count, sizeof(f64), 1, fp);
+    if (fread(&count, sizeof(f64), 1, fp) != 1)
+    {
+        printf("failed to read record count from %s\n", file_name);
+        fclose(fp);
+        return NULL;
+    }
     f64 *A = x_malloc(count * sizeof(f64));
-    fread(A, count * sizeof(f64), 1, fp);
+    if (fread(A, sizeof(f64), count, fp) != count)
+    {
+        printf("failed to read %lu f64 values from %s\n", count, file_name);
+        fclose(fp);
+        return NULL;
+    }
+    fclose(fp);
     return A;
 }
 
