@@ -248,8 +248,8 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
            value,
            pyscf_grid_lvl3_energy_11e_results[cc_method_idx],
            energy_diff,
-           //pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
-           //energy_diff < pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           // pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
+           // energy_diff < pyscf_grid_lvl3_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
            sanity_test_threshold,
            energy_diff < sanity_test_threshold ? "Passed" : "Failed");
 
@@ -259,8 +259,8 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
            value,
            pyscf_grid_lvl4_energy_11e_results[cc_method_idx],
            energy_diff,
-           //pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
-           //energy_diff < pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           // pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx],
+           // energy_diff < pyscf_grid_lvl4_energy_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
            sanity_test_threshold,
            energy_diff < sanity_test_threshold ? "Passed" : "Failed");
 
@@ -298,8 +298,8 @@ i64 check_forces(f64 *forces, u64 cc_method_id)
            max_delta_force,
            max_delta_ref_force,
            max_delta,
-           //pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx],
-           //max_delta < pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
+           // pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx],
+           // max_delta < pyscf_grid_lvl5_forces_on_nuclei_acceptance_threshold_lv14_rv6[cc_method_idx] ? "Passed" : "Failed");
            sanity_test_threshold,
            max_delta < sanity_test_threshold ? "Passed" : "Failed");
 

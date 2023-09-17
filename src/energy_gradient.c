@@ -60,7 +60,7 @@ struct task_func_eri_dwrt_nuc_arg
     f64 hyb_coef;
 };
 
-void task_func_eri_dwrt_nuc(void *p_arg)
+static void task_func_eri_dwrt_nuc(void *p_arg)
 {
     struct task_func_eri_dwrt_nuc_arg *arg = (struct task_func_eri_dwrt_nuc_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -201,7 +201,7 @@ void task_func_eri_dwrt_nuc(void *p_arg)
     x_free(p_arg);
 }
 
-void task_func_energy_dwrt_nuc(void *p_arg)
+static void task_func_energy_dwrt_nuc(void *p_arg)
 {
     struct task_func_energy_dwrt_nuc_arg *arg = (struct task_func_energy_dwrt_nuc_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;

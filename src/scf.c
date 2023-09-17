@@ -8,7 +8,6 @@
 #include <math.h>
 #include <time.h>
 
-//#include "python_bridge.h"
 #include "molecule.h"
 #include "scf.h"
 #include "cpp_bridge.h"
@@ -102,7 +101,7 @@ void print_scf_context(struct scf_context *ctx)
     printf("SCF Energy: %.6f\n", ctx->energy);
 }
 
-f64 calc_nuclear_repulsion_energy(struct molecule *mol)
+static f64 calc_nuclear_repulsion_energy(struct molecule *mol)
 {
     f64 nre = 0.0;
     for (u64 i = 0; i < mol->n_atoms; ++i)
@@ -115,7 +114,7 @@ f64 calc_nuclear_repulsion_energy(struct molecule *mol)
     return nre;
 }
 
-void initialize_density_matrix_with_H_core(struct scf_context *ctx)
+static void initialize_density_matrix_with_H_core(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     generalized_eigh_veconly(ctx->H, ctx->S, ctx->C, N);
@@ -141,7 +140,7 @@ void initialize_density_matrix_with_H_core(struct scf_context *ctx)
     einsum_mn_np__mp(ctx->COO, ctx->COOT, ctx->P, N, nocc, N);
 }
 
-void build_basis_funcs(struct scf_context *ctx, char const *basis_set_filename)
+static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_filename)
 {
     struct molecule *mol = ctx->mol;
     u64 *p_elements = mol_elements(mol);
@@ -275,7 +274,7 @@ struct task_func_stv_arg
     u64 j;
 };
 
-void task_func_stv(void *p_arg)
+static void task_func_stv(void *p_arg)
 {
     struct task_func_stv_arg *arg = (struct task_func_stv_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -307,7 +306,7 @@ void task_func_stv(void *p_arg)
     x_free(p_arg);
 }
 
-void build_one_electron_integrals(struct scf_context *ctx)
+static void build_one_electron_integrals(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -360,7 +359,7 @@ struct task_func_screen_arg
     u64 ij;
 };
 
-void task_func_screen(void *p_arg)
+static void task_func_screen(void *p_arg)
 {
     struct task_func_screen_arg *arg = (struct task_func_screen_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -371,7 +370,7 @@ void task_func_screen(void *p_arg)
     x_free(p_arg);
 }
 
-void build_two_electron_integrals(struct scf_context *ctx)
+static void build_two_electron_integrals(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;

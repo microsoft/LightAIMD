@@ -30,9 +30,9 @@ extern "C"
 {
 #endif
 
-int cuda_get_device_count();
-void cuda_configure();
-void cuda_sync_all();
+    int cuda_get_device_count();
+    void cuda_configure();
+    void cuda_sync_all();
 
 #ifdef __cplusplus
 }

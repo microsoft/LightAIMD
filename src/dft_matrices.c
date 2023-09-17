@@ -37,7 +37,7 @@ struct task_func_build_K_arg
     u64 ij_kl;
 };
 
-void task_func_build_K(void *p_arg)
+static void task_func_build_K(void *p_arg)
 {
     struct task_func_build_K_arg *arg = (struct task_func_build_K_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -183,7 +183,7 @@ struct task_func_build_J_arg
     u64 ij_kl;
 };
 
-void task_func_build_J(void *p_arg)
+static void task_func_build_J(void *p_arg)
 {
     struct task_func_build_J_arg *arg = (struct task_func_build_J_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -321,7 +321,7 @@ struct task_func_build_JK_arg
     u64 ij_kl;
 };
 
-void task_func_build_JK(void *p_arg)
+static void task_func_build_JK(void *p_arg)
 {
     struct task_func_build_JK_arg *arg = (struct task_func_build_JK_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;

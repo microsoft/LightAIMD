@@ -38,7 +38,7 @@ struct task_func_bfvalues_derivatives_arg
     u64 i;
 };
 
-void task_func_bfvalues_derivatives(void *p_arg)
+static void task_func_bfvalues_derivatives(void *p_arg)
 {
     struct task_func_bfvalues_derivatives_arg *arg = (struct task_func_bfvalues_derivatives_arg *)p_arg;
 
@@ -210,7 +210,7 @@ struct task_func_calc_integration_weights_arg
     u64 ag_offset;
 };
 
-void task_func_calc_integration_weights(void *p_arg)
+static void task_func_calc_integration_weights(void *p_arg)
 {
     struct task_func_calc_integration_weights_arg *arg = (struct task_func_calc_integration_weights_arg *)p_arg;
     struct atomic_grid_desc *gd = arg->gd;
@@ -259,7 +259,7 @@ void task_func_calc_integration_weights(void *p_arg)
     x_free(p_arg);
 }
 
-void task_func_calc_integration_weights_standard_grid(void *p_arg)
+static void task_func_calc_integration_weights_standard_grid(void *p_arg)
 {
     struct task_func_calc_integration_weights_arg *arg = (struct task_func_calc_integration_weights_arg *)p_arg;
     struct atomic_grid_desc *gd = arg->gd;
@@ -288,7 +288,7 @@ void task_func_calc_integration_weights_standard_grid(void *p_arg)
          */
         f64 radial_weight = 16.0 / 3.0 / (gd->num_radial_points + 1.0) * pow(sin_x1, 4.0) * ONE_OVER_LN2 / (xi + 1) * 4 * M_PI * r * r;
 
-        u64 num_angular_points = get_standard_grid_angular_point_num_by_radial_point_idx(gd->atomic_num, mgd->grid_scheme, i-1);
+        u64 num_angular_points = get_standard_grid_angular_point_num_by_radial_point_idx(gd->atomic_num, mgd->grid_scheme, i - 1);
         u64 lebedev_level = lebedev_num_points_to_level(num_angular_points);
         f64 *lebedev_grid = x_malloc(num_angular_points * 3 * sizeof(f64));
         f64 *lebedev_weights = x_malloc(num_angular_points * sizeof(f64));
@@ -322,7 +322,7 @@ struct task_func_calc_becke_weights_arg
     u64 n;
 };
 
-void task_func_calc_becke_weights(void *p_arg)
+static void task_func_calc_becke_weights(void *p_arg)
 {
     struct task_func_calc_becke_weights_arg *arg = (struct task_func_calc_becke_weights_arg *)p_arg;
     struct atomic_grid_desc *gd = arg->gd;

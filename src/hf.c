@@ -31,7 +31,7 @@
 #include "cuda_helper.h"
 
 /* F = h + J - 0.5K */
-void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
+static void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -96,7 +96,7 @@ struct task_func_eri_arg
     u64 ij_kl;
 };
 
-void task_func_eri(void *p_arg)
+static void task_func_eri(void *p_arg)
 {
     struct task_func_eri_arg *arg = (struct task_func_eri_arg *)p_arg;
     struct scf_context *ctx = arg->ctx;
@@ -148,7 +148,7 @@ void task_func_eri(void *p_arg)
 }
 
 /* F = h + (G + G.T) * 0.25 */
-void hf_build_fock_direct(struct scf_context *ctx)
+static void hf_build_fock_direct(struct scf_context *ctx)
 {
     /*log_tm_println("starting building fock ...");*/
     f64 *P = ctx->P;
@@ -241,7 +241,7 @@ void hf_build_fock_direct(struct scf_context *ctx)
     /*log_tm_println("fock has been built.");*/
 }
 
-void hf_build_fock(struct scf_context *ctx)
+static void hf_build_fock(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -257,7 +257,7 @@ void hf_build_fock(struct scf_context *ctx)
     }
 }
 
-void hf_initialize(struct scf_context *ctx)
+static void hf_initialize(struct scf_context *ctx)
 {
     hf_build_fock(ctx);
     memcpy(ctx->diis_F, ctx->F, ctx->N2_f64);
@@ -272,7 +272,7 @@ void hf_scf_config(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_SOAD;
 }
 
-void hf_total_energy(struct scf_context *ctx)
+static void hf_total_energy(struct scf_context *ctx)
 {
     /*
      * E = 0.5 * P_vu * (H_uv + F_uv) + NRE
@@ -288,7 +288,7 @@ void hf_total_energy(struct scf_context *ctx)
     ctx->energy = 0.5 * einsum_mn_nm(ctx->P, ctx->NxN_1, N, N) + ctx->nuclear_repulsion_energy;
 }
 
-void hf_scf_iterate(struct scf_context *ctx)
+static void hf_scf_iterate(struct scf_context *ctx)
 {
     console_printf(ctx->silent, "\nStarting HF SCF loop\n");
     u64 N = ctx->n_basis_funcs;

@@ -51,11 +51,11 @@ __device__ static C64 ln_gamma_f64(f64 x)
     // z is zero or negative integer
     if (x == ((i64)x) && x <= 0.0)
     {
-        #ifdef __NVCC__
+#ifdef __NVCC__
         return make_cuDoubleComplex(F64_QUASI_INFINITY, 0.0);
-        #else
+#else
         return F64_QUASI_INFINITY;
-        #endif
+#endif
     }
 
     u64 negative = 0;

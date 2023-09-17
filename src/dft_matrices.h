@@ -22,7 +22,7 @@ extern "C"
 {
 #endif
 
-void cg_electron_repulsion_integral_cuda(struct basis_func *basis_func_buff, u32 *basis_func_index_buff, u64 count, f64 *result);
+    void cg_electron_repulsion_integral_cuda(struct basis_func *basis_func_buff, u32 *basis_func_index_buff, u64 count, f64 *result);
 
 #ifdef __cplusplus
 }

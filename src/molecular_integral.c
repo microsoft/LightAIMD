@@ -138,9 +138,9 @@ __device__ static f64 pg_overlap_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, 
 /*
  * The axis_mask array is used to select the axis along which the derivative is calculated.
  */
-__device__ f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                            f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                            u64 *axis_mask, u64 center)
+__device__ static f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                   f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                   u64 *axis_mask, u64 center)
 {
     u64 C = (center == 1) ? 1 : 0;
     u64 D = (center == 2) ? 1 : 0;
@@ -197,8 +197,8 @@ __device__ void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_
 }
 
 /* Calculates kinetic energy integral between two primitive Gaussian functions */
-__device__ f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                   f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b)
+__device__ static f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                          f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b)
 {
     f64 gexp_b_sq2 = 2 * gexp_b * gexp_b;
 
@@ -223,9 +223,9 @@ __device__ f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn
     return (t_x + t_y + t_z) * pow(M_PI / (gexp_a + gexp_b), 1.5);
 }
 
-__device__ f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                            f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                            u64 *axis_mask, u64 center)
+__device__ static f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                   f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                   u64 *axis_mask, u64 center)
 {
     f64 gexp_b_sq2 = 2 * gexp_b * gexp_b;
 
@@ -299,9 +299,9 @@ __device__ void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_
 }
 
 /* Calculates nuclear attraction integral with respect to a center C (usually the nucleus) */
-__device__ f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                              f64 x0_c, f64 y0_c, f64 z0_c)
+__device__ static f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                     f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                     f64 x0_c, f64 y0_c, f64 z0_c)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     /* gaussian product center */
@@ -336,10 +336,10 @@ __device__ f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y
     return result;
 }
 
-__device__ f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                                       f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                                       f64 x0_c, f64 y0_c, f64 z0_c,
-                                                       u64 *axis_mask)
+__device__ static f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                              f64 x0_c, f64 y0_c, f64 z0_c,
+                                                              u64 *axis_mask)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gpc_x = (gexp_a * x0_a + gexp_b * x0_b) / gexp_a_b;
@@ -376,10 +376,10 @@ __device__ f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, 
     return result;
 }
 
-__device__ f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                                              f64 x0_c, f64 y0_c, f64 z0_c,
-                                                              u64 *axis_mask, u64 center)
+__device__ static f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                                     f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                                     f64 x0_c, f64 y0_c, f64 z0_c,
+                                                                     u64 *axis_mask, u64 center)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gpc_x = (gexp_a * x0_a + gexp_b * x0_b) / gexp_a_b;
@@ -495,10 +495,10 @@ __device__ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func
 }
 
 /* Calculates electron-electron repulsion integral */
-__device__ f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                              f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
-                                              f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d)
+__device__ static f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                     f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                     f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
+                                                     f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gexp_c_d = gexp_c + gexp_d;
@@ -552,12 +552,12 @@ __device__ f64 pg_electron_repulsion_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y
     return result;
 }
 
-__device__ f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
-                                                       f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                                       f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
-                                                       f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
-                                                       u64 *axis_mask,
-                                                       u64 center)
+__device__ static f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
+                                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
+                                                              f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
+                                                              f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
+                                                              u64 *axis_mask,
+                                                              u64 center)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gexp_c_d = gexp_c + gexp_d;
