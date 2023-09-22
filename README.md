@@ -34,6 +34,11 @@ The default compiler is clang. To use the icx/icpx compiler, you need to install
 source /opt/intel/oneapi/setvars.sh
 ```
 
+If the Nvidia CUDA Compiler `nvcc` is detected, the build script will compile the CUDA-enabled version of LightAIMD. To explicitly disable CUDA support, you can use the `--disable-cuda` option:
+```shell
+python3 scripts/build.py --build --release --disable-cuda
+```
+
 ### Sanity tests
 After building LightAIMD, you can run the sanity tests:
 ```shell
