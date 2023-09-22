@@ -28,39 +28,179 @@
  * Ref: Molecular electronic structure theory (purple book)
  */
 
+struct HermiteState
+{
+    i64 i;
+    i64 j;
+    i64 t;
+    f64 value;
+    f64 coefficient; // coefficient of the current term when returning to the parent
+    i64 parent;
+    u64 num_children;
+};
+
+__device__ static f64 hermite_coef_trivial_case(i64 i, i64 j, i64 t, f64 Kab)
+{
+    if ((t < 0) || (t > (i + j)))
+    {
+        return 0.0;
+    }
+
+    // i == 0 && j == 0 && t == 0
+    if (!((u64)i | (u64)j | (u64)t))
+    {
+        return Kab;
+    }
+
+    return NAN;
+}
+
 /*
- * Calculates the Hermite expansion coefficients E.
+ * Iterative implementation of calculating Hermite expansion coefficients E.
+ * The recursive implementation (hermite_coef_recursive, which can be found in this file) is used to verify the correctness of the iterative implementation.
  * The suffixes _a and _b indicates Gaussian a and b
  * num_nodes : the number of nodes in the Hermite Gaussian
  * relative_separation : the separation between the two Gaussian centers, integral chapter, eq 63; purple book eq 9.2.14
  */
 __device__ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation)
 {
-    // integral chapter, eq 64; purple book, eq 9.2.11
     f64 gexp_a_b = gexp_a + gexp_b;
-    // integral chapter, eq 66; purple book, eq 9.2.12
     f64 gexp_reduced = gexp_a * gexp_b / gexp_a_b;
+    f64 Kab = exp(-gexp_reduced * relative_separation * relative_separation);
+    f64 value = hermite_coef_trivial_case(amn_a, amn_b, num_nodes, Kab);
 
-    // purple book, eq 9.5.5
-    if ((num_nodes < 0) || (num_nodes > (amn_a + amn_b)))
+    if (!isnan(value))
     {
-        return 0.0;
+        return value;
     }
 
-    if ((amn_a == 0) && (amn_b == 0) && (num_nodes == 0))
+#ifdef __NVCC__
+    const u64 stack_size = 40; // assume amn_a + amn_b <= 20
+#else
+    u64 stack_size = (amn_a + amn_b) * 2;
+    stack_size = stack_size < 1 ? 1 : stack_size;
+#endif
+
+    struct HermiteState stack[stack_size];
+    i64 stack_top = 0; // points to the last element pushed to the stack
+    stack[stack_top] = (struct HermiteState){
+        .i = amn_a,
+        .j = amn_b,
+        .t = num_nodes,
+        .value = 0.0,
+        .coefficient = 1.0,
+        .parent = -1,
+        .num_children = 3,
+    };
+
+    while (stack_top > -1)
     {
-        // integral chapter, eq 73; purple book, eq 9.5.8, eq 9.2.15
-        return exp(-gexp_reduced * relative_separation * relative_separation);
+        i64 current_stack_top = stack_top;
+        struct HermiteState *pitem = &stack[current_stack_top];
+        i64 t = pitem->t;
+        i64 i = pitem->i;
+        i64 j = pitem->j;
+
+        if (pitem->num_children == 0) // the value calculated
+        {
+            if (pitem->parent >= 0)
+            {
+                struct HermiteState *parent = &stack[pitem->parent];
+                parent->value += pitem->coefficient * pitem->value;
+                parent->num_children--;
+            }
+            stack_top--;
+            continue;
+        }
+
+        if (j == 0)
+        {
+            // integral chapter, eq 74, t: num_nodes, i: amn_a, j: amn_b
+
+            f64 value_1 = hermite_coef_trivial_case(i - 1, j, t - 1, Kab);
+            if (!isnan(value_1))
+            {
+                pitem->value += (1 / (2 * gexp_a_b)) * value_1;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i - 1, j, t - 1, 0.0, 1 / (2 * gexp_a_b), current_stack_top, 3};
+            }
+
+            f64 value_2 = hermite_coef_trivial_case(i - 1, j, t, Kab);
+            if (!isnan(value_2))
+            {
+                pitem->value -= (gexp_reduced * relative_separation / gexp_a) * value_2;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i - 1, j, t, 0.0, -(gexp_reduced * relative_separation / gexp_a), current_stack_top, 3};
+            }
+
+            f64 value_3 = hermite_coef_trivial_case(i - 1, j, t + 1, Kab);
+            if (!isnan(value_3))
+            {
+                pitem->value += (t + 1) * value_3;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i - 1, j, t + 1, 0.0, t + 1, current_stack_top, 3};
+            }
+        }
+        else
+        {
+            // integral chapter, eq 75, t: num_nodes, i: amn_a, j: amn_b
+
+            f64 value_1 = hermite_coef_trivial_case(i, j - 1, t - 1, Kab);
+            if (!isnan(value_1))
+            {
+                pitem->value += (1 / (2 * gexp_a_b)) * value_1;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i, j - 1, t - 1, 0.0, 1 / (2 * gexp_a_b), current_stack_top, 3};
+            }
+
+            f64 value_2 = hermite_coef_trivial_case(i, j - 1, t, Kab);
+            if (!isnan(value_2))
+            {
+                pitem->value += (gexp_reduced * relative_separation / gexp_b) * value_2;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i, j - 1, t, 0.0, (gexp_reduced * relative_separation / gexp_b), current_stack_top, 3};
+            }
+
+            f64 value_3 = hermite_coef_trivial_case(i, j - 1, t + 1, Kab);
+            if (!isnan(value_3))
+            {
+                pitem->value += (t + 1) * value_3;
+                pitem->num_children--;
+            }
+            else
+            {
+                stack[++stack_top] = (struct HermiteState){i, j - 1, t + 1, 0.0, t + 1, current_stack_top, 3};
+            }
+        }
+
+        if (pitem->num_children == 0) // the value calculated
+        {
+            if (pitem->parent >= 0)
+            {
+                struct HermiteState *parent = &stack[pitem->parent];
+                parent->value += pitem->coefficient * pitem->value;
+                parent->num_children--;
+            }
+            stack_top--;
+        }
     }
 
-    if (amn_b == 0)
-    {
-        // integral chapter, eq 74
-        return (1 / (2 * gexp_a_b)) * hermite_coef(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes - 1, relative_separation) - (gexp_reduced * relative_separation / gexp_a) * hermite_coef(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes, relative_separation) + (num_nodes + 1) * hermite_coef(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes + 1, relative_separation);
-    }
-
-    // integral chapter, eq 75
-    return (1 / (2 * gexp_a_b)) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes - 1, relative_separation) + (gexp_reduced * relative_separation / gexp_b) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes, relative_separation) + (num_nodes + 1) * hermite_coef(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes + 1, relative_separation);
+    return stack[0].value;
 }
 
 __device__ static f64 hermite_coef_dwrt_nuc(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation, i64 q, i64 r)
@@ -680,6 +820,41 @@ __device__ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, st
 }
 
 #ifdef MODULE_TEST
+/*
+ * Recursive implementation of calculating Hermite expansion coefficients E.
+ * The suffixes _a and _b indicates Gaussian a and b
+ * num_nodes : the number of nodes in the Hermite Gaussian
+ * relative_separation : the separation between the two Gaussian centers, integral chapter, eq 63; purple book eq 9.2.14
+ */
+__device__ static f64 hermite_coef_recursive(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b, i64 num_nodes, f64 relative_separation)
+{
+    //  integral chapter, eq 64; purple book, eq 9.2.11
+    f64 gexp_a_b = gexp_a + gexp_b;
+    // integral chapter, eq 66; purple book, eq 9.2.12
+    f64 gexp_reduced = gexp_a * gexp_b / gexp_a_b;
+    f64 Kab = exp(-gexp_reduced * relative_separation * relative_separation);
+
+    // purple book, eq 9.5.5, t: num_nodes, i: amn_a, j: amn_b
+    if ((num_nodes < 0) || (num_nodes > (amn_a + amn_b)))
+    {
+        return 0.0;
+    }
+
+    if ((amn_a == 0) && (amn_b == 0) && (num_nodes == 0))
+    {
+        // integral chapter, eq 73; purple book, eq 9.5.8, eq 9.2.15
+        return Kab;
+    }
+
+    if (amn_b == 0)
+    {
+        // integral chapter, eq 74, t: num_nodes, i: amn_a, j: amn_b
+        return (1 / (2 * gexp_a_b)) * hermite_coef_recursive(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes - 1, relative_separation) - (gexp_reduced * relative_separation / gexp_a) * hermite_coef_recursive(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes, relative_separation) + (num_nodes + 1) * hermite_coef_recursive(gexp_a, gexp_b, amn_a - 1, amn_b, num_nodes + 1, relative_separation);
+    }
+
+    // integral chapter, eq 75, t: num_nodes, i: amn_a, j: amn_b
+    return (1 / (2 * gexp_a_b)) * hermite_coef_recursive(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes - 1, relative_separation) + (gexp_reduced * relative_separation / gexp_b) * hermite_coef_recursive(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes, relative_separation) + (num_nodes + 1) * hermite_coef_recursive(gexp_a, gexp_b, amn_a, amn_b - 1, num_nodes + 1, relative_separation);
+}
 
 #ifdef __NVCC__
 __global__ static void pg_electron_repulsion_integral_kernel(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
@@ -722,14 +897,54 @@ int main(void)
     cudaDeviceSynchronize();
     printf("output = %.16e\n", *output);
     cudaFree(output);
+
 #else
-    printf("%.16e\n", hermite_coef(130.70932, 130.70932, 0, 0, 0, 0.0));
-    printf("%.16e\n", hermite_coef(0.623914, 1.169596, 0, 0, 0, 1.494187));
-    printf("%.16e\n", hermite_coef(0.623914, 1.169596, 0, 0, 0, -1.494187));
+
+    for (i64 i = -5; i < 6; ++i)
+    {
+        for (i64 j = -5; j < 6; ++j)
+        {
+            for (i64 t = -5; t < 6; ++t)
+            {
+                printf("%.16e\n", hermite_coef_recursive(130.70932, 130.70932, i, j, t, 0.0));
+                printf("%.16e\n", hermite_coef(130.70932, 130.70932, i, j, t, 0.0));
+                printf("\n");
+            }
+        }
+    }
+
+    for (i64 i = -5; i < 6; ++i)
+    {
+        for (i64 j = -5; j < 6; ++j)
+        {
+            for (i64 t = -5; t < 6; ++t)
+            {
+                printf("%.16e\n", hermite_coef_recursive(0.623914, 1.169596, i, j, t, -1.494187));
+                printf("%.16e\n", hermite_coef(0.623914, 1.169596, i, j, t, -1.494187));
+                printf("\n");
+            }
+        }
+    }
+
+    for (i64 i = -10; i < 11; ++i)
+    {
+        for (i64 j = -10; j < 11; ++j)
+        {
+            for (i64 t = -10; t < 11; ++t)
+            {
+                printf("i = %ld, j = %ld, t = %ld\n", i, j, t);
+                printf("%.16e\n", hermite_coef_recursive(0.623914, 1.169596, i, j, t, 1.494187));
+                printf("%.16e\n", hermite_coef(0.623914, 1.169596, i, j, t, 1.494187));
+                printf("\n");
+            }
+        }
+    }
+
     printf("%.16e\n", pg_electron_repulsion_integral(1.0, 0, 0, 0, 0.0, 0.0, 0.0,
                                                      1.0, 0, 0, 0, 0.0, 0.0, 0.0,
                                                      1.0, 0, 0, 0, 0.0, 0.0, 0.0,
                                                      1.0, 0, 0, 0, 0.0, 0.0, 0.0));
 #endif
+    printf("Done\n");
 }
 #endif
