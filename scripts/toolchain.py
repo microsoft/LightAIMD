@@ -67,6 +67,12 @@ def find_nvcc():
         .strip()
     )
 
+    if config["NVCC"] == "":
+        # Try to find nvcc in the default CUDA installation path
+        default_nvcc_path = "/usr/local/cuda/bin/nvcc"
+        if os.path.exists(default_nvcc_path):
+            config["NVCC"] = default_nvcc_path
+
     nvidia_smi = (
         subprocess.run(
             ["which", "nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
@@ -211,7 +217,7 @@ def check_clang_selected_gcc():
     print(f"Clang selected GCC version: {selected_gcc_version}")
 
     if not is_package_installed(f"gcc-{selected_gcc_version}"):
-        print("Installing Clang selected GCC version...")
+        print("Installing Clang selected gcc version...")
         subprocess.run(
             ["sudo", "apt", "install", "-qq", "-y", f"gcc-{selected_gcc_version}"],
             stdout=subprocess.DEVNULL if config["quiet"] else None,
@@ -220,7 +226,7 @@ def check_clang_selected_gcc():
         )
 
     if not is_package_installed(f"g++-{selected_gcc_version}"):
-        print("Installing Clang selected G++ version...")
+        print("Installing Clang selected g++ version...")
         subprocess.run(
             ["sudo", "apt", "install", "-qq", "-y", f"g++-{selected_gcc_version}"],
             stdout=subprocess.DEVNULL if config["quiet"] else None,
