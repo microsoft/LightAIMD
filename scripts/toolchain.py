@@ -54,6 +54,7 @@ def is_package_installed(package_name):
 def find_compilers():
     find_CC()
     find_CXX()
+    check_clang_selected_gcc()
     find_nvcc()
 
 
@@ -187,6 +188,45 @@ def find_CXX():
         print("Critical: C++ compiler cannot be found")
 
     return config["CXX"]
+
+
+def check_clang_selected_gcc():
+    """
+    Clang usually picks up the newest GCC version installed on the system. However, sometimes gcc is installed but the corresponding g++ is not.
+    This function checks if the gcc/g++ version selected by clang is installed, and if not, installs it.
+    """
+    if config["COMPILER"] != "clang":
+        return
+
+    output = subprocess.run(
+        ["clang", "-v"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True
+    ).stdout.decode("utf-8")
+    output_lines = output.split("\n")
+    selected_gcc_version = ""
+    for line in output_lines:
+        l = line.strip()
+        if l.startswith("Selected GCC installation"):
+            selected_gcc_version = l.split("/")[-1]
+            break
+    print(f"Clang selected GCC version: {selected_gcc_version}")
+
+    if not is_package_installed(f"gcc-{selected_gcc_version}"):
+        print("Installing Clang selected GCC version...")
+        subprocess.run(
+            ["sudo", "apt", "install", "-qq", "-y", f"gcc-{selected_gcc_version}"],
+            stdout=subprocess.DEVNULL if config["quiet"] else None,
+            stderr=subprocess.DEVNULL if config["quiet"] else None,
+            check=True,
+        )
+
+    if not is_package_installed(f"g++-{selected_gcc_version}"):
+        print("Installing Clang selected G++ version...")
+        subprocess.run(
+            ["sudo", "apt", "install", "-qq", "-y", f"g++-{selected_gcc_version}"],
+            stdout=subprocess.DEVNULL if config["quiet"] else None,
+            stderr=subprocess.DEVNULL if config["quiet"] else None,
+            check=True,
+        )
 
 
 def create_version_file(data_dir, version):

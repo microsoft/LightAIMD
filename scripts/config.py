@@ -25,7 +25,13 @@ class Configuration:
             "LIBXC_VERSION": "6.2.2",
             # build system related
             "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
-            "RUNTIME_DEFINED_SYMS": ["__dso_handle", "__cudaRegisterLinkedBinary_", "_intel_fast_mem", "__svml_", "_GLOBAL_OFFSET_TABLE_"],
+            "RUNTIME_DEFINED_SYMS": [
+                "__dso_handle",
+                "__cudaRegisterLinkedBinary_",
+                "_intel_fast_mem",
+                "__svml_",
+                "_GLOBAL_OFFSET_TABLE_",
+            ],
             "STATIC_LIBS": [os.path.join(root_dir, "ext/libxc/lib/libxc.a")],
             "SRC_EXTENSIONS": ["c", "cpp", "cu", "h", "hpp"],
             # cuda related
