@@ -11,8 +11,9 @@ def extract_symbols(obj_file):
     undefined_symbols = set()
 
     if ".cuda." in obj_file:
+        cuobjdump_path = config["NVCC"].replace("nvcc", "cuobjdump")
         output = subprocess.run(
-            ["cuobjdump", "-symbols", obj_file], stdout=subprocess.PIPE, check=True
+            [cuobjdump_path, "-symbols", obj_file], stdout=subprocess.PIPE, check=True
         ).stdout.decode("utf-8")
         output_lines = output.split("\n")
         for line in output_lines:
