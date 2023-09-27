@@ -110,6 +110,9 @@ def find_CXX():
 
 
 def cpp_compiler_sanity_check():
+    if config["dry_run"]:
+        return True
+
     os.makedirs(config["tmp_dir"], exist_ok=True)
     hello_world_cpp = os.path.join(config["tmp_dir"], "hello_world.cpp")
     with open(hello_world_cpp, "w", newline="", encoding="utf-8") as f:
@@ -151,6 +154,9 @@ def check_clang_selected_gcc():
             break
     print(f"Clang selected GCC version: {selected_gcc_version}")
 
+    if config["dry_run"]:
+        return
+
     if not is_package_installed(f"gcc-{selected_gcc_version}"):
         print("Installing Clang selected gcc version...")
         subprocess.run(
@@ -171,11 +177,18 @@ def check_clang_selected_gcc():
 
 
 def create_version_file(data_dir, version):
+    if config["dry_run"]:
+        return
+
     with open(os.path.join(data_dir, version), "w") as f:
         f.write(f"{version}\n")
 
 
 def check_third_parties(use_cuda=False):
+    print("Checking third party libraries...")
+    if config["dry_run"]:
+        return
+
     nlohmann_dir = os.path.join(config["ext_dir"], "nlohmann")
     nlohmann_version_file = os.path.join(nlohmann_dir, config["NLOHMANN_JSON_VERSION"])
     if not os.path.exists(nlohmann_version_file):

@@ -28,10 +28,12 @@ def run_sanity_tests(args):
     debug_result = True
     release_result = True
     if args.debug:
+        print("Running the sanity tests for the debug version of lightaimd")
         config["active_build_dir"] = config["build_debug_dir"]
         debug_result = sanity_tests()
 
     if args.release:
+        print("Running the sanity tests for the release version of lightaimd")
         config["active_build_dir"] = config["build_release_dir"]
         release_result = sanity_tests()
 
@@ -39,6 +41,9 @@ def run_sanity_tests(args):
 
 
 def sanity_tests():
+    if config["dry_run"]:
+        return True
+
     passed = True
     for cmd in energies_comparison:
         cmd = cmd.format(active_build_dir=config["active_build_dir"])

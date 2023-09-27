@@ -31,6 +31,9 @@ def find_package_manager():
 
 
 def check_update():
+    if config["dry_run"]:
+        return
+
     if config["package_manager"] == "apt":
         subprocess.run(
             ["sudo", "apt", "update", "-qq"],
@@ -80,6 +83,9 @@ def is_package_installed(package_name):
 
 
 def install_packages(package_names):
+    if config["dry_run"]:
+        return
+
     packages = []
     for pkg in package_names:
         if is_package_installed(pkg):
