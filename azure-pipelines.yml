@@ -27,6 +27,9 @@ steps:
     addToPath: true
     architecture: 'x64'
 
+- script: python3 scripts/build.py --install-build-tools
+  displayName: 'Install Build Tools'
+
 - script: python3 scripts/build.py --build --release --debug
   displayName: 'Build LightAIMD'
 
