@@ -8,9 +8,14 @@
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
 ## Getting started
-You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Ubuntu systems (tested on Ubuntu 18.04, 20.04, and 22.04). Please adapt the scripts for other Linux distributions.
+You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Linux systems.
 
-To build LightAIMD, simply run (python3 is required):
+To install the build tools, run the following command if the `apt`, `dnf`, or `zypper` package manager is available on your system:
+```shell
+python3 scripts/build.py --install-build-tools
+```
+
+To build LightAIMD, simply run:
 ```shell
 python3 scripts/build.py --build --release
 ```

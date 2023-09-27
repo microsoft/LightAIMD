@@ -2,53 +2,9 @@
 import os
 import subprocess
 from config import *
+from build_tools import *
 
 __all__ = ["setup_toolchain", "remove_installed_third_parties"]
-
-
-def install_build_tools():
-    if (
-        is_package_installed("build-essential")
-        and is_package_installed("gfortran")
-        and is_package_installed("clang")
-        and is_package_installed("ninja-build")
-    ):
-        return
-
-    print("Installing build tools...")
-    subprocess.run(
-        ["sudo", "apt", "update", "-qq"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=True,
-    )
-    subprocess.run(
-        [
-            "sudo",
-            "apt",
-            "install",
-            "-qq",
-            "-y",
-            "build-essential",
-            "gfortran",
-            "clang",
-            "ninja-build",
-        ],
-        stdout=subprocess.DEVNULL if config["quiet"] else None,
-        stderr=subprocess.DEVNULL if config["quiet"] else None,
-        check=True,
-    )
-    print("Build tools installed")
-
-
-def is_package_installed(package_name):
-    output = subprocess.run(
-        ["apt", "-qq", "list", "--installed", package_name],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        check=True,
-    ).stdout.decode("utf-8")
-    return "[installed]" in output
 
 
 def find_compilers():
@@ -59,13 +15,7 @@ def find_compilers():
 
 
 def find_nvcc():
-    config["NVCC"] = (
-        subprocess.run(
-            ["which", "nvcc"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-        )
-        .stdout.decode("utf-8")
-        .strip()
-    )
+    config["NVCC"] = find_executable("nvcc")
 
     if config["NVCC"] == "":
         # Try to find nvcc in the default CUDA installation path
@@ -73,18 +23,17 @@ def find_nvcc():
         if os.path.exists(default_nvcc_path):
             config["NVCC"] = default_nvcc_path
 
-    nvidia_smi = (
-        subprocess.run(
-            ["which", "nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-        )
-        .stdout.decode("utf-8")
-        .strip()
-    )
+    nvidia_smi = find_executable("nvidia-smi")
 
     if nvidia_smi != "":
         compute_cap = (
             subprocess.run(
-                [nvidia_smi, "--query-gpu=compute_cap", "--format=csv,noheader"],
+                [
+                    "sudo",
+                    nvidia_smi,
+                    "--query-gpu=compute_cap",
+                    "--format=csv,noheader",
+                ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
             )
@@ -126,31 +75,13 @@ def find_nvcc():
 
 def find_CC():
     if config["COMPILER"] == "clang":
-        config["CC"] = (
-            subprocess.run(
-                ["which", "clang"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CC"] = find_executable("clang")
 
     if config["COMPILER"] == "gcc":
-        config["CC"] = (
-            subprocess.run(
-                ["which", "gcc"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CC"] = find_executable("gcc")
 
     if config["COMPILER"] == "icx":
-        config["CC"] = (
-            subprocess.run(
-                ["which", "icx"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CC"] = find_executable("icx")
 
     print(f"CC: '{config['CC']}'")
 
@@ -162,31 +93,13 @@ def find_CC():
 
 def find_CXX():
     if config["COMPILER"] == "clang":
-        config["CXX"] = (
-            subprocess.run(
-                ["which", "clang++"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CXX"] = find_executable("clang++")
 
     if config["COMPILER"] == "gcc":
-        config["CXX"] = (
-            subprocess.run(
-                ["which", "g++"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CXX"] = find_executable("g++")
 
     if config["COMPILER"] == "icx":
-        config["CXX"] = (
-            subprocess.run(
-                ["which", "icpx"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
+        config["CXX"] = find_executable("icpx")
 
     print(f"CXX: '{config['CXX']}'")
 
@@ -196,12 +109,34 @@ def find_CXX():
     return config["CXX"]
 
 
+def cpp_compiler_sanity_check():
+    os.makedirs(config["tmp_dir"], exist_ok=True)
+    hello_world_cpp = os.path.join(config["tmp_dir"], "hello_world.cpp")
+    with open(hello_world_cpp, "w", newline="", encoding="utf-8") as f:
+        f.write("#include <iostream>\n")
+        f.write('int main() { std::cout << "Hello World!" << std::endl; return 0; }\n')
+
+    output = subprocess.run(
+        [
+            config["CXX"],
+            "-o",
+            os.path.join(config["tmp_dir"], "hello_world"),
+            hello_world_cpp,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    return output.returncode == 0
+
+
 def check_clang_selected_gcc():
     """
-    Clang usually picks up the newest GCC version installed on the system. However, sometimes gcc is installed but the corresponding g++ is not.
-    This function checks if the gcc/g++ version selected by clang is installed, and if not, installs it.
+    Fix a known issue with clang on Ubuntu after installing cuda.
     """
-    if config["COMPILER"] != "clang":
+    if cpp_compiler_sanity_check():
+        return
+
+    if config["COMPILER"] != "clang" or linux_distro() != "ubuntu":
         return
 
     output = subprocess.run(
@@ -366,6 +301,14 @@ def check_third_parties(use_cuda=False):
         subprocess.run(["rm", downloaded_file_path], shell=False, check=True)
         subprocess.run(["rm", "-rf", libxc_src_dir], shell=False, check=True)
         create_version_file(libxc_dir, config["LIBXC_VERSION"])
+
+    if os.path.exists(os.path.join(libxc_dir, "lib", "libxc.a")):
+        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib", "libxc.a"))
+    elif os.path.exists(os.path.join(libxc_dir, "lib64", "libxc.a")):
+        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib64", "libxc.a"))
+    else:
+        raise RuntimeError("libxc static library not found")
+
     print("libxc installed")
 
     sto_3g_file = os.path.join(config["root_dir"], "basis-set", "sto-3g.json")

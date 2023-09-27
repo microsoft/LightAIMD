@@ -39,6 +39,17 @@ rule nvcc_link
   command = $nvcc $nvcc_flags -o $out $in $nvcc_link_flags $extra_link_flags
 """
 
+special_treatment = {
+    "cpp_bridge.o": {
+        "gcc": ["-Wno-maybe-uninitialized"],
+        "icx": ["-Wno-tautological-constant-compare"],
+    },  # ignore warning from Eigen
+    "cpp_bridge.main.o": {
+        "gcc": ["-Wno-maybe-uninitialized"],
+        "icx": ["-Wno-tautological-constant-compare"],
+    },  # ignore warning from Eigen
+}
+
 
 def generate_ninja_script(debug=False):
     def write_ninja_preamble(writer):
@@ -73,6 +84,11 @@ def generate_ninja_script(debug=False):
             obj = os.path.join(config["obj_dir"], ot.target)
             input_file = os.path.join(config["src_dir"], ot.src)
             extra_flags = ot.include_dirs + ot.flags
+
+            if ot.target in special_treatment:
+                flags = special_treatment[ot.target].get(config["COMPILER"], [])
+                extra_flags.extend(flags)
+
             if config["use_cuda"]:
                 extra_flags.append("-DUSE_CUDA")
             if ".cuda." in ot.target:
@@ -142,6 +158,10 @@ def generate_ninja_script(debug=False):
                             undefined.add(uf)
 
             extra_flags = [f"-l{lib}" for lib in libs]
+
+            if target in special_treatment:
+                flags = special_treatment[target].get(config["COMPILER"], [])
+                extra_flags.extend(flags)
 
             if cuda_obj and config["use_cuda"]:
                 writer.write(

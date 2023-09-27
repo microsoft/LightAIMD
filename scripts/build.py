@@ -3,6 +3,7 @@ import os
 import subprocess
 
 from config import *
+from build_tools import *
 from toolchain import *
 from ninja_generator import *
 from sanity_tests import *
@@ -34,10 +35,18 @@ def main():
     parser.add_argument(
         "--compiler",
         dest="compiler",
-        default="clang",
+        default="gcc",
         required=False,
         choices=["clang", "gcc", "icx"],
         help="Compiler to use",
+    )
+    parser.add_argument(
+        "--install-build-tools",
+        dest="install_build_tools",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Setup the build tools",
     )
     parser.add_argument(
         "--build",
@@ -157,6 +166,9 @@ def main():
     if args.reset:
         reset()
 
+    if args.install_build_tools:
+        install_build_tools()
+
     if args.build:
         setup_toolchain()
         if args.debug:
@@ -192,7 +204,10 @@ def reset():
 
 
 def clean():
-    subprocess.run(["ninja", "-t", "clean"], cwd=config["active_build_dir"], check=True)
+    if os.path.exists(config["active_build_dir"]):
+        subprocess.run(
+            ["ninja", "-t", "clean"], cwd=config["active_build_dir"], check=True
+        )
 
 
 def build_release():

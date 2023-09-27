@@ -64,6 +64,9 @@ def extract_symbols(obj_file):
 
 
 def extract_dynamic_lib_symbols(lib_file):
+    if lib_file is None:
+        return set()
+
     output = subprocess.run(
         ["objdump", "-T", lib_file], stdout=subprocess.PIPE, check=True
     ).stdout.decode("utf-8")
@@ -101,7 +104,11 @@ def get_ld_search_dir():
             for sd in l.split(";"):
                 d = sd.strip()
                 if d.startswith("SEARCH_DIR("):
-                    search_dirs.append(d[len('SEARCH_DIR("=') : -len('")')])
+                    search_dir = d[len('SEARCH_DIR("') : -len('")')]
+                    search_dir = search_dir.strip(
+                        "="
+                    )  # some ld versions have an extra '='
+                    search_dirs.append(search_dir)
     return search_dirs
 
 
@@ -111,6 +118,7 @@ def get_shared_lib_path(search_dirs, lib):
             for f in files:
                 if f"lib{lib}.so." in f:
                     return os.path.join(root, f)
+    print(f"Cannot find shared library {lib}")
     return None
 
 

@@ -32,7 +32,7 @@ class Configuration:
                 "__svml_",
                 "_GLOBAL_OFFSET_TABLE_",
             ],
-            "STATIC_LIBS": [os.path.join(root_dir, "ext/libxc/lib/libxc.a")],
+            "STATIC_LIBS": [],
             "SRC_EXTENSIONS": ["c", "cpp", "cu", "h", "hpp"],
             # cuda related
             "DISABLE_CUDA": False,
@@ -40,7 +40,7 @@ class Configuration:
             "CUDA_INC_DIR": "/usr/local/cuda/include",
             "CUDA_LIB_DIR": "/usr/local/cuda/lib64",
             # compiler related
-            "COMPILER": "clang",  # possible values: "clang", "gcc", "icx"
+            "COMPILER": "gcc",  # possible values: "clang", "gcc", "icx"
         }
 
         self.runtime_settings = {
