@@ -8,19 +8,29 @@
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
 ## Getting started
-You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org/) build scripts, and builds the project. The meta build system should work for most modern Linux systems.
+You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org) build scripts, and builds the project. The meta build system should work for most modern Linux systems.
 
 To install the build tools, run the following command if the `apt`, `dnf`, or `zypper` package manager is available on your system:
 ```shell
 python3 scripts/build.py --install-build-tools
 ```
 
+If the `apt`, `dnf`, or `zypper` package manager is not available on your system, you can install the build tools manually. The following packages are required:
+- python3 (for running the build script)
+- git (for cloning the source code)
+- [curl](https://curl.se/download.html) (for downloading the external dependencies)
+- C and C++ compiler (GCC, Clang, or Intel® C/C++ compiler)
+- gfortran (for building libxc)
+- [GNU AutoTools](https://en.wikipedia.org/wiki/GNU_Autotools) (for building libxc)
+- [Ninja](https://ninja-build.org) Build system
+- [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) (optional, for building the CUDA-enabled version of LightAIMD)
+
 To build LightAIMD, simply run:
 ```shell
 python3 scripts/build.py --build --release
 ```
 
-To build the debug version:
+To build the debug version, run:
 ```shell
 python3 scripts/build.py --build --debug
 ```
@@ -34,7 +44,7 @@ The supported compilers include Clang, GCC, and Intel® C/C++ compiler (icx/icpx
 ```shell
 python3 scripts/build.py --build --release --compiler gcc
 ```
-The default compiler is clang. To use the icx/icpx compiler, you need to install the [Intel® oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html) and configure the local environment variables using the `setvars.sh` script, which can be found in the installation directory, for example:
+The default compiler is gcc. To use the icx/icpx compiler, you need to install the [Intel® oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html) and configure the local environment variables using the `setvars.sh` script, which can be found in the installation directory, for example:
 ```shell
 source /opt/intel/oneapi/setvars.sh
 ```
