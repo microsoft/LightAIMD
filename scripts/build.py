@@ -156,6 +156,9 @@ def main():
     if args.quiet:
         config["quiet"] = True
 
+    if args.assume_yes:
+        config["assume_yes"] = True
+
     if args.dry_run:
         print("Running in dry run mode")
         config["dry_run"] = True
