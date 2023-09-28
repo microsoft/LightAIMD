@@ -15,7 +15,7 @@ To install the build tools, run the following command if a supported package man
 python3 scripts/build.py --install-build-tools
 ```
 
-If the `apt`, `dnf`, `pacman`, or `zypper` package manager is not available on your system, you need to install the build tools manually. The following packages are required:
+If a supported package manager cannot be found, the build script will print the missing required packages and you need to install them manually. The following packages are required:
 - python3 (for running the build script)
 - git (for cloning the source code)
 - [curl](https://curl.se/download.html) (for downloading the external dependencies)
