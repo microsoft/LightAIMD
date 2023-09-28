@@ -158,6 +158,8 @@ def main():
 
     if args.assume_yes:
         config["assume_yes"] = True
+    else:
+        config["assume_yes"] = False
 
     if args.dry_run:
         print("Running in dry run mode")
