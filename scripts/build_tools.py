@@ -163,16 +163,7 @@ def install_build_tools():
         )
         sys.exit(1)
 
-    required_tools = [
-        "git",
-        "curl",
-        "tar",
-        "make",
-        "gcc",
-        "g++",
-        "gfortran",
-        "ninja"
-    ]
+    required_tools = ["git", "curl", "tar", "make", "gcc", "g++", "gfortran", "ninja"]
 
     if config["COMPILER"] == "clang":
         required_tools += ["clang", "clang++"]
@@ -197,11 +188,12 @@ def install_build_tools():
         print("Cannot find a supported package manager, please install them manually")
         return
 
-    print("Do you want to install them? (y/n)")
-    answer = input()
-    if answer != "y":
-        print("Aborted")
-        sys.exit()
+    if not config["assume_yes"]:
+        print("Do you want to install them? (y/n)")
+        answer = input()
+        if answer != "y":
+            print("Aborted")
+            sys.exit()
 
     check_update()
 

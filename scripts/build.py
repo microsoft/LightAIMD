@@ -133,6 +133,14 @@ def main():
         help="Quiet output",
     )
     parser.add_argument(
+        "--assume-yes",
+        dest="assume_yes",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Assume yes as answer to all prompts",
+    )
+    parser.add_argument(
         "--dry-run",
         dest="dry_run",
         default=False,

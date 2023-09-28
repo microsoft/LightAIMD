@@ -27,11 +27,11 @@ steps:
     addToPath: true
     architecture: 'x64'
 
-- script: python3 scripts/build.py --install-build-tools
+- script: python3 scripts/build.py --install-build-tools --release --debug --assume-yes
   displayName: 'Install Build Tools'
 
-- script: python3 scripts/build.py --build --release --debug
+- script: python3 scripts/build.py --build --release --debug --assume-yes
   displayName: 'Build LightAIMD'
 
-- script: python3 scripts/build.py --sanity-test --release --debug
+- script: python3 scripts/build.py --sanity-test --release --debug --assume-yes
   displayName: 'Run Sanity Test'
