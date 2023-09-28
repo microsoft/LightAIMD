@@ -161,6 +161,9 @@ def main():
     if args.disable_cuda:
         config["DISABLE_CUDA"] = True
 
+    if not args.debug and not args.release:
+        args.release = True
+
     if args.clean:
         clean()
 
@@ -172,8 +175,6 @@ def main():
 
     if args.build:
         setup_toolchain()
-        if not args.debug and not args.release:
-            build_release()
         if args.debug:
             build_debug()
         if args.release:
