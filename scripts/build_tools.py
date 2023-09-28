@@ -171,7 +171,12 @@ def install_build_tools():
         "gcc",
         "g++",
         "gfortran",
+        "ninja"
     ]
+
+    if config["COMPILER"] == "clang":
+        required_tools += ["clang", "clang++"]
+
     missing_tools = []
 
     for tool in required_tools:
