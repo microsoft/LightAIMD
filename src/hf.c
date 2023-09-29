@@ -305,25 +305,25 @@ static void hf_scf_iterate(struct scf_context *ctx)
             ctx->energy_last = ctx->energy;
             if (ctx->direct_scf)
             {
-                log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, start\n", step);
+                // log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, start\n", step);
                 hf_build_fock_direct(ctx);
-                log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, end\n", step);
+                // log_dbg_print(ctx->silent, "Build Fock (direct), step %lu, end\n", step);
             }
             else
             {
-                log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, start\n", step);
+                // log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, start\n", step);
                 hf_build_fock_with_precomputed_eri(ctx);
-                log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, end\n", step);
+                // log_dbg_print(ctx->silent, "Build Fock with precomputed ERI, step %lu, end\n", step);
             }
-            log_dbg_print(ctx->silent, "DIIS update fock, step %lu, start\n", step);
+            // log_dbg_print(ctx->silent, "DIIS update fock, step %lu, start\n", step);
             diis_update_fock(ctx);
-            log_dbg_print(ctx->silent, "DIIS update fock, step %lu, end\n", step);
+            // log_dbg_print(ctx->silent, "DIIS update fock, step %lu, end\n", step);
         }
 
         /* Solving FC = eSC */
-        log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, start\n", step);
+        // log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, start\n", step);
         generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
-        log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, end\n", step);
+        // log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, end\n", step);
 
         u64 nocc = ctx->mol->n_electrons >> 1;
         matslice(ctx->C, ctx->COO, N, N, nocc);
