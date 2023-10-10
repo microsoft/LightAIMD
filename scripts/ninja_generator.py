@@ -229,6 +229,9 @@ def generate_ninja_script(debug=False):
     obj2libsyms = {}
 
     for obj, ufs in obj2undefined.items():
+        if obj not in obj2linkdeps:
+            obj2linkdeps[obj] = set()
+
         for uf in ufs:
             if uf not in sym2obj:
                 if obj not in obj2libsyms:
@@ -236,8 +239,6 @@ def generate_ninja_script(debug=False):
                 obj2libsyms[obj].add(uf)
 
             else:
-                if obj not in obj2linkdeps:
-                    obj2linkdeps[obj] = set()
                 obj2linkdeps[obj].add(sym2obj[uf])
 
     sym2staticlib = {}
