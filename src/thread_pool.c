@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/sysinfo.h>
 
-#include "cpp_bridge.h"
 #include "thread_pool.h"
 #include "time_util.h"
 #include "mm.h"
@@ -69,7 +69,7 @@ struct threadpool_context *threadpool_initialize(u64 threadpool_size, u64 task_q
     u64 n_workers = threadpool_size;
     if (threadpool_size == 0)
     {
-        n_workers = num_of_concurrent_threads();
+        n_workers = (u64)get_nprocs();
     }
 
     struct threadpool_context *tp_ctx = x_malloc(sizeof(struct threadpool_context));
