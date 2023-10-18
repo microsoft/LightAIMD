@@ -5,6 +5,7 @@
 #ifndef EINSUM_H
 #define EINSUM_H
 #include "numeric_types.h"
+#include "thread_pool.h"
 
 void einsum_mn_np__mp(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p);
 void einsum_mn_np__mp_parallel(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p, struct threadpool_context *tp_ctx);
