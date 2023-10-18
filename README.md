@@ -107,8 +107,7 @@ LightAIMD is currently a research project. It is not an officially supported Mic
 ## Acknowledgements
 
 The repo doesn't contain 3rd party code. It links to the following external libraries:
-- [Eigen](https://eigen.tuxfamily.org)
 - [Libxc](https://www.tddft.org/programs/libxc/)
-- [Nlohmann/json](https://github.com/nlohmann/json)
+- [Lapacke](https://www.netlib.org/lapack/lapacke.html)
 
 To understand the theory behind LightAIMD, you may refer to this [tutorial](https://www.binshao.info/download/tutorials/CQC101.pdf).
