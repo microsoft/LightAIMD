@@ -9,6 +9,12 @@
 
 #include "config.h"
 
+#ifndef __cplusplus
+#ifndef bool
+#define bool _Bool
+#endif
+#endif
+
 #ifdef PREFER_FAST_TYPE
 
 #define i8 int_fast8_t
