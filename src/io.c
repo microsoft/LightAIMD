@@ -2,11 +2,13 @@
  * Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License.
  */
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 
 #include "numeric_types.h"
+#include "mm.h"
 
 void filename_stem(const char *path, char *stem)
 {
@@ -65,8 +67,35 @@ u64 ensure_dir_exists(char const *path)
     return 0;
 }
 
+void read_file_to_buffer_ot(char const *file_path, void **buffer, u64 *buffer_size)
+{
+    FILE *fp = fopen(file_path, "rb");
+    if (NULL == fp)
+    {
+        return;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    *buffer_size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    *buffer = x_malloc(*buffer_size);
+    if (NULL == *buffer)
+    {
+        fclose(fp);
+        return;
+    }
+
+    if (fread(*buffer, 1, *buffer_size, fp) != *buffer_size)
+    {
+        x_free(*buffer);
+        *buffer = NULL;
+        *buffer_size = 0;
+    }
+    fclose(fp);
+}
+
 #ifdef MODULE_TEST
-#include <stdio.h>
 int main(void)
 {
     ensure_dir_exists("output");
