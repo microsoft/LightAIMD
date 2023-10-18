@@ -27,9 +27,9 @@ struct json
     u32 *codepoints; // utf8 code points for the json value
     u64 length;      // length of codepoints (for literal, number, and string), array, object
 
-    i64 type;          // type of the json value
+    i64 type;           // type of the json value
     struct json *child; // point to the first json value in the array or object
-    struct json *next; // point to the next json value in the same array or object
+    struct json *next;  // point to the next json value in the same array or object
 };
 
 struct json_token
