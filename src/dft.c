@@ -18,8 +18,8 @@
 #include "dft_matrices.h"
 #include "molecular_grid.h"
 #include "dft.h"
-#include "math_util.h"
-#include "cpp_bridge.h"
+#include "matrix.h"
+#include "lapacke_bridge.h"
 #include "cmd_line_args.h"
 #include "libxc_bridge.h"
 #include "diagnostics.h"
@@ -56,7 +56,8 @@ static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
 
     diis_update_fock(ctx);
 
-    generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
+    // generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
+    solve_generalized_eigenvalue_symmetric(ctx->diis_F, ctx->S, ctx->C, N);
 
     u64 nocc = ctx->mol->n_electrons >> 1;
     matslice(ctx->C, ctx->COO, N, N, nocc);

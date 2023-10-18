@@ -9,7 +9,7 @@
 #include "constants.h"
 #include "vec3d.h"
 #include "lebedev_grid.h"
-#include "math_util.h"
+#include "matrix.h"
 #include "time_util.h"
 #include "molecule.h"
 #include "molecular_grid.h"

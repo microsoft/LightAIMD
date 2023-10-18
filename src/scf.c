@@ -10,16 +10,17 @@
 
 #include "molecule.h"
 #include "scf.h"
-#include "cpp_bridge.h"
+#include "lapacke_bridge.h"
 #include "basis_func.h"
 #include "molecular_integral.h"
-#include "math_util.h"
+#include "matrix.h"
 #include "time_util.h"
 #include "soad.h"
 #include "spinlock.h"
 #include "diagnostics.h"
 #include "mm.h"
 #include "einsum.h"
+#include "basis_set.h"
 
 /* define all the available density matrix intialization method */
 const u64 DENSITY_INIT_SOAD = 1;
@@ -117,7 +118,8 @@ static f64 calc_nuclear_repulsion_energy(struct molecule *mol)
 static void initialize_density_matrix_with_H_core(struct scf_context *ctx)
 {
     u64 N = ctx->n_basis_funcs;
-    generalized_eigh_veconly(ctx->H, ctx->S, ctx->C, N);
+    // generalized_eigh_veconly(ctx->H, ctx->S, ctx->C, N);
+    solve_generalized_eigenvalue_symmetric(ctx->H, ctx->S, ctx->C, N);
 
     u64 nocc = ctx->mol->n_electrons >> 1;
     matslice(ctx->C, ctx->COO, N, N, nocc);
@@ -146,7 +148,7 @@ static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_fil
     u64 *p_elements = mol_elements(mol);
     u64 n_elements = *p_elements;
     log_tm_println(ctx->silent, "Loading basis set %s\n", basis_set_filename);
-    ctx->basis_funcs_buff = load_basis_set(basis_set_filename, n_elements, (p_elements + 1));
+    ctx->basis_funcs_buff = load_basis_set_from_file(basis_set_filename, n_elements, (p_elements + 1));
     x_free(p_elements);
 
     u64 *element2basisfuncs[128] = {0};
@@ -540,7 +542,8 @@ void diis_update_fock(struct scf_context *ctx)
 
     transpose(tag_conjugate(ctx->diis_FPS), ctx->diis_SPF, N, N);
 
-    fractional_matrix_power(ctx->S, ctx->NxN_1, N, -0.5);
+    //fractional_matrix_power(ctx->S, ctx->NxN_1, N, -0.5);
+    mat_fractional_power(ctx->S, ctx->NxN_1, N, -0.5);
     mat_subtract(ctx->diis_FPS, ctx->diis_SPF, ctx->NxN_2, N, N);
 
     einsum_mn_np__mp(ctx->NxN_1, ctx->NxN_2, ctx->NxN_3, N, N, N);
@@ -584,7 +587,8 @@ void diis_update_fock(struct scf_context *ctx)
     memset(ctx->diis_ordinate_vector, 0, ctx->diis_history_size * sizeof(f64));
     ctx->diis_ordinate_vector[ctx->diis_history_size] = -1.0;
 
-    solve_linear_system(ctx->diis_B, ctx->diis_ordinate_vector, ctx->diis_coefficients, ctx->diis_history_size + 1);
+    solve_linear_system_symmetric(ctx->diis_B, ctx->diis_ordinate_vector, ctx->diis_coefficients, ctx->diis_history_size + 1);
+    //solve_linear_system(ctx->diis_B, ctx->diis_ordinate_vector, ctx->diis_coefficients, ctx->diis_history_size + 1);
 
     memset(ctx->diis_F, 0, ctx->N2_f64);
 

@@ -13,13 +13,13 @@
 #include "scf.h"
 #include "sample.h"
 #include "molecule.h"
-#include "math_util.h"
+#include "matrix.h"
 #include "time_util.h"
 #include "error_code.h"
 #include "thread_pool.h"
 #include "molecular_integral.h"
 #include "spinlock.h"
-#include "cpp_bridge.h"
+#include "lapacke_bridge.h"
 #include "cmd_line_args.h"
 #include "mm.h"
 #include "diagnostics.h"
@@ -322,7 +322,8 @@ static void hf_scf_iterate(struct scf_context *ctx)
 
         /* Solving FC = eSC */
         // log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, start\n", step);
-        generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
+        // generalized_eigh_veconly(ctx->diis_F, ctx->S, ctx->C, N);
+        solve_generalized_eigenvalue_symmetric(ctx->diis_F, ctx->S, ctx->C, N);
         // log_dbg_print(ctx->silent, "Solving FC = eSC, step %lu, end\n", step);
 
         u64 nocc = ctx->mol->n_electrons >> 1;

@@ -11,7 +11,7 @@
 #include "dft_matrices.h"
 #include "molecular_grid.h"
 #include "molecular_integral.h"
-#include "math_util.h"
+#include "matrix.h"
 #include "einsum.h"
 #include "mm.h"
 #include "time_util.h"
