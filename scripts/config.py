@@ -20,11 +20,9 @@ class Configuration:
     def __init__(self):
         self.user_settings = {
             # library versions
-            "NLOHMANN_JSON_VERSION": "3.11.2",
-            "EIGEN_VERSION": "3.4.0",
             "LIBXC_VERSION": "6.2.2",
             # build system related
-            "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
+            "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++", "lapacke"],
             "RUNTIME_DEFINED_SYMS": [
                 "__dso_handle",
                 "__cudaRegisterLinkedBinary_",
@@ -84,6 +82,9 @@ class Configuration:
 
     def items(self):
         return {**self.user_settings, **self.runtime_settings}.items()
+
+    def has_key(self, key):
+        return key in self.user_settings or key in self.runtime_settings
 
 
 config = Configuration()

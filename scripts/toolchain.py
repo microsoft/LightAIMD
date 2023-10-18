@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import shutil
 import subprocess
 from config import *
 from build_tools import *
@@ -184,64 +185,37 @@ def create_version_file(data_dir, version):
         f.write(f"{version}\n")
 
 
-def check_third_parties(use_cuda=False):
-    print("Checking third party libraries...")
+def check_lapacke():
+    print("Checking lapacke ...")
     if config["dry_run"]:
         return
 
-    nlohmann_dir = os.path.join(config["ext_dir"], "nlohmann")
-    nlohmann_version_file = os.path.join(nlohmann_dir, config["NLOHMANN_JSON_VERSION"])
-    if not os.path.exists(nlohmann_version_file):
-        os.makedirs(nlohmann_dir, exist_ok=True)
-        subprocess.run(
-            [
-                "curl",
-                "-fsSL",
-                f"https://github.com/nlohmann/json/releases/download/v{config['NLOHMANN_JSON_VERSION']}/json.hpp",
-                "--output",
-                os.path.join(nlohmann_dir, "json.hpp"),
-            ],
-            shell=False,
-            check=True,
-        )
-        create_version_file(nlohmann_dir, config["NLOHMANN_JSON_VERSION"])
-    print("nlohmann json installed")
+    lapacke_header_path_1 = "/usr/include/lapacke.h"
+    lapacke_header_path_2 = "/usr/include/lapacke/lapacke.h"
 
-    eigen_dir = os.path.join(config["ext_dir"], "eigen")
-    eigen_version_file = os.path.join(eigen_dir, config["EIGEN_VERSION"])
-    if not os.path.exists(eigen_version_file):
-        os.makedirs(config["tmp_dir"], exist_ok=True)
-        downloaded_file_path = os.path.join(
-            config["tmp_dir"], f"eigen-{config['EIGEN_VERSION']}.tar.gz"
-        )
-        subprocess.run(
-            [
-                "curl",
-                "-fsSL",
-                f"https://gitlab.com/libeigen/eigen/-/archive/{config['EIGEN_VERSION']}/eigen-{config['EIGEN_VERSION']}.tar.gz",
-                "--output",
-                downloaded_file_path,
-            ],
-            shell=False,
-            check=True,
-        )
-        subprocess.run(
-            ["tar", "xzf", downloaded_file_path, "-C", config["ext_dir"]],
-            shell=False,
-            check=True,
-        )
-        subprocess.run(
-            [
-                "mv",
-                os.path.join(config["ext_dir"], f"eigen-{config['EIGEN_VERSION']}"),
-                eigen_dir,
-            ],
-            shell=False,
-            check=True,
-        )
-        subprocess.run(["rm", downloaded_file_path], shell=False, check=True)
-        create_version_file(eigen_dir, config["EIGEN_VERSION"])
-    print("eigen installed")
+    pkgmgr2package = {
+        "apt": "liblapacke-dev",
+        "dnf": "lapack-devel",
+        "zypper": "lapacke-devel",
+        "pacman": "lapacke",
+    }
+
+    if not os.path.exists(lapacke_header_path_1) and not os.path.exists(
+        lapacke_header_path_2
+    ):
+        find_package_manager()
+        if config["package_manager"] == "unknown":
+            print(
+                "Cannot find a supported package manager, please install lapacke manually"
+            )
+        else:
+            install_packages([pkgmgr2package[config["package_manager"]]])
+
+
+def check_libxc(use_cuda=False):
+    print("Checking libxc ...")
+    if config["dry_run"]:
+        return
 
     libxc_dir = os.path.join(config["ext_dir"], "libxc")
     libxc_version_file = os.path.join(libxc_dir, config["LIBXC_VERSION"])
@@ -280,7 +254,7 @@ def check_third_parties(use_cuda=False):
         if use_cuda:
             subprocess.run(
                 [
-                    f'CC="{config["NVCC"]} -x cu -ccbin clang --allow-unsupported-compiler" CFLAGS="--generate-code=arch=compute_{config["gpu_compute_capability"]},code=[compute_{config["gpu_compute_capability"]},sm_{config["gpu_compute_capability"]}] -O3 --std=c++14 --compiler-options -Wall,-Wfatal-errors,-Wno-unused-variable,-Wno-unused-but-set-variable" CCLD="/usr/local/cuda/bin/nvcc -ccbin clang --allow-unsupported-compiler" ./configure --enable-cuda --prefix={libxc_dir}'
+                    f'CC="{config["NVCC"]} -x cu -ccbin {config["COMPILER"]} --allow-unsupported-compiler" CFLAGS="--generate-code=arch=compute_{config["gpu_compute_capability"]},code=[compute_{config["gpu_compute_capability"]},sm_{config["gpu_compute_capability"]}] -O3 --std=c++14 --compiler-options -Wall,-Wfatal-errors,-Wno-unused-variable,-Wno-unused-but-set-variable" CCLD="/usr/local/cuda/bin/nvcc -ccbin {config["COMPILER"]} --allow-unsupported-compiler" ./configure --enable-cuda --prefix={libxc_dir}'
                 ],
                 cwd=libxc_src_dir,
                 shell=True,
@@ -294,12 +268,9 @@ def check_third_parties(use_cuda=False):
             )
         else:
             subprocess.run(
-                [
-                    f"{os.path.join(libxc_src_dir, 'configure')}",
-                    f"--prefix={libxc_dir}",
-                ],
+                [f'CC="{config["CC"]}" CFLAGS="-O3" ./configure --prefix={libxc_dir}'],
                 cwd=libxc_src_dir,
-                shell=False,
+                shell=True,
                 check=True,
             )
             subprocess.run(
@@ -315,14 +286,38 @@ def check_third_parties(use_cuda=False):
         subprocess.run(["rm", "-rf", libxc_src_dir], shell=False, check=True)
         create_version_file(libxc_dir, config["LIBXC_VERSION"])
 
+    cuda_label = ".cuda" if use_cuda else ""
+
+    libxc_lib_file = f"libxc{cuda_label}.a"
+
     if os.path.exists(os.path.join(libxc_dir, "lib", "libxc.a")):
-        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib", "libxc.a"))
+        if use_cuda and not os.path.exists(
+            os.path.join(libxc_dir, "lib", libxc_lib_file)
+        ):
+            shutil.copy(
+                os.path.join(libxc_dir, "lib", "libxc.a"),
+                os.path.join(libxc_dir, "lib", libxc_lib_file),
+            )
+        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib", libxc_lib_file))
     elif os.path.exists(os.path.join(libxc_dir, "lib64", "libxc.a")):
-        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib64", "libxc.a"))
+        if use_cuda and not os.path.exists(
+            os.path.join(libxc_dir, "lib64", libxc_lib_file)
+        ):
+            shutil.copy(
+                os.path.join(libxc_dir, "lib64", "libxc.a"),
+                os.path.join(libxc_dir, "lib64", libxc_lib_file),
+            )
+        config["STATIC_LIBS"].append(os.path.join(libxc_dir, "lib64", libxc_lib_file))
     else:
         raise RuntimeError("libxc static library not found")
 
     print("libxc installed")
+
+
+def check_sample_basis_set():
+    print("Checking the sto-3g sample basis set file ...")
+    if config["dry_run"]:
+        return
 
     sto_3g_file = os.path.join(config["root_dir"], "basis-set", "sto-3g.json")
     if not os.path.exists(sto_3g_file):
@@ -342,18 +337,18 @@ def check_third_parties(use_cuda=False):
     return 0
 
 
-def remove_installed_third_parties():
-    import shutil
+def check_third_parties():
+    print("Checking third party libraries...")
 
-    nlohmann_dir = os.path.join(config["ext_dir"], "nlohmann")
-    eigen_dir = os.path.join(config["ext_dir"], "eigen")
+    check_lapacke()
+    check_libxc()
+    check_sample_basis_set()
+
+
+def remove_installed_third_parties():
     libxc_dir = os.path.join(config["ext_dir"], "libxc")
     sto_3g_file = os.path.join(config["root_dir"], "basis-set", "sto-3g.json")
 
-    if os.path.exists(nlohmann_dir):
-        shutil.rmtree(nlohmann_dir)
-    if os.path.exists(eigen_dir):
-        shutil.rmtree(eigen_dir)
     if os.path.exists(libxc_dir):
         shutil.rmtree(libxc_dir)
     if os.path.exists(sto_3g_file):
@@ -363,7 +358,7 @@ def remove_installed_third_parties():
 def setup_toolchain():
     install_build_tools()
     find_compilers()
-    check_third_parties(use_cuda=False)
+    check_third_parties()
 
 
 if __name__ == "__main__":

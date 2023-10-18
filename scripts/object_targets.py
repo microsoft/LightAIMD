@@ -26,8 +26,6 @@ class ObjectTarget:
 
 header2include_dirs = {
     "xc": "-I${ext_dir}/libxc/include",
-    "Eigen": "-I${ext_dir}/eigen",
-    "nlohmann/json": "-I${ext_dir}",
 }
 
 
@@ -44,6 +42,9 @@ def expand_strings(ss):
 
 
 def generate_object_targets():
+    if os.path.exists("/usr/include/lapacke"):
+        header2include_dirs["lapacke"] = "-I/usr/include/lapacke"
+
     for k, v in header2include_dirs.items():
         header2include_dirs[k] = expand_string(v)
 

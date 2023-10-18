@@ -40,14 +40,15 @@ rule nvcc_link
 """
 
 special_treatment = {
-    "cpp_bridge.o": {
-        "gcc": ["-Wno-maybe-uninitialized"],
-        "icx": ["-Wno-tautological-constant-compare"],
-    },  # ignore warning from Eigen
-    "cpp_bridge.main.o": {
-        "gcc": ["-Wno-maybe-uninitialized"],
-        "icx": ["-Wno-tautological-constant-compare"],
-    },  # ignore warning from Eigen
+    ## example
+    # "cpp_bridge.o": {
+    #    "gcc": ["-Wno-maybe-uninitialized"],
+    #    "icx": ["-Wno-tautological-constant-compare"],
+    # },  # ignore warning from Eigen
+    # "cpp_bridge.main.o": {
+    #    "gcc": ["-Wno-maybe-uninitialized"],
+    #    "icx": ["-Wno-tautological-constant-compare"],
+    # },  # ignore warning from Eigen
 }
 
 
@@ -151,6 +152,9 @@ def generate_ninja_script(debug=False):
             if len(static_libs) > 0:
                 input_files.extend(static_libs)
                 for staticlib in static_libs:
+                    if ".cuda." in staticlib:
+                        cuda_obj = True
+
                     for uf in staticlib2undefined_sym[staticlib]:
                         if uf in sym2lib:
                             libs |= sym2lib[uf]

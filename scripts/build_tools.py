@@ -75,6 +75,9 @@ def check_update():
 
 
 def is_package_installed(package_name):
+    if not config.has_key("package_manager"):
+        find_package_manager()
+
     if config["package_manager"] == "apt":
         output = subprocess.run(
             ["apt", "-qq", "list", "--installed", package_name],

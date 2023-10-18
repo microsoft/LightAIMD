@@ -214,7 +214,7 @@ def main():
 
 def reset():
     print(
-        "Resetting the project to the initial state (removing all build files and the installed third party libraries)"
+        "Resetting the project to the initial state.\nAll the build files and the installed third party libraries will be removed ..."
     )
     if config["dry_run"]:
         return
