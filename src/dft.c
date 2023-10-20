@@ -32,12 +32,12 @@
 #include "energy_gradient.h"
 #include "cuda_helper.h"
 
-static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
+static void dft_calculate_density_matrix(struct dft_context* dft_ctx)
 {
-    struct scf_context *ctx = dft_ctx->scf_ctx;
-    struct molecular_grid_desc *mgd = dft_ctx->mgd;
+    struct scf_context* ctx = dft_ctx->scf_ctx;
+    struct molecular_grid_desc* mgd = dft_ctx->mgd;
     u64 N = ctx->n_basis_funcs;
-    f64 *F = ctx->F;
+    f64* F = ctx->F;
 
     for (u64 i = 0; i < N; ++i)
     {
@@ -76,11 +76,11 @@ static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
      */
     if (ctx->damping)
     {
-        f64 *P_ = mgd->NxN;
+        f64* P_ = mgd->NxN;
         einsum_mn_np__mp(ctx->COO, ctx->COOT, P_, N, nocc, N);
         mat_scalar_multiply(P_, P_, N, N, 2.0);
 
-        f64 *P = ctx->P;
+        f64* P = ctx->P;
         for (u64 i = 0; i < N; ++i)
         {
             u64 iN = i * N;
@@ -93,19 +93,19 @@ static void dft_calculate_density_matrix(struct dft_context *dft_ctx)
     }
     else
     {
-        f64 *P = ctx->P;
+        f64* P = ctx->P;
         einsum_mn_np__mp(ctx->COO, ctx->COOT, P, N, nocc, N);
         mat_scalar_multiply(P, P, N, N, 2.0);
     }
 }
 
-struct dft_context *dft_initialize(struct scf_context *scf_ctx, struct cmd_line_args *args)
+struct dft_context* dft_initialize(struct scf_context* scf_ctx, struct cmd_line_args* args)
 {
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
-    struct dft_context *ctx = x_malloc(sizeof(struct dft_context));
-    struct molecular_grid_desc *mgd = x_malloc(sizeof(struct molecular_grid_desc));
+    struct dft_context* ctx = x_malloc(sizeof(struct dft_context));
+    struct molecular_grid_desc* mgd = x_malloc(sizeof(struct molecular_grid_desc));
     ctx->mgd = mgd;
     ctx->scf_ctx = scf_ctx;
     scf_ctx->dft_ctx = ctx;
@@ -137,10 +137,10 @@ struct dft_context *dft_initialize(struct scf_context *scf_ctx, struct cmd_line_
     return ctx;
 }
 
-static void dft_scf_iterate(struct dft_context *ctx)
+static void dft_scf_iterate(struct dft_context* ctx)
 {
-    struct scf_context *scf_ctx = ctx->scf_ctx;
-    struct molecular_grid_desc *mgd = ctx->mgd;
+    struct scf_context* scf_ctx = ctx->scf_ctx;
+    struct molecular_grid_desc* mgd = ctx->mgd;
     u64 step = 0;
     ctx->total_energy = 0.0;
     f64 energy_last = 0.0;
@@ -196,10 +196,10 @@ static void dft_scf_iterate(struct dft_context *ctx)
     printf("SCF took %lu steps to converge\n", step);
 }
 
-void dft_total_energy(struct dft_context *ctx)
+void dft_total_energy(struct dft_context* ctx)
 {
-    struct scf_context *scf_ctx = ctx->scf_ctx;
-    struct molecular_grid_desc *mgd = ctx->mgd;
+    struct scf_context* scf_ctx = ctx->scf_ctx;
+    struct molecular_grid_desc* mgd = ctx->mgd;
     u64 N = scf_ctx->n_basis_funcs;
 
     f64 single_electron_energy = einsum_mn_nm(scf_ctx->P, scf_ctx->H, N, N);
@@ -215,9 +215,9 @@ void dft_total_energy(struct dft_context *ctx)
                  scf_ctx->nuclear_repulsion_energy);
 }
 
-void dft_finalize(struct dft_context *ctx)
+void dft_finalize(struct dft_context* ctx)
 {
-    struct molecular_grid_desc *mgd = ctx->mgd;
+    struct molecular_grid_desc* mgd = ctx->mgd;
 
     x_free(mgd->global_coords);
     x_free(mgd->local_coords);
@@ -302,7 +302,7 @@ void dft_finalize(struct dft_context *ctx)
     libxc_finalize();
 }
 
-void dft_scf_config(struct scf_context *ctx)
+void dft_scf_config(struct scf_context* ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -311,10 +311,10 @@ void dft_scf_config(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_HCORE;
 }
 
-void dft_single_point_energy(struct cmd_line_args *args)
+void dft_single_point_energy(struct cmd_line_args* args)
 {
-    struct scf_context *scf_ctx = scf_initialize(args, dft_scf_config);
-    struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
+    struct scf_context* scf_ctx = scf_initialize(args, dft_scf_config);
+    struct dft_context* dft_ctx = dft_initialize(scf_ctx, args);
 
     dft_scf_iterate(dft_ctx);
     if (args->check_results)
@@ -326,26 +326,26 @@ void dft_single_point_energy(struct cmd_line_args *args)
     scf_finalize(scf_ctx);
 }
 
-void dft_single_point_forces(struct cmd_line_args *args)
+void dft_single_point_forces(struct cmd_line_args* args)
 {
-    struct scf_context *scf_ctx = scf_initialize(args, dft_scf_config);
-    struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
+    struct scf_context* scf_ctx = scf_initialize(args, dft_scf_config);
+    struct dft_context* dft_ctx = dft_initialize(scf_ctx, args);
 
     dft_scf_iterate(dft_ctx);
     energy_dwrt_nuc(scf_ctx);
     if (args->check_results)
     {
         check_total_energy(dft_ctx->total_energy, args->check_results);
-        check_forces((f64 *)(scf_ctx->mol->forces), args->check_results);
+        check_forces((f64*)(scf_ctx->mol->forces), args->check_results);
     }
 
     dft_finalize(dft_ctx);
     scf_finalize(scf_ctx);
 }
 
-void dft_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
+void dft_calc_forces_on_nuclei(struct cmd_line_args* args, struct md_context* md_ctx)
 {
-    struct scf_context *scf_ctx = NULL;
+    struct scf_context* scf_ctx = NULL;
     if (md_ctx->step > 0)
     {
         scf_ctx = scf_initialize(args, scf_config_md);
@@ -356,7 +356,7 @@ void dft_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md
         scf_ctx = scf_initialize(args, dft_scf_config);
     }
 
-    struct dft_context *dft_ctx = dft_initialize(scf_ctx, args);
+    struct dft_context* dft_ctx = dft_initialize(scf_ctx, args);
     dft_scf_iterate(dft_ctx);
     energy_dwrt_nuc(scf_ctx);
     dft_finalize(dft_ctx);
@@ -366,7 +366,7 @@ void dft_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md
 }
 
 #ifdef MODULE_TEST
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef USE_CUDA
     cuda_configure();
@@ -393,11 +393,11 @@ int main(int argc, char *argv[])
     }
     if (args.job_type == JOB_TYPE_BOMD)
     {
-        struct scf_context *ctx = scf_initialize(&args, dft_scf_config);
+        struct scf_context* ctx = scf_initialize(&args, dft_scf_config);
         u64 n_basis_funcs = ctx->n_basis_funcs;
         scf_finalize(ctx);
 
-        struct md_context *md_ctx = md_initialize(&args, dft_calc_forces_on_nuclei, n_basis_funcs, "dft");
+        struct md_context* md_ctx = md_initialize(&args, dft_calc_forces_on_nuclei, n_basis_funcs, "dft");
         md_simulate(&args, md_ctx);
         md_finalize(md_ctx);
     }

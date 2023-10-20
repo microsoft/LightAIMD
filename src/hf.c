@@ -31,16 +31,16 @@
 #include "cuda_helper.h"
 
 /* F = h + J - 0.5K */
-static void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
+static void hf_build_fock_with_precomputed_eri(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
     u64 N3 = N2 * N;
 
-    f64 *A = ctx->TwoE;
-    f64 *P = ctx->P;
-    f64 *F = ctx->F;
-    f64 *H = ctx->H;
+    f64* A = ctx->TwoE;
+    f64* P = ctx->P;
+    f64* F = ctx->F;
+    f64* H = ctx->H;
 
     for (u64 p = 0; p < N; ++p)
     {
@@ -84,9 +84,9 @@ static void hf_build_fock_with_precomputed_eri(struct scf_context *ctx)
 
 struct task_func_eri_arg
 {
-    struct scf_context *ctx;
-    f64 *F;
-    f64 *P;
+    struct scf_context* ctx;
+    f64* F;
+    f64* P;
     u64 i;
     u64 j;
     u64 k;
@@ -96,13 +96,13 @@ struct task_func_eri_arg
     u64 ij_kl;
 };
 
-static void task_func_eri(void *p_arg)
+static void task_func_eri(void* p_arg)
 {
-    struct task_func_eri_arg *arg = (struct task_func_eri_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    volatile atomic_bool *L = ctx->LOCK;
-    f64 *F = arg->F;
-    f64 *P = arg->P;
+    struct task_func_eri_arg* arg = (struct task_func_eri_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    volatile atomic_bool* L = ctx->LOCK;
+    f64* F = arg->F;
+    f64* P = arg->P;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 k = arg->k;
@@ -120,7 +120,7 @@ static void task_func_eri(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
+              ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -148,12 +148,12 @@ static void task_func_eri(void *p_arg)
 }
 
 /* F = h + (G + G.T) * 0.25 */
-static void hf_build_fock_direct(struct scf_context *ctx)
+static void hf_build_fock_direct(struct scf_context* ctx)
 {
     /*log_tm_println("starting building fock ...");*/
-    f64 *P = ctx->P;
-    f64 *F = ctx->F;
-    f64 *H = ctx->H;
+    f64* P = ctx->P;
+    f64* F = ctx->F;
+    f64* H = ctx->H;
 
     u64 N = ctx->n_basis_funcs;
     memset(F, 0, N * N * sizeof(f64));
@@ -213,7 +213,7 @@ static void hf_build_fock_direct(struct scf_context *ctx)
                             continue;
                         }
 
-                        struct task_func_eri_arg *arg = x_malloc(sizeof(struct task_func_eri_arg));
+                        struct task_func_eri_arg* arg = x_malloc(sizeof(struct task_func_eri_arg));
                         arg->ctx = ctx;
                         arg->F = F;
                         arg->P = P;
@@ -233,7 +233,7 @@ static void hf_build_fock_direct(struct scf_context *ctx)
 
     threadpool_wait_job_done(ctx->tp_ctx);
 
-    f64 *M = ctx->NxN_1;
+    f64* M = ctx->NxN_1;
     transpose(F, M, N, N);
     mat_add(F, M, M, N, N);
     mat_scalar_multiply(M, F, N, N, 0.25);
@@ -241,7 +241,7 @@ static void hf_build_fock_direct(struct scf_context *ctx)
     /*log_tm_println("fock has been built.");*/
 }
 
-static void hf_build_fock(struct scf_context *ctx)
+static void hf_build_fock(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -257,13 +257,13 @@ static void hf_build_fock(struct scf_context *ctx)
     }
 }
 
-static void hf_initialize(struct scf_context *ctx)
+static void hf_initialize(struct scf_context* ctx)
 {
     hf_build_fock(ctx);
     memcpy(ctx->diis_F, ctx->F, ctx->N2_f64);
 }
 
-void hf_scf_config(struct scf_context *ctx)
+void hf_scf_config(struct scf_context* ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -272,7 +272,7 @@ void hf_scf_config(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_SOAD;
 }
 
-static void hf_total_energy(struct scf_context *ctx)
+static void hf_total_energy(struct scf_context* ctx)
 {
     /*
      * E = 0.5 * P_vu * (H_uv + F_uv) + NRE
@@ -288,7 +288,7 @@ static void hf_total_energy(struct scf_context *ctx)
     ctx->energy = 0.5 * einsum_mn_nm(ctx->P, ctx->NxN_1, N, N) + ctx->nuclear_repulsion_energy;
 }
 
-static void hf_scf_iterate(struct scf_context *ctx)
+static void hf_scf_iterate(struct scf_context* ctx)
 {
     console_printf(ctx->silent, "\nStarting HF SCF loop\n");
     u64 N = ctx->n_basis_funcs;
@@ -379,10 +379,10 @@ static void hf_scf_iterate(struct scf_context *ctx)
     console_printf(ctx->silent, "SCF took %.3f ms (%.3f ms/step)\n", scf_time, scf_time / (step + 1));
 }
 
-void hf_single_point_energy(struct cmd_line_args *args)
+void hf_single_point_energy(struct cmd_line_args* args)
 {
     log_dbg_print(args->silent, "HF single point energy calculation\n");
-    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
+    struct scf_context* ctx = scf_initialize(args, hf_scf_config);
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
     if (args->check_results)
@@ -392,23 +392,23 @@ void hf_single_point_energy(struct cmd_line_args *args)
     scf_finalize(ctx);
 }
 
-void hf_single_point_forces(struct cmd_line_args *args)
+void hf_single_point_forces(struct cmd_line_args* args)
 {
-    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
+    struct scf_context* ctx = scf_initialize(args, hf_scf_config);
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
     energy_dwrt_nuc(ctx);
     if (args->check_results)
     {
         check_total_energy(ctx->energy, args->check_results);
-        check_forces((f64 *)(ctx->mol->forces), args->check_results);
+        check_forces((f64*)(ctx->mol->forces), args->check_results);
     }
     scf_finalize(ctx);
 }
 
-void hf_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_ctx)
+void hf_calc_forces_on_nuclei(struct cmd_line_args* args, struct md_context* md_ctx)
 {
-    struct scf_context *ctx = scf_initialize(args, hf_scf_config);
+    struct scf_context* ctx = scf_initialize(args, hf_scf_config);
 
     hf_initialize(ctx);
     hf_scf_iterate(ctx);
@@ -418,7 +418,7 @@ void hf_calc_forces_on_nuclei(struct cmd_line_args *args, struct md_context *md_
 }
 
 #ifdef MODULE_TEST
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef USE_CUDA
     cuda_configure();
@@ -445,11 +445,11 @@ int main(int argc, char *argv[])
     }
     if (args.job_type == JOB_TYPE_BOMD)
     {
-        struct scf_context *ctx = scf_initialize(&args, hf_scf_config);
+        struct scf_context* ctx = scf_initialize(&args, hf_scf_config);
         u64 n_basis_funcs = ctx->n_basis_funcs;
         scf_finalize(ctx);
 
-        struct md_context *md_ctx = md_initialize(&args, hf_calc_forces_on_nuclei, n_basis_funcs, "hf");
+        struct md_context* md_ctx = md_initialize(&args, hf_calc_forces_on_nuclei, n_basis_funcs, "hf");
         md_simulate(&args, md_ctx);
         md_finalize(md_ctx);
     }

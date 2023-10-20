@@ -13,7 +13,7 @@
 #include "velocity_init.h"
 #include "thermostat.h"
 
-void scf_config_md(struct scf_context *ctx)
+void scf_config_md(struct scf_context* ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -22,9 +22,9 @@ void scf_config_md(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_USER_PROVIDED;
 }
 
-struct md_context *md_initialize(struct cmd_line_args *args, force_calculation_func_pointer calc_forces_on_nuclei, u64 n_basis_funcs, char const *job_name)
+struct md_context* md_initialize(struct cmd_line_args* args, force_calculation_func_pointer calc_forces_on_nuclei, u64 n_basis_funcs, char const* job_name)
 {
-    struct md_context *md_ctx = x_malloc(sizeof(struct md_context));
+    struct md_context* md_ctx = x_malloc(sizeof(struct md_context));
     md_ctx->delta_t_fs = args->md_delta_t_fs;
     md_ctx->temperature_K = args->md_temperature_K;
     md_ctx->thermostat_time_smoothing_factor = args->md_thermostat_time_smoothing_factor;
@@ -37,17 +37,17 @@ struct md_context *md_initialize(struct cmd_line_args *args, force_calculation_f
     return md_ctx;
 }
 
-void md_finalize(struct md_context *md_ctx)
+void md_finalize(struct md_context* md_ctx)
 {
     x_free(md_ctx->density_matrix);
     x_free(md_ctx);
 }
 
-void md_simulate(struct cmd_line_args *args, struct md_context *md_ctx)
+void md_simulate(struct cmd_line_args* args, struct md_context* md_ctx)
 {
     f64 delta_t = md_ctx->delta_t_fs * TIME_FS_TO_ATOMIC_UNIT;
 
-    struct molecule *mol = args->mol;
+    struct molecule* mol = args->mol;
     maxwell_boltzmann_velocity_init(mol, md_ctx->temperature_K);
     enforce_temperature(mol, md_ctx->temperature_K);
 
@@ -55,11 +55,11 @@ void md_simulate(struct cmd_line_args *args, struct md_context *md_ctx)
     const u64 bufsz = 256;
     char sbuf[bufsz];
     snprintf(sbuf, bufsz, "output/%s_%s_trajectory.xyz", args->mol->name, md_ctx->job_name);
-    FILE *fp_traj = fopen(sbuf, "wb");
+    FILE* fp_traj = fopen(sbuf, "wb");
     snprintf(sbuf, bufsz, "output/%s_%s_force.xyz", args->mol->name, md_ctx->job_name);
-    FILE *fp_force = fopen(sbuf, "wb");
+    FILE* fp_force = fopen(sbuf, "wb");
     snprintf(sbuf, bufsz, "output/%s_%s_velocity.xyz", args->mol->name, md_ctx->job_name);
-    FILE *fp_velocity = fopen(sbuf, "wb");
+    FILE* fp_velocity = fopen(sbuf, "wb");
 
     for (u64 i = 0; i < args->md_steps; ++i)
     {

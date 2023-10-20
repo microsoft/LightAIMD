@@ -542,8 +542,7 @@ void diis_update_fock(struct scf_context *ctx)
 
     transpose(tag_conjugate(ctx->diis_FPS), ctx->diis_SPF, N, N);
 
-    //fractional_matrix_power(ctx->S, ctx->NxN_1, N, -0.5);
-    mat_fractional_power(ctx->S, ctx->NxN_1, N, -0.5);
+    fractional_matrix_power(ctx->S, ctx->NxN_1, N, -0.5);
     mat_subtract(ctx->diis_FPS, ctx->diis_SPF, ctx->NxN_2, N, N);
 
     einsum_mn_np__mp(ctx->NxN_1, ctx->NxN_2, ctx->NxN_3, N, N, N);
@@ -588,7 +587,6 @@ void diis_update_fock(struct scf_context *ctx)
     ctx->diis_ordinate_vector[ctx->diis_history_size] = -1.0;
 
     solve_linear_system_symmetric(ctx->diis_B, ctx->diis_ordinate_vector, ctx->diis_coefficients, ctx->diis_history_size + 1);
-    //solve_linear_system(ctx->diis_B, ctx->diis_ordinate_vector, ctx->diis_coefficients, ctx->diis_history_size + 1);
 
     memset(ctx->diis_F, 0, ctx->N2_f64);
 

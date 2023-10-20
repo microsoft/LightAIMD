@@ -13,7 +13,7 @@
 #include "diagnostics.h"
 #include "cuda_helper.h"
 
-void scf_config_hf(struct scf_context *ctx)
+void scf_config_hf(struct scf_context* ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -22,7 +22,7 @@ void scf_config_hf(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_SOAD;
 }
 
-void scf_config_dft(struct scf_context *ctx)
+void scf_config_dft(struct scf_context* ctx)
 {
     ctx->JK_screening_threshold = 1e-8;
     ctx->converge_threshold = 1e-12;
@@ -31,7 +31,7 @@ void scf_config_dft(struct scf_context *ctx)
     ctx->density_init_method = DENSITY_INIT_HCORE;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef USE_CUDA
     cuda_configure();
@@ -76,22 +76,22 @@ int main(int argc, char *argv[])
     {
         if (args.cc_method == CC_METHOD_HF)
         {
-            struct scf_context *ctx = scf_initialize(&args, hf_scf_config);
+            struct scf_context* ctx = scf_initialize(&args, hf_scf_config);
             u64 n_basis_funcs = ctx->n_basis_funcs;
             scf_finalize(ctx);
 
-            struct md_context *md_ctx = md_initialize(&args, hf_calc_forces_on_nuclei, n_basis_funcs, "hf");
+            struct md_context* md_ctx = md_initialize(&args, hf_calc_forces_on_nuclei, n_basis_funcs, "hf");
             md_simulate(&args, md_ctx);
             md_finalize(md_ctx);
         }
 
         if (args.cc_method == CC_METHOD_DFT)
         {
-            struct scf_context *ctx = scf_initialize(&args, dft_scf_config);
+            struct scf_context* ctx = scf_initialize(&args, dft_scf_config);
             u64 n_basis_funcs = ctx->n_basis_funcs;
             scf_finalize(ctx);
 
-            struct md_context *md_ctx = md_initialize(&args, dft_calc_forces_on_nuclei, n_basis_funcs, "dft");
+            struct md_context* md_ctx = md_initialize(&args, dft_calc_forces_on_nuclei, n_basis_funcs, "dft");
             md_simulate(&args, md_ctx);
             md_finalize(md_ctx);
         }

@@ -7,6 +7,6 @@
 
 #include "numeric_types.h"
 
-char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_elements, u64 *selected_elements);
+char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_elements, u64* selected_elements);
 
 #endif

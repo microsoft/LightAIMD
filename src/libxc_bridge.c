@@ -17,17 +17,17 @@ const u64 XC_TYPE_MGGA = 7;
 struct libxc_registry
 {
     u64 func_count;
-    xc_func_type *funcs;
-    f64 *hybrid_coeffs;
-    u64 *xc_types;
-    u64 *funcs_initialized; /* each number (0/1) is a flag indicating whether the current funcs slot is initialized */
+    xc_func_type* funcs;
+    f64* hybrid_coeffs;
+    u64* xc_types;
+    u64* funcs_initialized; /* each number (0/1) is a flag indicating whether the current funcs slot is initialized */
 };
 
 static struct libxc_registry registry;
 
-void print_xc_dimensions(xc_func_type *func)
+void print_xc_dimensions(xc_func_type* func)
 {
-    xc_dimensions *dim = &(func->dim);
+    xc_dimensions* dim = &(func->dim);
     printf("rho: %d  ", dim->rho);
     printf("sigma: %d  ", dim->sigma);
     printf("lapl: %d  ", dim->lapl);
@@ -40,7 +40,7 @@ void print_xc_dimensions(xc_func_type *func)
     printf("vtau: %d\n", dim->vtau);
 }
 
-void libxc_initialize(i32 *func_ids, i32 *is_polarized, u64 func_count)
+void libxc_initialize(i32* func_ids, i32* is_polarized, u64 func_count)
 {
     i32 max_func_id = -1;
     for (u64 i = 0; i < func_count; ++i)
@@ -73,7 +73,7 @@ void libxc_initialize(i32 *func_ids, i32 *is_polarized, u64 func_count)
 
         registry.funcs_initialized[func_id] = 0;
 
-        xc_func_type *func = registry.funcs + func_id;
+        xc_func_type* func = registry.funcs + func_id;
         /* 0 (OK) or -1 (ERROR) */
         if (xc_func_init(func, func_id, nspin))
         {
@@ -138,10 +138,10 @@ u64 get_xc_type(u64 x_functional_id, u64 c_functional_id)
  *  exc: the energy per unit particle
  *  vrho: first derivative of the energy per unit volume
  */
-void libxc_exc_vxc(u64 func_id, u64 num_points, f64 const *rho, f64 const *sigma, f64 const *lapl, f64 const *tau,
-                   f64 *exc, f64 *vrho, f64 *vsigma, f64 *vlapl, f64 *vtau)
+void libxc_exc_vxc(u64 func_id, u64 num_points, f64 const* rho, f64 const* sigma, f64 const* lapl, f64 const* tau,
+                   f64* exc, f64* vrho, f64* vsigma, f64* vlapl, f64* vtau)
 {
-    xc_func_type *func = registry.funcs + func_id;
+    xc_func_type* func = registry.funcs + func_id;
     switch (func->info->family)
     {
     case XC_FAMILY_LDA:
@@ -180,12 +180,12 @@ int main(void)
     f64 vsigma[5] = {0};
 
     /* input */
-    f64 *lapl = NULL;
-    f64 *tau = NULL;
+    f64* lapl = NULL;
+    f64* tau = NULL;
 
     /* output */
-    f64 *vlapl = NULL;
-    f64 *vtau = NULL;
+    f64* vlapl = NULL;
+    f64* vtau = NULL;
 
     /*
      * If the functional was initialized with nspin=XC_UNPOLARIZED,

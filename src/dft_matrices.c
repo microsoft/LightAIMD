@@ -24,9 +24,9 @@
 
 struct task_func_build_K_arg
 {
-    struct scf_context *ctx;
-    f64 *K;
-    f64 *P;
+    struct scf_context* ctx;
+    f64* K;
+    f64* P;
     u64 i;
     u64 j;
     u64 k;
@@ -36,13 +36,13 @@ struct task_func_build_K_arg
     u64 ij_kl;
 };
 
-static void task_func_build_K(void *p_arg)
+static void task_func_build_K(void* p_arg)
 {
-    struct task_func_build_K_arg *arg = (struct task_func_build_K_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    volatile atomic_bool *L = ctx->LOCK;
-    f64 *K = arg->K;
-    f64 *P = arg->P;
+    struct task_func_build_K_arg* arg = (struct task_func_build_K_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    volatile atomic_bool* L = ctx->LOCK;
+    f64* K = arg->K;
+    f64* P = arg->P;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 k = arg->k;
@@ -59,7 +59,7 @@ static void task_func_build_K(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
+              ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Exchange */
@@ -78,13 +78,13 @@ static void task_func_build_K(void *p_arg)
     x_free(p_arg);
 }
 
-void build_K_matrix(struct molecular_grid_desc *mgd)
+void build_K_matrix(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *ctx = mgd->scf_ctx;
+    struct scf_context* ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
 
-    f64 *P = ctx->P;
-    f64 *K = mgd->K;
+    f64* P = ctx->P;
+    f64* K = mgd->K;
     memset(K, 0, N * N * sizeof(f64));
 
     for (u64 i = 0; i < N; ++i)
@@ -142,7 +142,7 @@ void build_K_matrix(struct molecular_grid_desc *mgd)
                             continue;
                         }
 
-                        struct task_func_build_K_arg *arg = x_malloc(sizeof(struct task_func_build_K_arg));
+                        struct task_func_build_K_arg* arg = x_malloc(sizeof(struct task_func_build_K_arg));
                         arg->ctx = ctx;
                         arg->K = K;
                         arg->P = P;
@@ -162,7 +162,7 @@ void build_K_matrix(struct molecular_grid_desc *mgd)
 
     threadpool_wait_job_done(ctx->tp_ctx);
 
-    f64 *M = ctx->NxN_1;
+    f64* M = ctx->NxN_1;
     transpose(K, M, N, N);
     mat_add(K, M, M, N, N);
     mat_scalar_multiply(M, K, N, N, 0.5);
@@ -170,9 +170,9 @@ void build_K_matrix(struct molecular_grid_desc *mgd)
 
 struct task_func_build_J_arg
 {
-    struct scf_context *ctx;
-    f64 *J;
-    f64 *P;
+    struct scf_context* ctx;
+    f64* J;
+    f64* P;
     u64 i;
     u64 j;
     u64 k;
@@ -182,13 +182,13 @@ struct task_func_build_J_arg
     u64 ij_kl;
 };
 
-static void task_func_build_J(void *p_arg)
+static void task_func_build_J(void* p_arg)
 {
-    struct task_func_build_J_arg *arg = (struct task_func_build_J_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    volatile atomic_bool *L = ctx->LOCK;
-    f64 *J = arg->J;
-    f64 *P = arg->P;
+    struct task_func_build_J_arg* arg = (struct task_func_build_J_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    volatile atomic_bool* L = ctx->LOCK;
+    f64* J = arg->J;
+    f64* P = arg->P;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 k = arg->k;
@@ -202,7 +202,7 @@ static void task_func_build_J(void *p_arg)
     u64 kN = k * N;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
+              ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -215,13 +215,13 @@ static void task_func_build_J(void *p_arg)
     x_free(p_arg);
 }
 
-void build_J_matrix(struct molecular_grid_desc *mgd)
+void build_J_matrix(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *ctx = mgd->scf_ctx;
+    struct scf_context* ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
 
-    f64 *P = ctx->P;
-    f64 *J = mgd->J;
+    f64* P = ctx->P;
+    f64* J = mgd->J;
     memset(J, 0, N * N * sizeof(f64));
 
     for (u64 i = 0; i < N; ++i)
@@ -279,7 +279,7 @@ void build_J_matrix(struct molecular_grid_desc *mgd)
                             continue;
                         }
 
-                        struct task_func_build_J_arg *arg = x_malloc(sizeof(struct task_func_build_J_arg));
+                        struct task_func_build_J_arg* arg = x_malloc(sizeof(struct task_func_build_J_arg));
                         arg->ctx = ctx;
                         arg->J = J;
                         arg->P = P;
@@ -299,7 +299,7 @@ void build_J_matrix(struct molecular_grid_desc *mgd)
 
     threadpool_wait_job_done(ctx->tp_ctx);
 
-    f64 *M = ctx->NxN_1;
+    f64* M = ctx->NxN_1;
     transpose(J, M, N, N);
     mat_add(J, M, M, N, N);
     mat_scalar_multiply(M, J, N, N, 0.25);
@@ -307,10 +307,10 @@ void build_J_matrix(struct molecular_grid_desc *mgd)
 
 struct task_func_build_JK_arg
 {
-    struct scf_context *ctx;
-    f64 *J;
-    f64 *K;
-    f64 *P;
+    struct scf_context* ctx;
+    f64* J;
+    f64* K;
+    f64* P;
     u64 i;
     u64 j;
     u64 k;
@@ -320,14 +320,14 @@ struct task_func_build_JK_arg
     u64 ij_kl;
 };
 
-static void task_func_build_JK(void *p_arg)
+static void task_func_build_JK(void* p_arg)
 {
-    struct task_func_build_JK_arg *arg = (struct task_func_build_JK_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    volatile atomic_bool *L = ctx->LOCK;
-    f64 *J = arg->J;
-    f64 *K = arg->K;
-    f64 *P = arg->P;
+    struct task_func_build_JK_arg* arg = (struct task_func_build_JK_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    volatile atomic_bool* L = ctx->LOCK;
+    f64* J = arg->J;
+    f64* K = arg->K;
+    f64* P = arg->P;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 k = arg->k;
@@ -345,7 +345,7 @@ static void task_func_build_JK(void *p_arg)
     u64 kNj = kN + j;
 
     f64 val = cg_electron_repulsion_integral(ctx->basis_funcs + i, ctx->basis_funcs + j,
-                                             ctx->basis_funcs + k, ctx->basis_funcs + l) *
+              ctx->basis_funcs + k, ctx->basis_funcs + l) *
               i_j * k_l * ij_kl;
 
     /* Coulomb */
@@ -373,19 +373,19 @@ static void task_func_build_JK(void *p_arg)
     x_free(p_arg);
 }
 
-void build_JK_matrices(struct molecular_grid_desc *mgd)
+void build_JK_matrices(struct molecular_grid_desc* mgd)
 {
 #ifdef USE_CUDA
     return build_JK_matrices_cuda(mgd);
 #endif
 
-    struct scf_context *ctx = mgd->scf_ctx;
+    struct scf_context* ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
 
-    f64 *P = ctx->P;
-    f64 *J = mgd->J;
-    f64 *K = mgd->K;
+    f64* P = ctx->P;
+    f64* J = mgd->J;
+    f64* K = mgd->K;
     memset(J, 0, N2 * sizeof(f64));
     memset(K, 0, N2 * sizeof(f64));
 
@@ -444,7 +444,7 @@ void build_JK_matrices(struct molecular_grid_desc *mgd)
                             continue;
                         }
 
-                        struct task_func_build_JK_arg *arg = x_malloc(sizeof(struct task_func_build_JK_arg));
+                        struct task_func_build_JK_arg* arg = x_malloc(sizeof(struct task_func_build_JK_arg));
                         arg->ctx = ctx;
                         arg->J = J;
                         arg->K = K;
@@ -465,7 +465,7 @@ void build_JK_matrices(struct molecular_grid_desc *mgd)
 
     threadpool_wait_job_done(ctx->tp_ctx);
 
-    f64 *M = ctx->NxN_1;
+    f64* M = ctx->NxN_1;
     transpose(J, M, N, N);
     mat_add(J, M, M, N, N);
     mat_scalar_multiply(M, J, N, N, 0.25);
@@ -477,7 +477,7 @@ void build_JK_matrices(struct molecular_grid_desc *mgd)
 }
 
 #ifdef USE_CUDA
-static void update_JK_with_eri(f64 *J, f64 *K, f64 *P, u64 N, u32 *basis_func_index_buff, u64 cuda_task_index, f64 *eri_output_buff)
+static void update_JK_with_eri(f64* J, f64* K, f64* P, u64 N, u32* basis_func_index_buff, u64 cuda_task_index, f64* eri_output_buff)
 {
     for (u64 t = 0; t < cuda_task_index; ++t)
     {
@@ -522,15 +522,15 @@ static void update_JK_with_eri(f64 *J, f64 *K, f64 *P, u64 N, u32 *basis_func_in
     }
 }
 
-void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
+void build_JK_matrices_cuda(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *ctx = mgd->scf_ctx;
+    struct scf_context* ctx = mgd->scf_ctx;
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
 
-    f64 *P = ctx->P;
-    f64 *J = mgd->J;
-    f64 *K = mgd->K;
+    f64* P = ctx->P;
+    f64* J = mgd->J;
+    f64* K = mgd->K;
     memset(J, 0, N2 * sizeof(f64));
     memset(K, 0, N2 * sizeof(f64));
 
@@ -542,8 +542,8 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
         cuda_task_count = minimum_task_count;
     }
 
-    u32 *basis_func_index_buff = x_malloc(sizeof(u32) * cuda_task_count * 4);
-    f64 *eri_output_buff = x_malloc(sizeof(f64) * cuda_task_count);
+    u32* basis_func_index_buff = x_malloc(sizeof(u32) * cuda_task_count * 4);
+    f64* eri_output_buff = x_malloc(sizeof(f64) * cuda_task_count);
     u64 cuda_task_index = 0;
 
     struct timespec time_start, time_end;
@@ -623,7 +623,7 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
     x_free(basis_func_index_buff);
     x_free(eri_output_buff);
 
-    f64 *M = ctx->NxN_1;
+    f64* M = ctx->NxN_1;
     transpose(J, M, N, N);
     mat_add(J, M, M, N, N);
     mat_scalar_multiply(M, J, N, N, 0.25);
@@ -635,29 +635,29 @@ void build_JK_matrices_cuda(struct molecular_grid_desc *mgd)
 }
 #endif
 
-void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
+void build_xc_matrix_with_grid(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *scf_ctx = mgd->scf_ctx;
+    struct scf_context* scf_ctx = mgd->scf_ctx;
     u64 N = scf_ctx->n_basis_funcs;
 
     /* input variables */
-    f64 *rho = mgd->densities;
-    f64 *sigma = mgd->densities_sigma;
-    f64 *lapl = mgd->lapl;
-    f64 *tau = mgd->tau;
+    f64* rho = mgd->densities;
+    f64* sigma = mgd->densities_sigma;
+    f64* lapl = mgd->lapl;
+    f64* tau = mgd->tau;
 
     /* output variable */
-    f64 *exc_x = mgd->exc_x;
-    f64 *vrho_x = mgd->vrho_x;
-    f64 *exc_c = mgd->exc_c;
-    f64 *vrho_c = mgd->vrho_c;
+    f64* exc_x = mgd->exc_x;
+    f64* vrho_x = mgd->vrho_x;
+    f64* exc_c = mgd->exc_c;
+    f64* vrho_c = mgd->vrho_c;
 
-    f64 *XC = mgd->XC;
-    f64 *NxN = mgd->NxN;
-    f64 *bf_v = mgd->bf_v;
-    f64 *weighted_vrho = mgd->weighted_vrho;
-    f64 *MxN = mgd->MxN;
-    f64 *Mx1 = mgd->Mx1;
+    f64* XC = mgd->XC;
+    f64* NxN = mgd->NxN;
+    f64* bf_v = mgd->bf_v;
+    f64* weighted_vrho = mgd->weighted_vrho;
+    f64* MxN = mgd->MxN;
+    f64* Mx1 = mgd->Mx1;
 
     struct timespec time_start, time_end;
 
@@ -782,9 +782,9 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
 
     if (mgd->xc_type == XC_TYPE_GGA || mgd->xc_type == XC_TYPE_MGGA)
     {
-        f64 *weighted_vsigma_rho_dx = mgd->weighted_vsigma_rho_dx;
-        f64 *weighted_vsigma_rho_dy = mgd->weighted_vsigma_rho_dy;
-        f64 *weighted_vsigma_rho_dz = mgd->weighted_vsigma_rho_dz;
+        f64* weighted_vsigma_rho_dx = mgd->weighted_vsigma_rho_dx;
+        f64* weighted_vsigma_rho_dy = mgd->weighted_vsigma_rho_dy;
+        f64* weighted_vsigma_rho_dz = mgd->weighted_vsigma_rho_dz;
 
         /* Mx1 = v_sigma_x + vsigma_c */
         mat_add(mgd->vsigma_x, mgd->vsigma_c, Mx1, mgd->grid_size, 1);
@@ -857,7 +857,7 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
 
         if (mgd->xc_type == XC_TYPE_MGGA)
         {
-            f64 *weighted_vtau = Mx1;
+            f64* weighted_vtau = Mx1;
             mat_add(mgd->vtau_x, mgd->vtau_c, weighted_vtau, mgd->grid_size, 1);
             mat_multiply(mgd->weights, weighted_vtau, weighted_vtau, mgd->grid_size, 1);
             mat_scalar_multiply(weighted_vtau, weighted_vtau, mgd->grid_size, 1, 0.25);
@@ -1006,17 +1006,17 @@ void build_xc_matrix_with_grid(struct molecular_grid_desc *mgd)
     /* derivatives wrt nuclear coordinates end */
 }
 
-void calc_xc_gradients(struct molecular_grid_desc *mgd)
+void calc_xc_gradients(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *scf_ctx = mgd->scf_ctx;
+    struct scf_context* scf_ctx = mgd->scf_ctx;
     u64 N = scf_ctx->n_basis_funcs;
 
     /* output variable */
-    f64 *NxN = mgd->NxN;
-    f64 *bf_v = mgd->bf_v;
-    f64 *weighted_vrho = mgd->weighted_vrho;
-    f64 *MxN = mgd->MxN;
-    f64 *Mx1 = mgd->Mx1;
+    f64* NxN = mgd->NxN;
+    f64* bf_v = mgd->bf_v;
+    f64* weighted_vrho = mgd->weighted_vrho;
+    f64* MxN = mgd->MxN;
+    f64* Mx1 = mgd->Mx1;
 
     mat_add(mgd->vrho_x, mgd->vrho_c, Mx1, mgd->grid_size, 1);
     mat_multiply(mgd->weights, Mx1, weighted_vrho, mgd->grid_size, 1);
@@ -1078,9 +1078,9 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
 
     if (mgd->xc_type == XC_TYPE_GGA || mgd->xc_type == XC_TYPE_MGGA)
     {
-        f64 *weighted_vsigma_rho_dx = mgd->weighted_vsigma_rho_dx;
-        f64 *weighted_vsigma_rho_dy = mgd->weighted_vsigma_rho_dy;
-        f64 *weighted_vsigma_rho_dz = mgd->weighted_vsigma_rho_dz;
+        f64* weighted_vsigma_rho_dx = mgd->weighted_vsigma_rho_dx;
+        f64* weighted_vsigma_rho_dy = mgd->weighted_vsigma_rho_dy;
+        f64* weighted_vsigma_rho_dz = mgd->weighted_vsigma_rho_dz;
 
         /* Mx1 = v_sigma_x + vsigma_c */
         mat_add(mgd->vsigma_x, mgd->vsigma_c, Mx1, mgd->grid_size, 1);
@@ -1147,7 +1147,7 @@ void calc_xc_gradients(struct molecular_grid_desc *mgd)
 
         if (mgd->xc_type == XC_TYPE_MGGA)
         {
-            f64 *weighted_vtau = Mx1;
+            f64* weighted_vtau = Mx1;
             mat_add(mgd->vtau_x, mgd->vtau_c, weighted_vtau, mgd->grid_size, 1);
             mat_multiply(mgd->weights, weighted_vtau, weighted_vtau, mgd->grid_size, 1);
             mat_scalar_multiply(weighted_vtau, weighted_vtau, mgd->grid_size, 1, 0.25);

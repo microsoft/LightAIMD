@@ -18,7 +18,7 @@ static volatile atomic_bool mm_malloc_lock = 0;
 static volatile atomic_bool mm_calloc_lock = 0;
 static volatile atomic_bool mm_free_lock = 0;
 
-void *x_malloc(u64 size)
+void* x_malloc(u64 size)
 {
     spinlock_lock(&mm_malloc_lock);
     ++malloc_count;
@@ -26,7 +26,7 @@ void *x_malloc(u64 size)
     spinlock_unlock(&mm_malloc_lock);
 
 #ifdef USE_CUDA
-    void *ptr;
+    void* ptr;
     cudaMallocManaged(&ptr, size, cudaMemAttachGlobal);
     return ptr;
 #else
@@ -34,7 +34,7 @@ void *x_malloc(u64 size)
 #endif
 }
 
-void *x_calloc(u64 count, u64 size)
+void* x_calloc(u64 count, u64 size)
 {
     u64 _size = count * size;
     spinlock_lock(&mm_calloc_lock);
@@ -43,7 +43,7 @@ void *x_calloc(u64 count, u64 size)
     spinlock_unlock(&mm_calloc_lock);
 
 #ifdef USE_CUDA
-    void *ptr;
+    void* ptr;
     cudaMallocManaged(&ptr, _size, cudaMemAttachGlobal);
     memset(ptr, 0, _size);
     return ptr;
@@ -52,7 +52,7 @@ void *x_calloc(u64 count, u64 size)
 #endif
 }
 
-void x_free(void *ptr)
+void x_free(void* ptr)
 {
     spinlock_lock(&mm_free_lock);
     ++free_count;

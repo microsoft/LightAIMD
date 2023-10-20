@@ -32,7 +32,7 @@
  * vrho = df/drho = (4.0 / 3.0) c rho^{1/3}
  * c = LDA_X_EXC_PREFACTOR
  */
-void functional_lda_x(f64 const *rho, f64 *exc, f64 *vrho, u64 num_grid_points)
+void functional_lda_x(f64 const* rho, f64* exc, f64* vrho, u64 num_grid_points)
 {
     for (u64 i = 0; i < num_grid_points; ++i)
     {
@@ -50,7 +50,7 @@ void functional_lda_x(f64 const *rho, f64 *exc, f64 *vrho, u64 num_grid_points)
     }
 }
 
-void functional_lda_c_vwn(f64 const *rho, f64 *exc, f64 *vrho, u64 num_grid_points)
+void functional_lda_c_vwn(f64 const* rho, f64* exc, f64* vrho, u64 num_grid_points)
 {
     for (u64 i = 0; i < num_grid_points; i++)
     {

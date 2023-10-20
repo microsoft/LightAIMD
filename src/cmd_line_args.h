@@ -21,8 +21,8 @@ extern const u64 GRID_SCHEME_SG3;
 struct cmd_line_args
 {
     u64 job_type;
-    char *basis_set;
-    struct molecule *mol;
+    char* basis_set;
+    struct molecule* mol;
 
     u64 cc_method;
 
@@ -50,6 +50,6 @@ struct cmd_line_args
     u64 check_results;
 };
 
-void parse_cmd_line_args(int argc, char *argv[], struct cmd_line_args *args);
+void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args);
 
 #endif

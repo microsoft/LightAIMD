@@ -67,12 +67,12 @@
         }                                       \
     } while (0)
 
-void print_f64_array(f64 *A, u64 count, u64 col_size, int precision);
-void print_f64_array_with_label(f64 *A, u64 count, u64 col_size, int precision, char const *label);
-void print_u32_array(u32 *A, u64 count, u64 col_size);
-void print_u32_array_with_label(u32 *A, u64 count, u64 col_size, char const *label);
-void print_f64_values_within_bounds(f64 *A, u64 count, f64 lower_bound, f64 upper_bound, u64 col_size, int precision, i64 max_count);
-void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const *array_label);
-void print_f64_diff(f64 value, f64 expected, char const *label);
+void print_f64_array(f64* A, u64 count, u64 col_size, int precision);
+void print_f64_array_with_label(f64* A, u64 count, u64 col_size, int precision, char const* label);
+void print_u32_array(u32* A, u64 count, u64 col_size);
+void print_u32_array_with_label(u32* A, u64 count, u64 col_size, char const* label);
+void print_f64_values_within_bounds(f64* A, u64 count, f64 lower_bound, f64 upper_bound, u64 col_size, int precision, i64 max_count);
+void inspect_nan(f64* A, u64 count, u64 col_size, i64 max_count, char const* array_label);
+void print_f64_diff(f64 value, f64 expected, char const* label);
 
 #endif

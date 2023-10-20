@@ -1651,7 +1651,7 @@ u64 lebedev_num_points_to_level(u64 num_points)
     return level;
 }
 
-void set_lebedev_weight(f64 *weight_buff, f64 weight, u64 count)
+void set_lebedev_weight(f64* weight_buff, f64 weight, u64 count)
 {
     for (u64 i = 0; i < count; ++i)
     {
@@ -1659,7 +1659,7 @@ void set_lebedev_weight(f64 *weight_buff, f64 weight, u64 count)
     }
 }
 
-void gen_lebedev_points_category_3(f64 *grid, f64 a)
+void gen_lebedev_points_category_3(f64* grid, f64 a)
 {
     u64 n_points = lebedev_grid_sizes[3] * 3;
     f64 b = sqrt(1.0 - 2.0 * a * a);
@@ -1669,7 +1669,7 @@ void gen_lebedev_points_category_3(f64 *grid, f64 a)
     }
 }
 
-void gen_lebedev_points_category_4(f64 *grid, f64 a)
+void gen_lebedev_points_category_4(f64* grid, f64 a)
 {
     u64 n_points = lebedev_grid_sizes[4] * 3;
     f64 b = sqrt(1.0 - a * a);
@@ -1679,7 +1679,7 @@ void gen_lebedev_points_category_4(f64 *grid, f64 a)
     }
 }
 
-void gen_lebedev_points_category_5(f64 *grid, f64 a, f64 b)
+void gen_lebedev_points_category_5(f64* grid, f64 a, f64 b)
 {
     u64 n_points = lebedev_grid_sizes[5] * 3;
     f64 c = sqrt(1.0 - a * a - b * b);
@@ -1690,7 +1690,7 @@ void gen_lebedev_points_category_5(f64 *grid, f64 a, f64 b)
 }
 
 /* level ([0, 31]): refers to the level-th group of lebedev parameters */
-u64 lebedev_gen_grid(f64 *grid, f64 *weights, u64 level)
+u64 lebedev_gen_grid(f64* grid, f64* weights, u64 level)
 {
     u64 offset_start = lebedev_parameter_offset[level];
     u64 offset_end = lebedev_parameter_offset[level + 1];

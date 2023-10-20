@@ -11,19 +11,19 @@
 #include "einsum.h"
 #include "lapacke_bridge.h"
 
-i64 solve_generalized_eigenvalue_symmetric(f64 *A, f64 *B, f64 *V, u64 N)
+i64 solve_generalized_eigenvalue_symmetric(f64* A, f64* B, f64* V, u64 N)
 {
-    f64 *B_INOUT = x_malloc(N * N * sizeof(f64));
+    f64* B_INOUT = x_malloc(N * N * sizeof(f64));
     memcpy(B_INOUT, B, N * N * sizeof(f64));
     memcpy(V, A, N * N * sizeof(f64));
-    f64 *W = x_malloc(N * sizeof(f64));
+    f64* W = x_malloc(N * sizeof(f64));
     lapack_int info = LAPACKE_dsygvd(LAPACK_ROW_MAJOR, (lapack_int)1, 'V', 'L', (lapack_int)N, V, (lapack_int)N, B_INOUT, (lapack_int)N, W);
     x_free(W);
     x_free(B_INOUT);
     return (i64)info;
 }
 
-i64 mat_fractional_power(f64 *A, f64 *B, u64 N, f64 p)
+i64 fractional_matrix_power(f64* A, f64* B, u64 N, f64 p)
 {
     /*
      * A = Z D ZT, where ZT is the transpose of Z
@@ -32,10 +32,10 @@ i64 mat_fractional_power(f64 *A, f64 *B, u64 N, f64 p)
 
     memcpy(B, A, N * N * sizeof(f64));
 
-    f64 *eigenvalues = x_malloc(N * sizeof(f64));
-    f64 *eigenvectors = x_malloc(N * N * sizeof(f64)); // the columns are the eigenvectors
+    f64* eigenvalues = x_malloc(N * sizeof(f64));
+    f64* eigenvectors = x_malloc(N * N * sizeof(f64)); // the columns are the eigenvectors
 
-    lapack_int *ISUPPZ = x_malloc(2 * N * sizeof(lapack_int));
+    lapack_int* ISUPPZ = x_malloc(2 * N * sizeof(lapack_int));
     f64 abstol = -1.0;
     lapack_int number_of_found_eigenvalues;
 
@@ -46,7 +46,7 @@ i64 mat_fractional_power(f64 *A, f64 *B, u64 N, f64 p)
                                      abstol, &number_of_found_eigenvalues,
                                      eigenvalues, eigenvectors, N, ISUPPZ);
 
-    f64 *D = x_calloc(N, sizeof(f64));
+    f64* D = x_calloc(N, sizeof(f64));
     for (u64 i = 0; i < N; ++i)
     {
         D[i] = pow(eigenvalues[i], p);
@@ -77,10 +77,10 @@ i64 mat_fractional_power(f64 *A, f64 *B, u64 N, f64 p)
     return (i64)info;
 }
 
-i64 solve_linear_system_symmetric(f64 *A, f64 *b, f64 *x, u64 N)
+i64 solve_linear_system_symmetric(f64* A, f64* b, f64* x, u64 N)
 {
     memcpy(x, b, N * sizeof(f64));
-    lapack_int *ipiv = x_malloc(N * sizeof(lapack_int));
+    lapack_int* ipiv = x_malloc(N * sizeof(lapack_int));
     lapack_int info = LAPACKE_dsysv(LAPACK_ROW_MAJOR, 'L', (lapack_int)N, (lapack_int)1, A, (lapack_int)N, ipiv, x, (lapack_int)1);
     x_free(ipiv);
     return (i64)info;
@@ -98,7 +98,8 @@ void test_solve_generalized_eigenvalue_symmetric()
         {-9.5527204487693984e-01, -9.5527204487693984e-01, -5.1628988962874072e+00, -2.4333957318475483e+00, 4.0663713195749033e-18, -1.0956991499644125e-01, 3.0639541469921448e-16},
         {3.5131251855208537e-18, -4.5585376351376927e-17, -2.4970069155071695e-18, 4.0663713195749033e-18, -3.8891796505481430e-01, -1.1147763543782036e-16, -7.6762761984471445e-17},
         {-3.5406867540913306e-01, -3.5406867540913306e-01, -2.8238380318442714e-02, -1.0956991499644125e-01, -1.1147763543782036e-16, -3.2717123523978875e-01, 2.5673880865644773e-16},
-        {3.8607960650126749e-01, -3.8607960650126727e-01, -4.2500739705864210e-17, 3.0639541469921448e-16, -7.6762761984471445e-17, 2.5673880865644773e-16, -2.9083674614854393e-01}};
+        {3.8607960650126749e-01, -3.8607960650126727e-01, -4.2500739705864210e-17, 3.0639541469921448e-16, -7.6762761984471445e-17, 2.5673880865644773e-16, -2.9083674614854393e-01}
+    };
 
     f64 S[7][7] = {
         {1.0000000000000000e+00, 2.2870034924425992e-01, 4.8973322893555903e-02, 4.4835728647441092e-01, 0.0000000000000000e+00, 2.3156639380392935e-01, -2.9989746082803970e-01},
@@ -107,7 +108,8 @@ void test_solve_generalized_eigenvalue_symmetric()
         {4.4835728647441092e-01, 4.4835728647441092e-01, 2.3670392057272621e-01, 9.9999999999999978e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00},
         {0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01, 0.0000000000000000e+00, 0.0000000000000000e+00},
         {2.3156639380392935e-01, 2.3156639380392935e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01, 0.0000000000000000e+00},
-        {-2.9989746082803970e-01, 2.9989746082803970e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01}};
+        {-2.9989746082803970e-01, 2.9989746082803970e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01}
+    };
 
     f64 C_ground_truth[7][7] = {
         {-5.5340815462863457e-03, 1.5549174171048680e-01, 4.4751423406869256e-01, -2.9358760822978758e-01, 3.2107972698915469e-19, -7.6900415793243670e-01, 8.0321234086126880e-01},
@@ -116,12 +118,13 @@ void test_solve_generalized_eigenvalue_symmetric()
         {2.5744628592884108e-02, 8.4867456334529656e-01, 2.0671705469138953e-16, 5.2215703502468080e-01, 1.0202385273153853e-16, 8.1653982372000944e-01, 1.2082105931910020e-15},
         {1.4500451204493677e-19, -1.0678622578851863e-18, 7.2207058399275504e-17, 1.5273760795117625e-16, -1.0000000000000002e+00, -4.5227903308962775e-17, -2.6897672975988954e-17},
         {3.9594157542520653e-03, 1.1567558112739362e-01, -2.4932518494844437e-16, -7.6841795464461171e-01, -2.8719288989889235e-16, 7.3936542683773765e-01, 1.0380020037241296e-15},
-        {8.9167119584560225e-17, -2.9034590241486445e-17, -6.0514648752443889e-01, -3.7396326849272470e-17, -1.4046421548173776e-16, -8.0958075687248944e-16, 9.6847331978707629e-01}};
+        {8.9167119584560225e-17, -2.9034590241486445e-17, -6.0514648752443889e-01, -3.7396326849272470e-17, -1.4046421548173776e-16, -8.0958075687248944e-16, 9.6847331978707629e-01}
+    };
 
     lapack_int N = 7;
 
     f64 C[7];
-    lapack_int info = LAPACKE_dsygvd(LAPACK_ROW_MAJOR, 1, 'V', 'L', N, (f64 *)F, N, (f64 *)S, N, (f64 *)C);
+    lapack_int info = LAPACKE_dsygvd(LAPACK_ROW_MAJOR, 1, 'V', 'L', N, (f64*)F, N, (f64*)S, N, (f64*)C);
     printf("info: %d\n", info);
 
     printf("Eigenvalues:\n");
@@ -141,7 +144,7 @@ void test_solve_generalized_eigenvalue_symmetric()
     }
 }
 
-void test_mat_fractional_power()
+void test_fractional_matrix_power()
 {
     f64 S[7][7] = {
         {1.0000000000000000e+00, 2.2870034924425992e-01, 4.8973322893555903e-02, 4.4835728647441092e-01, 0.0000000000000000e+00, 2.3156639380392935e-01, -2.9989746082803970e-01},
@@ -150,25 +153,26 @@ void test_mat_fractional_power()
         {4.4835728647441092e-01, 4.4835728647441092e-01, 2.3670392057272621e-01, 9.9999999999999978e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00},
         {0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01, 0.0000000000000000e+00, 0.0000000000000000e+00},
         {2.3156639380392935e-01, 2.3156639380392935e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01, 0.0000000000000000e+00},
-        {-2.9989746082803970e-01, 2.9989746082803970e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01}};
+        {-2.9989746082803970e-01, 2.9989746082803970e-01, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 0.0000000000000000e+00, 9.9999999999999956e-01}
+    };
 
     f64 S_1_2[7][7];
 
-    mat_fractional_power((f64 *)S, (f64 *)S_1_2, 7, 0.5);
+    fractional_matrix_power((f64*)S, (f64*)S_1_2, 7, 0.5);
 
     printf("S^(1/2):\n");
-    matprint((f64 *)S_1_2, 7, 7);
+    matprint((f64*)S_1_2, 7, 7);
 
     f64 S2[7][7];
-    einsum_mn_np__mp((f64 *)S_1_2, (f64 *)S_1_2, (f64 *)S2, 7, 7, 7);
+    einsum_mn_np__mp((f64*)S_1_2, (f64*)S_1_2, (f64*)S2, 7, 7, 7);
     printf("S_1_2 * S_1_2:\n");
-    matprint((f64 *)S2, 7, 7);
+    matprint((f64*)S2, 7, 7);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // test_solve_generalized_eigenvalue_symmetric();
-    test_mat_fractional_power();
+    test_fractional_matrix_power();
 
     print_mm_status();
 

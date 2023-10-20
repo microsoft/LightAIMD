@@ -10,20 +10,19 @@
 
 extern "C"
 {
-
-    __global__ void cg_electron_repulsion_integral_cuda_kernel(struct basis_func *basis_func_buff, u32 *basis_func_index_buff, u64 count, f64 *result)
+    __global__ void cg_electron_repulsion_integral_cuda_kernel(struct basis_func* basis_func_buff, u32* basis_func_index_buff, u64 count, f64* result)
     {
         u64 i = blockIdx.x * blockDim.x + threadIdx.x;
         if (i < count)
         {
             result[i] = cg_electron_repulsion_integral(basis_func_buff + basis_func_index_buff[i * 4],
-                                                       basis_func_buff + basis_func_index_buff[i * 4 + 1],
-                                                       basis_func_buff + basis_func_index_buff[i * 4 + 2],
-                                                       basis_func_buff + basis_func_index_buff[i * 4 + 3]);
+                        basis_func_buff + basis_func_index_buff[i * 4 + 1],
+                        basis_func_buff + basis_func_index_buff[i * 4 + 2],
+                        basis_func_buff + basis_func_index_buff[i * 4 + 3]);
         }
     }
 
-    void cg_electron_repulsion_integral_cuda(struct basis_func *basis_func_buff, u32 *basis_func_index_buff, u64 count, f64 *result)
+    void cg_electron_repulsion_integral_cuda(struct basis_func* basis_func_buff, u32* basis_func_index_buff, u64 count, f64* result)
     {
         u64 device_count = (u64)cuda_get_device_count();
 

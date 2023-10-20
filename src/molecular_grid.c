@@ -31,33 +31,33 @@
 
 struct task_func_bfvalues_derivatives_arg
 {
-    struct molecular_grid_desc *mgd;
-    struct basis_func *bf;
+    struct molecular_grid_desc* mgd;
+    struct basis_func* bf;
     u64 M;
     u64 N;
     u64 i;
 };
 
-static void task_func_bfvalues_derivatives(void *p_arg)
+static void task_func_bfvalues_derivatives(void* p_arg)
 {
-    struct task_func_bfvalues_derivatives_arg *arg = (struct task_func_bfvalues_derivatives_arg *)p_arg;
+    struct task_func_bfvalues_derivatives_arg* arg = (struct task_func_bfvalues_derivatives_arg*)p_arg;
 
-    struct molecular_grid_desc *mgd = arg->mgd;
-    struct basis_func *bf = arg->bf;
+    struct molecular_grid_desc* mgd = arg->mgd;
+    struct basis_func* bf = arg->bf;
     u64 M = arg->M;
     u64 N = arg->N;
     u64 i = arg->i;
 
-    f64 *xx = mgd->bf_derivative_xx;
-    f64 *yy = mgd->bf_derivative_yy;
-    f64 *zz = mgd->bf_derivative_zz;
-    f64 *xy = mgd->bf_derivative_xy;
-    f64 *xz = mgd->bf_derivative_xz;
-    f64 *yz = mgd->bf_derivative_yz;
+    f64* xx = mgd->bf_derivative_xx;
+    f64* yy = mgd->bf_derivative_yy;
+    f64* zz = mgd->bf_derivative_zz;
+    f64* xy = mgd->bf_derivative_xy;
+    f64* xz = mgd->bf_derivative_xz;
+    f64* yz = mgd->bf_derivative_yz;
 
     for (u64 k = 0; k < M; ++k)
     {
-        struct vec3d *glb_coord = mgd->global_coords + k;
+        struct vec3d* glb_coord = mgd->global_coords + k;
 
         mgd->bf_values[k * N + i] = basis_funcs_value(bf, glb_coord);
         basis_funcs_first_derivative(bf,
@@ -72,17 +72,17 @@ static void task_func_bfvalues_derivatives(void *p_arg)
     x_free(p_arg);
 }
 
-void calc_bfvalues_derivatives(struct molecular_grid_desc *mgd)
+void calc_bfvalues_derivatives(struct molecular_grid_desc* mgd)
 {
-    struct scf_context *scf_ctx = mgd->scf_ctx;
+    struct scf_context* scf_ctx = mgd->scf_ctx;
     u64 M = mgd->grid_size;
     u64 N = scf_ctx->n_basis_funcs;
 
     for (u64 i = 0; i < N; ++i)
     {
-        struct basis_func *bf = scf_ctx->basis_funcs + i;
+        struct basis_func* bf = scf_ctx->basis_funcs + i;
 
-        struct task_func_bfvalues_derivatives_arg *arg = x_malloc(sizeof(struct task_func_bfvalues_derivatives_arg));
+        struct task_func_bfvalues_derivatives_arg* arg = x_malloc(sizeof(struct task_func_bfvalues_derivatives_arg));
         arg->mgd = mgd;
         arg->bf = bf;
         arg->M = M;
@@ -98,32 +98,32 @@ void calc_bfvalues_derivatives(struct molecular_grid_desc *mgd)
  * calculates the densitry: rho, the contracted gradients of the density: sigma,
  * the laplacian of the density: lapl, the kinetic energy density: tau
  */
-void calc_rho_sigma_lapl_tau(struct molecular_grid_desc *mgd)
+void calc_rho_sigma_lapl_tau(struct molecular_grid_desc* mgd)
 {
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
-    struct scf_context *scf_ctx = mgd->scf_ctx;
+    struct scf_context* scf_ctx = mgd->scf_ctx;
     u64 M = mgd->grid_size;
     u64 N = scf_ctx->n_basis_funcs;
 
-    f64 *P = scf_ctx->P;
+    f64* P = scf_ctx->P;
 
-    f64 *bf_values = mgd->bf_values;
-    f64 *bf_gradidents_x = mgd->bf_derivative_x;
-    f64 *bf_gradidents_y = mgd->bf_derivative_y;
-    f64 *bf_gradidents_z = mgd->bf_derivative_z;
-    f64 *bf_laplacian = mgd->bf_laplacian;
+    f64* bf_values = mgd->bf_values;
+    f64* bf_gradidents_x = mgd->bf_derivative_x;
+    f64* bf_gradidents_y = mgd->bf_derivative_y;
+    f64* bf_gradidents_z = mgd->bf_derivative_z;
+    f64* bf_laplacian = mgd->bf_laplacian;
 
-    f64 *rho = mgd->densities;
-    f64 *sigma_x = mgd->density_derivative_x;
-    f64 *sigma_y = mgd->density_derivative_y;
-    f64 *sigma_z = mgd->density_derivative_z;
-    f64 *lapl = mgd->lapl;
-    f64 *tau = mgd->tau;
+    f64* rho = mgd->densities;
+    f64* sigma_x = mgd->density_derivative_x;
+    f64* sigma_y = mgd->density_derivative_y;
+    f64* sigma_z = mgd->density_derivative_z;
+    f64* lapl = mgd->lapl;
+    f64* tau = mgd->tau;
 
-    f64 *M1 = mgd->MxN;
-    f64 *M2 = mgd->MxN_2;
+    f64* M1 = mgd->MxN;
+    f64* M2 = mgd->MxN_2;
 
     /* calc rho */
     einsum_mn_np__mp_parallel(bf_values, P, M1, M, N, N, scf_ctx->tp_ctx);
@@ -134,7 +134,7 @@ void calc_rho_sigma_lapl_tau(struct molecular_grid_desc *mgd)
      * Currently, the program is designed to work with symmetric density matrix only, therefore
      * PT = P
      */
-    f64 *PT = tag_transpose(P);
+    f64* PT = tag_transpose(P);
 
     /* calc sigma_x */
     einsum_mn_mn__m(M1, bf_gradidents_x, sigma_x, M, N);
@@ -186,7 +186,7 @@ void calc_rho_sigma_lapl_tau(struct molecular_grid_desc *mgd)
     f64 density_sum = 0.0;
     for (int i = 0, ag_offset = 0; i < scf_ctx->mol->n_atoms; ++i)
     {
-        struct atomic_grid_desc *gd = mgd->atomic_grid_descs + i;
+        struct atomic_grid_desc* gd = mgd->atomic_grid_descs + i;
         for (int j = 0; j < gd->grid_size; ++j)
         {
             density_sum += mgd->weights[ag_offset + j] * mgd->densities[ag_offset + j];
@@ -206,16 +206,16 @@ void calc_rho_sigma_lapl_tau(struct molecular_grid_desc *mgd)
 
 struct task_func_calc_integration_weights_arg
 {
-    struct atomic_grid_desc *gd;
+    struct atomic_grid_desc* gd;
     u64 ag_offset;
 };
 
-static void task_func_calc_integration_weights(void *p_arg)
+static void task_func_calc_integration_weights(void* p_arg)
 {
-    struct task_func_calc_integration_weights_arg *arg = (struct task_func_calc_integration_weights_arg *)p_arg;
-    struct atomic_grid_desc *gd = arg->gd;
+    struct task_func_calc_integration_weights_arg* arg = (struct task_func_calc_integration_weights_arg*)p_arg;
+    struct atomic_grid_desc* gd = arg->gd;
     u64 ag_offset = arg->ag_offset;
-    struct molecular_grid_desc *mgd = gd->mgd;
+    struct molecular_grid_desc* mgd = gd->mgd;
 
     f64 pi_n_1 = M_PI / (f64)(gd->num_radial_points + 1);
     u64 grid_point_idx = 0;
@@ -241,8 +241,8 @@ static void task_func_calc_integration_weights(void *p_arg)
 
         for (u64 a = 0; a < gd->num_angular_points; ++a)
         {
-            struct vec3d *local_coord = mgd->local_coords + ag_offset + grid_point_idx;
-            struct vec3d *global_coord = mgd->global_coords + ag_offset + grid_point_idx;
+            struct vec3d* local_coord = mgd->local_coords + ag_offset + grid_point_idx;
+            struct vec3d* global_coord = mgd->global_coords + ag_offset + grid_point_idx;
             local_coord->x = mgd->lebedev_grid[a * 3 + 0] * r;
             local_coord->y = mgd->lebedev_grid[a * 3 + 1] * r;
             local_coord->z = mgd->lebedev_grid[a * 3 + 2] * r;
@@ -259,12 +259,12 @@ static void task_func_calc_integration_weights(void *p_arg)
     x_free(p_arg);
 }
 
-static void task_func_calc_integration_weights_standard_grid(void *p_arg)
+static void task_func_calc_integration_weights_standard_grid(void* p_arg)
 {
-    struct task_func_calc_integration_weights_arg *arg = (struct task_func_calc_integration_weights_arg *)p_arg;
-    struct atomic_grid_desc *gd = arg->gd;
+    struct task_func_calc_integration_weights_arg* arg = (struct task_func_calc_integration_weights_arg*)p_arg;
+    struct atomic_grid_desc* gd = arg->gd;
     u64 ag_offset = arg->ag_offset;
-    struct molecular_grid_desc *mgd = gd->mgd;
+    struct molecular_grid_desc* mgd = gd->mgd;
 
     f64 pi_n_1 = M_PI / (f64)(gd->num_radial_points + 1);
     u64 grid_point_idx = 0;
@@ -290,13 +290,13 @@ static void task_func_calc_integration_weights_standard_grid(void *p_arg)
 
         u64 num_angular_points = get_standard_grid_angular_point_num_by_radial_point_idx(gd->atomic_num, mgd->grid_scheme, i - 1);
         u64 lebedev_level = lebedev_num_points_to_level(num_angular_points);
-        f64 *lebedev_grid = x_malloc(num_angular_points * 3 * sizeof(f64));
-        f64 *lebedev_weights = x_malloc(num_angular_points * sizeof(f64));
+        f64* lebedev_grid = x_malloc(num_angular_points * 3 * sizeof(f64));
+        f64* lebedev_weights = x_malloc(num_angular_points * sizeof(f64));
         lebedev_gen_grid(lebedev_grid, lebedev_weights, lebedev_level);
         for (u64 a = 0; a < num_angular_points; ++a)
         {
-            struct vec3d *local_coord = mgd->local_coords + ag_offset + grid_point_idx;
-            struct vec3d *global_coord = mgd->global_coords + ag_offset + grid_point_idx;
+            struct vec3d* local_coord = mgd->local_coords + ag_offset + grid_point_idx;
+            struct vec3d* global_coord = mgd->global_coords + ag_offset + grid_point_idx;
             local_coord->x = lebedev_grid[a * 3 + 0] * r;
             local_coord->y = lebedev_grid[a * 3 + 1] * r;
             local_coord->z = lebedev_grid[a * 3 + 2] * r;
@@ -317,37 +317,37 @@ static void task_func_calc_integration_weights_standard_grid(void *p_arg)
 
 struct task_func_calc_becke_weights_arg
 {
-    struct atomic_grid_desc *gd;
+    struct atomic_grid_desc* gd;
     u64 ag_offset;
     u64 n;
 };
 
-static void task_func_calc_becke_weights(void *p_arg)
+static void task_func_calc_becke_weights(void* p_arg)
 {
-    struct task_func_calc_becke_weights_arg *arg = (struct task_func_calc_becke_weights_arg *)p_arg;
-    struct atomic_grid_desc *gd = arg->gd;
+    struct task_func_calc_becke_weights_arg* arg = (struct task_func_calc_becke_weights_arg*)p_arg;
+    struct atomic_grid_desc* gd = arg->gd;
     u64 ag_offset = arg->ag_offset;
     u64 n = arg->n;
-    struct molecular_grid_desc *mgd = gd->mgd;
-    struct molecule *mol = mgd->scf_ctx->mol;
+    struct molecular_grid_desc* mgd = gd->mgd;
+    struct molecule* mol = mgd->scf_ctx->mol;
 
     for (u64 k = 0; k < gd->grid_size; ++k)
     {
         f64 denom = 0.0;
         f64 nom = 0.0;
-        struct vec3d *gp_coord = mgd->global_coords + ag_offset + k;
+        struct vec3d* gp_coord = mgd->global_coords + ag_offset + k;
 
         // loop over all atoms to get Pn(r)
         for (u64 i = 0; i < mol->n_atoms; ++i)
         {
-            struct vec3d *coord_i = mol->coords + i;
+            struct vec3d* coord_i = mol->coords + i;
             f64 wprod = 1.0;
 
             for (u64 j = 0; j < mol->n_atoms; ++j)
             {
                 if (j != i)
                 {
-                    struct vec3d *coord_j = mol->coords + j;
+                    struct vec3d* coord_j = mol->coords + j;
 
                     /* becke1988: JCP 88 (1988), p2549 */
                     struct vec3d tmp;
@@ -388,13 +388,13 @@ static void task_func_calc_becke_weights(void *p_arg)
     x_free(p_arg);
 }
 
-void build_molecular_grid(struct molecular_grid_desc *mgd)
+void build_molecular_grid(struct molecular_grid_desc* mgd)
 {
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
-    struct scf_context *scf_ctx = mgd->scf_ctx;
-    struct molecule *mol = scf_ctx->mol;
+    struct scf_context* scf_ctx = mgd->scf_ctx;
+    struct molecule* mol = scf_ctx->mol;
 
     /*
      * Build lebedev grid, which is the angular part of the molecular grid.
@@ -411,7 +411,7 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
     mgd->grid_size = 0;
     for (u64 i = 0; i < mol->n_atoms; ++i)
     {
-        struct atomic_grid_desc *gd = mgd->atomic_grid_descs + i;
+        struct atomic_grid_desc* gd = mgd->atomic_grid_descs + i;
         gd->mgd = mgd;
 
         /*
@@ -433,7 +433,7 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
             gd->grid_size = get_standard_grid_point_num(gd->atomic_num, mgd->grid_scheme);
         }
 
-        struct vec3d *nucleus_coord = mol->coords + i;
+        struct vec3d* nucleus_coord = mol->coords + i;
         gd->nucleus_coord.x = nucleus_coord->x;
         gd->nucleus_coord.y = nucleus_coord->y;
         gd->nucleus_coord.z = nucleus_coord->z;
@@ -501,9 +501,9 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
 
     for (u64 n = 0, ag_offset = 0; n < mol->n_atoms; ++n)
     {
-        struct atomic_grid_desc *gd = mgd->atomic_grid_descs + n;
+        struct atomic_grid_desc* gd = mgd->atomic_grid_descs + n;
 
-        struct task_func_calc_integration_weights_arg *arg = x_malloc(sizeof(struct task_func_calc_integration_weights_arg));
+        struct task_func_calc_integration_weights_arg* arg = x_malloc(sizeof(struct task_func_calc_integration_weights_arg));
         arg->gd = gd;
         arg->ag_offset = ag_offset;
         if (mgd->grid_scheme == GRID_SCHEME_FULL)
@@ -521,9 +521,9 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
 
     for (u64 n = 0, ag_offset = 0; n < mol->n_atoms; ++n)
     {
-        struct atomic_grid_desc *gd = mgd->atomic_grid_descs + n;
+        struct atomic_grid_desc* gd = mgd->atomic_grid_descs + n;
 
-        struct task_func_calc_becke_weights_arg *arg = x_malloc(sizeof(struct task_func_calc_becke_weights_arg));
+        struct task_func_calc_becke_weights_arg* arg = x_malloc(sizeof(struct task_func_calc_becke_weights_arg));
         arg->gd = gd;
         arg->ag_offset = ag_offset;
         arg->n = n;
@@ -556,7 +556,7 @@ void build_molecular_grid(struct molecular_grid_desc *mgd)
     console_printf(scf_ctx->silent, "build_molecular_grid took %.3f ms\n", diff_time_ms(&time_start, &time_end));
 }
 
-f64 cal_rho_sum_with_grid(struct molecular_grid_desc *mgd)
+f64 cal_rho_sum_with_grid(struct molecular_grid_desc* mgd)
 {
     f64 total_rho = 0.0;
     for (u64 i = 0; i < mgd->grid_size; ++i)

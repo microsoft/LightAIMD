@@ -20,7 +20,7 @@ double normalize_gaussian_primitive(double alpha, u64 l, u64 m, u64 n)
     return pow(2, l + m + n + 0.75) * pow(alpha, 0.5 * (l + m + n) + 0.75) / sqrt(double_factorial(2 * l - 1) * double_factorial(2 * m - 1) * double_factorial(2 * n - 1) * POW_PI_1_DOT_5);
 }
 
-double normalize_contracted_gaussian_func(u64 n_primitives, u64 l, u64 m, u64 n, double *exponents, double *coefficients, double *primitive_normalization_factor)
+double normalize_contracted_gaussian_func(u64 n_primitives, u64 l, u64 m, u64 n, double* exponents, double* coefficients, double* primitive_normalization_factor)
 {
     u64 L = l + m + n;
     double N = 0.0;
@@ -35,7 +35,7 @@ double normalize_contracted_gaussian_func(u64 n_primitives, u64 l, u64 m, u64 n,
     return pow(N * POW_PI_1_DOT_5 * double_factorial(2 * l - 1) * double_factorial(2 * m - 1) * double_factorial(2 * n - 1) / pow(2.0, L), -0.5);
 }
 
-f64 basis_funcs_value(struct basis_func *bf, struct vec3d *v)
+f64 basis_funcs_value(struct basis_func* bf, struct vec3d* v)
 {
     struct vec3d vt = {bf->x0, bf->y0, bf->z0};
     vec3d_subtract(v, &vt, &vt);
@@ -60,7 +60,7 @@ f64 basis_funcs_value(struct basis_func *bf, struct vec3d *v)
     return value;
 }
 
-void basis_funcs_first_derivative(struct basis_func *bf, struct vec3d *v, f64 *x, f64 *y, f64 *z)
+void basis_funcs_first_derivative(struct basis_func* bf, struct vec3d* v, f64* x, f64* y, f64* z)
 {
     /* + 1e-30 to avoid division by zero */
     f64 x_x0 = v->x - bf->x0 + 1e-100;
@@ -93,8 +93,8 @@ void basis_funcs_first_derivative(struct basis_func *bf, struct vec3d *v, f64 *x
  * output: xx, yy, zz, xy, xz, yz
  * Note: yx = xy, zx = xz, zy = yz, therefore yx, zx and zy are omitted.
  */
-void basis_funcs_second_derivative(struct basis_func *bf, struct vec3d *v,
-                                   f64 *xx, f64 *yy, f64 *zz, f64 *xy, f64 *xz, f64 *yz)
+void basis_funcs_second_derivative(struct basis_func* bf, struct vec3d* v,
+                                   f64* xx, f64* yy, f64* zz, f64* xy, f64* xz, f64* yz)
 {
     /* + 1e-100 to avoid division by zero */
     f64 x_x0 = v->x - bf->x0 + 1e-100;
@@ -150,7 +150,7 @@ void basis_funcs_second_derivative(struct basis_func *bf, struct vec3d *v,
     *yz = yzg;
 }
 
-f64 basis_func_laplacian(struct basis_func *bf, struct vec3d *v)
+f64 basis_func_laplacian(struct basis_func* bf, struct vec3d* v)
 {
     /* + 1e-100 to avoid division by zero */
     f64 x_x0 = v->x - bf->x0 + 1e-100;
@@ -184,10 +184,10 @@ f64 basis_func_laplacian(struct basis_func *bf, struct vec3d *v)
     return result;
 }
 
-void basis_funcs_third_derivative(struct basis_func *bf, struct vec3d *v,
-                                  f64 *xxx, f64 *xyy, f64 *xzz,
-                                  f64 *yyy, f64 *yxx, f64 *yzz,
-                                  f64 *zzz, f64 *zxx, f64 *zyy)
+void basis_funcs_third_derivative(struct basis_func* bf, struct vec3d* v,
+                                  f64* xxx, f64* xyy, f64* xzz,
+                                  f64* yyy, f64* yxx, f64* yzz,
+                                  f64* zzz, f64* zxx, f64* zyy)
 {
     /* + 1e-60 to avoid division by zero */
     f64 x_x0 = v->x - bf->x0 + 1e-60;
@@ -261,7 +261,7 @@ void basis_funcs_third_derivative(struct basis_func *bf, struct vec3d *v,
     *zzz = zzz_;
 }
 
-void print_basis_func(struct basis_func *bf)
+void print_basis_func(struct basis_func* bf)
 {
     printf("center: (%.6e %.6e %.6e)\n", bf->x0, bf->y0, bf->z0);
     printf("l: %lu m: %lu n: %lu n_exponents: %lu\n", bf->l, bf->m, bf->n, bf->n_exponents);
@@ -272,9 +272,9 @@ void print_basis_func(struct basis_func *bf)
     }
 }
 
-void print_basis_funcs_buffer(const char *buffer)
+void print_basis_funcs_buffer(const char* buffer)
 {
-    u64 *p = (u64 *)buffer;
+    u64* p = (u64*)buffer;
     u64 n_elements = *p;
     ++p;
 
@@ -305,14 +305,14 @@ void print_basis_funcs_buffer(const char *buffer)
             printf("exponents   :");
             for (u64 k = 0; k < n_exponents; ++k)
             {
-                f64 exponent = *((f64 *)p);
+                f64 exponent = *((f64*)p);
                 ++p;
                 printf("%19.12e ", exponent);
             }
             printf("\ncoefficients:");
             for (u64 k = 0; k < n_exponents; ++k)
             {
-                f64 coefficient = *((f64 *)p);
+                f64 coefficient = *((f64*)p);
                 ++p;
                 printf("%19.12e ", coefficient);
             }

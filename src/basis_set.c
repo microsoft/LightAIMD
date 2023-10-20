@@ -15,11 +15,11 @@ static u32 const UTF8_CODEPOINTS_EXPONENTS[] = {'e', 'x', 'p', 'o', 'n', 'e', 'n
 static u32 const UTF8_CODEPOINTS_COEFFICIENTS[] = {'c', 'o', 'e', 'f', 'f', 'i', 'c', 'i', 'e', 'n', 't', 's'};                         // coefficients
 static u32 const UTF8_CODEPOINTS_ANGULAR_MOMENTUM[] = {'a', 'n', 'g', 'u', 'l', 'a', 'r', '_', 'm', 'o', 'm', 'e', 'n', 't', 'u', 'm'}; // angular_momentum
 
-char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_elements, u64 *selected_elements)
+char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_elements, u64* selected_elements)
 {
     u64 filepath_len = strlen(basis_set_filepath);
     u64 sanitized_filepath_len = filepath_len * 4 + 1; // replace '*' with "_st_"
-    char *sanitized_filepath = x_malloc(sanitized_filepath_len);
+    char* sanitized_filepath = x_malloc(sanitized_filepath_len);
 
     u64 filepath_idx = 0;
     u64 sanitized_filepath_idx = 0;
@@ -39,25 +39,25 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
         }
     }
 
-    u32 *codepoints;
+    u32* codepoints;
     u64 codepoints_len;
     read_json_into_codepoints_ot(sanitized_filepath, &codepoints, &codepoints_len);
     x_free(sanitized_filepath);
-    struct json_token *tokens;
+    struct json_token* tokens;
     u64 tokens_len = json_tokenize_ot(codepoints, codepoints_len, &tokens);
     u64 token_index = 0;
-    struct json *json = decode_json_tokens_ot(codepoints, tokens, &token_index, tokens_len);
+    struct json* json = decode_json_tokens_ot(codepoints, tokens, &token_index, tokens_len);
     x_free(tokens);
 
     u64 bc = sizeof(u64); /* byte count, initial value: space for number of elements */
     u64 n_found_elements = 0;
-    struct json *elements = find_json_obj_member_by_codepoints(json, UTF8_CODEPOINTS_ELEMENTS, sizeof(UTF8_CODEPOINTS_ELEMENTS) / sizeof(u32));
+    struct json* elements = find_json_obj_member_by_codepoints(json, UTF8_CODEPOINTS_ELEMENTS, sizeof(UTF8_CODEPOINTS_ELEMENTS) / sizeof(u32));
 
-    struct json *element = elements->child;
+    struct json* element = elements->child;
     while (element != NULL)
     {
         u64 Z = utf8tou64(element->codepoints, element->length);
-        u64 *s = selected_elements;
+        u64* s = selected_elements;
         u64 found = 0;
         for (u64 r = 0; r < n_selected_elements; ++r)
         {
@@ -72,14 +72,14 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
         {
             ++n_found_elements;
             bc += sizeof(u64) * 2;
-            struct json *electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
-            struct json *electron_shell = electron_shells->child;
+            struct json* electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
+            struct json* electron_shell = electron_shells->child;
             while (electron_shell != NULL)
             {
-                struct json *exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
+                struct json* exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
                 u64 n_exponents = exponents->length;
-                struct json *angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
-                struct json *am = angular_momentum->child;
+                struct json* angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
+                struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
                     u64 k = utf8tou64(am->codepoints, am->length);
@@ -98,8 +98,8 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
         }
     }
 
-    u64 *buffer = (u64 *)x_malloc(bc);
-    u64 *p = buffer;
+    u64* buffer = (u64*)x_malloc(bc);
+    u64* p = buffer;
     *p = n_found_elements;
     ++p;
 
@@ -107,7 +107,7 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
     while (element != NULL)
     {
         u64 Z = utf8tou64(element->codepoints, element->length);
-        u64 *s = selected_elements;
+        u64* s = selected_elements;
         u64 found = 0;
         for (u64 r = 0; r < n_selected_elements; ++r)
         {
@@ -122,19 +122,19 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
         {
             *p = Z;
             ++p;
-            u64 *n_orbitals_p = p;
+            u64* n_orbitals_p = p;
             ++p; // skip the n_orbitals as we do not know its value yet
             u64 n_orbitals = 0;
-            struct json *electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
-            struct json *electron_shell = electron_shells->child;
+            struct json* electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
+            struct json* electron_shell = electron_shells->child;
             while (electron_shell != NULL)
             {
-                struct json *exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
+                struct json* exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
                 u64 n_exponents = exponents->length;
-                struct json *coefficients = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_COEFFICIENTS, sizeof(UTF8_CODEPOINTS_COEFFICIENTS) / sizeof(u32));
+                struct json* coefficients = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_COEFFICIENTS, sizeof(UTF8_CODEPOINTS_COEFFICIENTS) / sizeof(u32));
                 u64 am_index = 0;
-                struct json *angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
-                struct json *am = angular_momentum->child;
+                struct json* angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
+                struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
                     u64 k = utf8tou64(am->codepoints, am->length);
@@ -153,24 +153,24 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
                             *p = n_exponents;
                             ++p;
 
-                            struct json *exponent = exponents->child;
+                            struct json* exponent = exponents->child;
                             while (exponent != NULL)
                             {
-                                *((f64 *)p) = utf8tof64(exponent->codepoints, exponent->length);
+                                *((f64*)p) = utf8tof64(exponent->codepoints, exponent->length);
                                 ++p;
                                 exponent = exponent->next;
                             }
 
-                            struct json *coefficient = coefficients->child;
+                            struct json* coefficient = coefficients->child;
                             u64 coefficient_index = 0;
                             while (coefficient != NULL)
                             {
                                 if (coefficient_index == am_index)
                                 {
-                                    struct json *coeff = coefficient->child;
+                                    struct json* coeff = coefficient->child;
                                     while (coeff != NULL)
                                     {
-                                        *((f64 *)p) = utf8tof64(coeff->codepoints, coeff->length);
+                                        *((f64*)p) = utf8tof64(coeff->codepoints, coeff->length);
                                         ++p;
                                         coeff = coeff->next;
                                     }
@@ -200,7 +200,7 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
 
     free_json(json);
     x_free(codepoints);
-    return (char *)buffer;
+    return (char*)buffer;
 }
 
 #ifdef MODULE_TEST
@@ -210,7 +210,7 @@ char *load_basis_set_from_file(char const *basis_set_filepath, u64 n_selected_el
 #include <unistd.h>
 #include <libgen.h>
 
-int test_read_basis_set_file(char *program_path)
+int test_read_basis_set_file(char* program_path)
 {
     char buffer[PATH_MAX];
     char parent_dir_buffer[PATH_MAX];
@@ -224,7 +224,7 @@ int test_read_basis_set_file(char *program_path)
     }
 
     // Get the parent directory path
-    char *parentDir = dirname(buffer);
+    char* parentDir = dirname(buffer);
     if (realpath(parentDir, parent_dir_buffer) == NULL)
     {
         perror("Error finding parent directory path");
@@ -242,14 +242,14 @@ int test_read_basis_set_file(char *program_path)
     printf("reading json_file: %s\n", json_file_abspath);
 
     u64 selected_elements[] = {1, 3};
-    char *basis_set_buffer = load_basis_set_from_file(json_file_abspath, 2, selected_elements);
+    char* basis_set_buffer = load_basis_set_from_file(json_file_abspath, 2, selected_elements);
     x_free(basis_set_buffer);
 
     printf("\n");
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     test_read_basis_set_file(argv[0]);
 

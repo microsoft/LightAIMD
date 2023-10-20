@@ -25,7 +25,7 @@ char digit_to_char(i32 d)
  * Get the index of dot (.) in a string representing a f64 number
  * e.g. "-7.496469771270e+01"
  */
-i32 pos_of_dot(char *s, i32 size)
+i32 pos_of_dot(char* s, i32 size)
 {
     for (i32 i = 0; i < size; ++i)
     {
@@ -37,7 +37,7 @@ i32 pos_of_dot(char *s, i32 size)
     return -1;
 }
 
-i32 get_exponent(char *s, i32 size)
+i32 get_exponent(char* s, i32 size)
 {
     for (i32 i = 0; i < size; ++i)
     {
@@ -71,14 +71,14 @@ i32 f64_sign(f64 value)
  * such as -7.49646977125e+01.
  * TODO: test boundary cases
  */
-i32 round_f64_to_string(f64 value, i64 n, char *buff, i32 size)
+i32 round_f64_to_string(f64 value, i64 n, char* buff, i32 size)
 {
-    char const *fmt_ = "%%.%lde";
+    char const* fmt_ = "%%.%lde";
     int buff_size_ = snprintf(NULL, 0, fmt_, n);
     char buff_[buff_size_ + 1]; // +1 for terminating null
     snprintf(buff_, sizeof(buff_), fmt_, n);
 
-    char const *fmt = buff_;
+    char const* fmt = buff_;
 
     int buff_size = snprintf(NULL, 0, fmt, value);
 
@@ -93,7 +93,7 @@ i32 round_f64_to_string(f64 value, i64 n, char *buff, i32 size)
         return size - 1;
     }
 
-    char const *value_fmt = "%.15e";
+    char const* value_fmt = "%.15e";
     int value_buff_size = snprintf(NULL, 0, value_fmt, value);
     char value_buff[value_buff_size + 1]; // +1 for terminating null
     snprintf(value_buff, sizeof(value_buff), value_fmt, value);

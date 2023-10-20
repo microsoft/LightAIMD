@@ -15,7 +15,7 @@
  * C = einsum('mn,np->mp', A, B)
  * A: m x n; B: n x p; C: m x p
  */
-void einsum_mn_np__mp(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p)
+void einsum_mn_np__mp(f64* A, f64* B, f64* C, u64 m, u64 n, u64 p)
 {
     for (u64 i = 0; i < m; ++i)
     {
@@ -34,21 +34,21 @@ void einsum_mn_np__mp(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p)
 
 struct task_func_einsum_mn_np__mp_arg
 {
-    f64 *A;
-    f64 *B;
-    f64 *C;
+    f64* A;
+    f64* B;
+    f64* C;
     u64 m;
     u64 n;
     u64 p;
     u64 j;
 };
 
-void task_func_einsum_mn_np__mp(void *p_arg)
+void task_func_einsum_mn_np__mp(void* p_arg)
 {
-    struct task_func_einsum_mn_np__mp_arg *arg = (struct task_func_einsum_mn_np__mp_arg *)p_arg;
-    f64 *A = arg->A;
-    f64 *B = arg->B;
-    f64 *C = arg->C;
+    struct task_func_einsum_mn_np__mp_arg* arg = (struct task_func_einsum_mn_np__mp_arg*)p_arg;
+    f64* A = arg->A;
+    f64* B = arg->B;
+    f64* C = arg->C;
     u64 m = arg->m;
     u64 n = arg->n;
     u64 p = arg->p;
@@ -67,11 +67,11 @@ void task_func_einsum_mn_np__mp(void *p_arg)
     x_free(p_arg);
 }
 
-void einsum_mn_np__mp_parallel(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p, struct threadpool_context *tp_ctx)
+void einsum_mn_np__mp_parallel(f64* A, f64* B, f64* C, u64 m, u64 n, u64 p, struct threadpool_context* tp_ctx)
 {
     for (u64 j = 0; j < p; ++j)
     {
-        struct task_func_einsum_mn_np__mp_arg *arg = x_malloc(sizeof(struct task_func_einsum_mn_np__mp_arg));
+        struct task_func_einsum_mn_np__mp_arg* arg = x_malloc(sizeof(struct task_func_einsum_mn_np__mp_arg));
         arg->A = A;
         arg->B = B;
         arg->C = C;
@@ -90,7 +90,7 @@ void einsum_mn_np__mp_parallel(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p, stru
  * A: m x n; B: m x n;
  * C = einsum('mn,mp->np', A, B)
  */
-void einsum_mn_mp__np(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p)
+void einsum_mn_mp__np(f64* A, f64* B, f64* C, u64 m, u64 n, u64 p)
 {
     for (u64 i = 0; i < n; ++i)
     {
@@ -108,18 +108,18 @@ void einsum_mn_mp__np(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p)
 
 struct task_func_einsum_mn_mp__np_arg
 {
-    f64 *A;
-    f64 *B;
-    f64 *C;
+    f64* A;
+    f64* B;
+    f64* C;
     u64 m;
     u64 n;
     u64 p;
     u64 i;
 };
 
-void task_func_einsum_mn_mp__np(void *p_arg)
+void task_func_einsum_mn_mp__np(void* p_arg)
 {
-    struct task_func_einsum_mn_mp__np_arg *arg = (struct task_func_einsum_mn_mp__np_arg *)p_arg;
+    struct task_func_einsum_mn_mp__np_arg* arg = (struct task_func_einsum_mn_mp__np_arg*)p_arg;
 
     for (u64 j = 0; j < arg->p; ++j)
     {
@@ -134,11 +134,11 @@ void task_func_einsum_mn_mp__np(void *p_arg)
     x_free(p_arg);
 }
 
-void einsum_mn_mp__np_parallel(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p, struct threadpool_context *tp_ctx)
+void einsum_mn_mp__np_parallel(f64* A, f64* B, f64* C, u64 m, u64 n, u64 p, struct threadpool_context* tp_ctx)
 {
     for (u64 i = 0; i < n; ++i)
     {
-        struct task_func_einsum_mn_mp__np_arg *arg = x_malloc(sizeof(struct task_func_einsum_mn_mp__np_arg));
+        struct task_func_einsum_mn_mp__np_arg* arg = x_malloc(sizeof(struct task_func_einsum_mn_mp__np_arg));
         arg->A = A;
         arg->B = B;
         arg->C = C;
@@ -154,7 +154,7 @@ void einsum_mn_mp__np_parallel(f64 *A, f64 *B, f64 *C, u64 m, u64 n, u64 p, stru
 /*
  * D = einsum('mn,mp,m->np', A, B, C)
  */
-void einsum_mn_mp_m__np(f64 *A, f64 *B, f64 *C, f64 *D, u64 m, u64 n, u64 p)
+void einsum_mn_mp_m__np(f64* A, f64* B, f64* C, f64* D, u64 m, u64 n, u64 p)
 {
     for (u64 i = 0; i < n; ++i)
     {
@@ -174,7 +174,7 @@ void einsum_mn_mp_m__np(f64 *A, f64 *B, f64 *C, f64 *D, u64 m, u64 n, u64 p)
  * The 'addition assignment +=' version of 'mn,mp,m->np'
  * D += einsum('mn,mp,m->np', A, B, C)
  */
-void einsumaa_mn_mp_m__np(f64 *A, f64 *B, f64 *C, f64 *D, u64 m, u64 n, u64 p)
+void einsumaa_mn_mp_m__np(f64* A, f64* B, f64* C, f64* D, u64 m, u64 n, u64 p)
 {
     for (u64 i = 0; i < n; ++i)
     {
@@ -193,7 +193,7 @@ void einsumaa_mn_mp_m__np(f64 *A, f64 *B, f64 *C, f64 *D, u64 m, u64 n, u64 p)
 /*
  * C = einsum('mn,mn->m', A, B)
  */
-void einsum_mn_mn__m(f64 *A, f64 *B, f64 *C, u64 m, u64 n)
+void einsum_mn_mn__m(f64* A, f64* B, f64* C, u64 m, u64 n)
 {
     for (u64 i = 0; i < m; ++i)
     {
@@ -210,7 +210,7 @@ void einsum_mn_mn__m(f64 *A, f64 *B, f64 *C, u64 m, u64 n)
 /*
  * einsum('mn,nm->', A, B)
  */
-f64 einsum_mn_nm(f64 *A, f64 *B, u64 m, u64 n)
+f64 einsum_mn_nm(f64* A, f64* B, u64 m, u64 n)
 {
     f64 result = 0.0;
     for (u64 i = 0; i < m; ++i)

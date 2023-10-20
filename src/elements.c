@@ -5,7 +5,7 @@
 #include <string.h>
 #include "numeric_types.h"
 
-char *ELEMENTS[] = {
+char* ELEMENTS[] = {
     "X", /* Placeholder */
     "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
     "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
@@ -21,7 +21,7 @@ char *ELEMENTS[] = {
     "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og" /* Og: 118 (Z) */
 };
 
-u64 atomic_symbol_to_num(char const *sym)
+u64 atomic_symbol_to_num(char const* sym)
 {
     for (u64 i = 0; i < 119; ++i)
     {
@@ -33,7 +33,7 @@ u64 atomic_symbol_to_num(char const *sym)
     return 0;
 }
 
-char *ATOMIC_NAMES[] = {
+char* ATOMIC_NAMES[] = {
     "Placeholder",
     /* IUPAC version dated 28 November 2016 */
     "Hydrogen", "Helium", "Lithium", "Beryllium", "Boron",

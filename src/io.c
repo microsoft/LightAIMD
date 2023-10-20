@@ -10,9 +10,9 @@
 #include "numeric_types.h"
 #include "mm.h"
 
-void filename_stem(const char *path, char *stem)
+void filename_stem(const char* path, char* stem)
 {
-    char const *p = path;
+    char const* p = path;
     u64 idx = 0;
     while (1)
     {
@@ -46,7 +46,7 @@ void filename_stem(const char *path, char *stem)
     memcpy(stem, p, dot_idx);
 }
 
-u64 ensure_dir_exists(char const *path)
+u64 ensure_dir_exists(char const* path)
 {
     struct stat status;
     stat(path, &status);
@@ -67,9 +67,9 @@ u64 ensure_dir_exists(char const *path)
     return 0;
 }
 
-void read_file_to_buffer_ot(char const *file_path, void **buffer, u64 *buffer_size)
+void read_file_to_buffer_ot(char const* file_path, void** buffer, u64* buffer_size)
 {
-    FILE *fp = fopen(file_path, "rb");
+    FILE* fp = fopen(file_path, "rb");
     if (NULL == fp)
     {
         return;

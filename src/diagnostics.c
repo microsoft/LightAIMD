@@ -10,7 +10,7 @@
 #include "mm.h"
 #include "f64_util.h"
 
-void print_f64_array(f64 *A, u64 count, u64 col_size, int precision)
+void print_f64_array(f64* A, u64 count, u64 col_size, int precision)
 {
     u64 nrow = count / col_size;
     u64 last_row = count % col_size;
@@ -50,13 +50,13 @@ void print_f64_array(f64 *A, u64 count, u64 col_size, int precision)
     printf("\n");
 }
 
-void print_f64_array_with_label(f64 *A, u64 count, u64 col_size, int precision, char const *label)
+void print_f64_array_with_label(f64* A, u64 count, u64 col_size, int precision, char const* label)
 {
     printf("%s:\n", label);
     print_f64_array(A, count, col_size, precision);
 }
 
-void print_u32_array(u32 *A, u64 count, u64 col_size)
+void print_u32_array(u32* A, u64 count, u64 col_size)
 {
     u64 nrow = count / col_size;
     u64 last_row = count % col_size;
@@ -90,13 +90,13 @@ void print_u32_array(u32 *A, u64 count, u64 col_size)
     printf("\n");
 }
 
-void print_u32_array_with_label(u32 *A, u64 count, u64 col_size, char const *label)
+void print_u32_array_with_label(u32* A, u64 count, u64 col_size, char const* label)
 {
     printf("%s:\n", label);
     print_u32_array(A, count, col_size);
 }
 
-void print_f64_values_within_bounds(f64 *A, u64 count, f64 lower_bound, f64 upper_bound, u64 col_size, int precision, i64 max_count)
+void print_f64_values_within_bounds(f64* A, u64 count, f64 lower_bound, f64 upper_bound, u64 col_size, int precision, i64 max_count)
 {
     u64 nrow = count / col_size;
     u64 last_row = count % col_size;
@@ -168,7 +168,7 @@ end:
     printf("\n");
 }
 
-void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const *array_label)
+void inspect_nan(f64* A, u64 count, u64 col_size, i64 max_count, char const* array_label)
 {
     printf("checking %s for nan values ...\n", array_label);
 
@@ -211,17 +211,17 @@ void inspect_nan(f64 *A, u64 count, u64 col_size, i64 max_count, char const *arr
     }
 }
 
-void dump_f64_array(f64 *A, u64 count, char const *file_name)
+void dump_f64_array(f64* A, u64 count, char const* file_name)
 {
-    FILE *fp = fopen(file_name, "wb");
+    FILE* fp = fopen(file_name, "wb");
     fwrite(&count, sizeof(u64), 1, fp);
     fwrite(A, sizeof(f64) * count, 1, fp);
     fclose(fp);
 }
 
-f64 *load_f64_array(char const *file_name)
+f64* load_f64_array(char const* file_name)
 {
-    FILE *fp = fopen(file_name, "rb");
+    FILE* fp = fopen(file_name, "rb");
     u64 count;
     if (fread(&count, sizeof(f64), 1, fp) != 1)
     {
@@ -229,7 +229,7 @@ f64 *load_f64_array(char const *file_name)
         fclose(fp);
         return NULL;
     }
-    f64 *A = x_malloc(count * sizeof(f64));
+    f64* A = x_malloc(count * sizeof(f64));
     if (fread(A, sizeof(f64), count, fp) != count)
     {
         printf("failed to read %lu f64 values from %s\n", count, file_name);
@@ -240,7 +240,7 @@ f64 *load_f64_array(char const *file_name)
     return A;
 }
 
-i64 compare_f64_arrays(f64 *A, f64 *B, u64 count)
+i64 compare_f64_arrays(f64* A, f64* B, u64 count)
 {
     for (u64 i = 0; i < count; ++i)
     {
@@ -256,7 +256,7 @@ i64 compare_f64_arrays(f64 *A, f64 *B, u64 count)
     return 0;
 }
 
-void print_f64_diff(f64 value, f64 expected, char const *label)
+void print_f64_diff(f64 value, f64 expected, char const* label)
 {
     printf("---------------------------------\n");
     printf("%s:\n", label);
@@ -298,7 +298,7 @@ int main(void)
     /* test dump and load f64 array */
     dump_f64_array(A, 34, "A.bin");
     printf("f64 array has been dumped to A.bin\n");
-    f64 *B = load_f64_array("A.bin");
+    f64* B = load_f64_array("A.bin");
     printf("%ld\n", compare_f64_arrays(A, B, 34));
     if (remove("A.bin") == 0)
     {

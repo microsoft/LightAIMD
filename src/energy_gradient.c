@@ -20,23 +20,23 @@
 
 struct task_func_energy_dwrt_nuc_arg
 {
-    struct scf_context *ctx;
-    struct molecular_grid_desc *mgd;
-    struct vec3d *coord_n;
+    struct scf_context* ctx;
+    struct molecular_grid_desc* mgd;
+    struct vec3d* coord_n;
     u64 n_atoms;
     u64 n;
     u64 N;
     f64 hyb_coef;
 };
 
-static void vec3d_addto(f64 *a, f64 *b)
+static void vec3d_addto(f64* a, f64* b)
 {
     b[0] += a[0];
     b[1] += a[1];
     b[2] += a[2];
 }
 
-static void vec3d_subtractfrom(f64 *a, f64 *b, f64 k)
+static void vec3d_subtractfrom(f64* a, f64* b, f64 k)
 {
     b[0] -= k * a[0];
     b[1] -= k * a[1];
@@ -45,10 +45,10 @@ static void vec3d_subtractfrom(f64 *a, f64 *b, f64 k)
 
 struct task_func_eri_dwrt_nuc_arg
 {
-    struct scf_context *ctx;
-    f64 *dF_x;
-    f64 *dF_y;
-    f64 *dF_z;
+    struct scf_context* ctx;
+    f64* dF_x;
+    f64* dF_y;
+    f64* dF_z;
     u64 n;
     u64 i;
     u64 j;
@@ -60,13 +60,13 @@ struct task_func_eri_dwrt_nuc_arg
     f64 hyb_coef;
 };
 
-static void task_func_eri_dwrt_nuc(void *p_arg)
+static void task_func_eri_dwrt_nuc(void* p_arg)
 {
-    struct task_func_eri_dwrt_nuc_arg *arg = (struct task_func_eri_dwrt_nuc_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    f64 *dF_x = arg->dF_x;
-    f64 *dF_y = arg->dF_y;
-    f64 *dF_z = arg->dF_z;
+    struct task_func_eri_dwrt_nuc_arg* arg = (struct task_func_eri_dwrt_nuc_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    f64* dF_x = arg->dF_x;
+    f64* dF_y = arg->dF_y;
+    f64* dF_z = arg->dF_z;
     u64 n = arg->n;
     u64 i = arg->i;
     u64 j = arg->j;
@@ -77,7 +77,7 @@ static void task_func_eri_dwrt_nuc(void *p_arg)
     u64 ij_kl = arg->ij_kl;
     f64 hyb_coef = arg->hyb_coef;
 
-    volatile atomic_bool *L = ctx->LOCK;
+    volatile atomic_bool* L = ctx->LOCK;
     u64 N = ctx->n_basis_funcs;
     u64 iN = i * N;
     u64 iNj = iN + j;
@@ -201,12 +201,12 @@ static void task_func_eri_dwrt_nuc(void *p_arg)
     x_free(p_arg);
 }
 
-static void task_func_energy_dwrt_nuc(void *p_arg)
+static void task_func_energy_dwrt_nuc(void* p_arg)
 {
-    struct task_func_energy_dwrt_nuc_arg *arg = (struct task_func_energy_dwrt_nuc_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    struct molecular_grid_desc *mgd = arg->mgd;
-    struct vec3d *coord_n = arg->coord_n;
+    struct task_func_energy_dwrt_nuc_arg* arg = (struct task_func_energy_dwrt_nuc_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    struct molecular_grid_desc* mgd = arg->mgd;
+    struct vec3d* coord_n = arg->coord_n;
     u64 n_atoms = arg->n_atoms;
     u64 n = arg->n;
     u64 N = arg->N;
@@ -215,26 +215,26 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
     f64 hyb_coef = arg->hyb_coef;
 
     /* allocate the buffers for storing the derivatives */
-    f64 *dS_x = x_malloc(N2_f64);
-    f64 *dT_x = x_malloc(N2_f64);
-    f64 *dV_x = x_malloc(N2_f64);
-    f64 *dF_x = x_malloc(N2_f64);
-    f64 *M1_x = x_malloc(N2_f64);
-    f64 *M2_x = x_malloc(N2_f64);
+    f64* dS_x = x_malloc(N2_f64);
+    f64* dT_x = x_malloc(N2_f64);
+    f64* dV_x = x_malloc(N2_f64);
+    f64* dF_x = x_malloc(N2_f64);
+    f64* M1_x = x_malloc(N2_f64);
+    f64* M2_x = x_malloc(N2_f64);
 
-    f64 *dS_y = x_malloc(N2_f64);
-    f64 *dT_y = x_malloc(N2_f64);
-    f64 *dV_y = x_malloc(N2_f64);
-    f64 *dF_y = x_malloc(N2_f64);
-    f64 *M1_y = x_malloc(N2_f64);
-    f64 *M2_y = x_malloc(N2_f64);
+    f64* dS_y = x_malloc(N2_f64);
+    f64* dT_y = x_malloc(N2_f64);
+    f64* dV_y = x_malloc(N2_f64);
+    f64* dF_y = x_malloc(N2_f64);
+    f64* M1_y = x_malloc(N2_f64);
+    f64* M2_y = x_malloc(N2_f64);
 
-    f64 *dS_z = x_malloc(N2_f64);
-    f64 *dT_z = x_malloc(N2_f64);
-    f64 *dV_z = x_malloc(N2_f64);
-    f64 *dF_z = x_malloc(N2_f64);
-    f64 *M1_z = x_malloc(N2_f64);
-    f64 *M2_z = x_malloc(N2_f64);
+    f64* dS_z = x_malloc(N2_f64);
+    f64* dT_z = x_malloc(N2_f64);
+    f64* dV_z = x_malloc(N2_f64);
+    f64* dF_z = x_malloc(N2_f64);
+    f64* M1_z = x_malloc(N2_f64);
+    f64* M2_z = x_malloc(N2_f64);
 
     f64 xyz[] = {0.0, 0.0, 0.0};
 
@@ -268,7 +268,7 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
             vec3d_subtractfrom(xyz, dv, ctx->mol->atomic_nums[n]);
             for (u64 m = 0; m < n_atoms; ++m)
             {
-                struct vec3d *coord_m = ctx->mol->coords + m;
+                struct vec3d* coord_m = ctx->mol->coords + m;
 
                 /*
                  * Derivatives with respect to the orbital centers
@@ -316,7 +316,7 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
          * -(((x-x0) Z1 Z2)/((x-x0)^2+(y-y0)^2+(z-z0)^2)^(3/2))
          */
 
-        struct vec3d *coord_m = ctx->mol->coords + m;
+        struct vec3d* coord_m = ctx->mol->coords + m;
 
         f64 dx = coord_n->x - coord_m->x;
         f64 dy = coord_n->y - coord_m->y;
@@ -339,7 +339,7 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
     memset(dF_x, 0, N2_f64);
     memset(dF_y, 0, N2_f64);
     memset(dF_z, 0, N2_f64);
-    struct threadpool_context *alt_tp_ctx = threadpool_initialize(0, 4096);
+    struct threadpool_context* alt_tp_ctx = threadpool_initialize(0, 4096);
     for (u64 i = 0; i < N; ++i)
     {
         u64 iN = i * N;
@@ -371,7 +371,7 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
                     }
                     if (ij >= kl)
                     {
-                        struct task_func_eri_dwrt_nuc_arg *arg = x_malloc(sizeof(struct task_func_eri_dwrt_nuc_arg));
+                        struct task_func_eri_dwrt_nuc_arg* arg = x_malloc(sizeof(struct task_func_eri_dwrt_nuc_arg));
                         arg->ctx = ctx;
                         arg->dF_x = dF_x;
                         arg->dF_y = dF_y;
@@ -456,8 +456,8 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
         force[2] += xc_force[2];
     }
 
-    f64 *M1 = M1_x;
-    f64 *M2 = M2_x;
+    f64* M1 = M1_x;
+    f64* M2 = M2_x;
     einsum_mn_np__mp(ctx->F, ctx->P, M1, N, N, N);
     einsum_mn_np__mp(ctx->P, M1, M2, N, N, N);
 
@@ -497,13 +497,13 @@ static void task_func_energy_dwrt_nuc(void *p_arg)
     x_free(p_arg);
 }
 
-void energy_dwrt_nuc(struct scf_context *ctx)
+void energy_dwrt_nuc(struct scf_context* ctx)
 {
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
     f64 hyb_coef = 1.0;
-    struct molecular_grid_desc *mgd = NULL;
+    struct molecular_grid_desc* mgd = NULL;
     if (ctx->dft_ctx)
     {
         mgd = ctx->dft_ctx->mgd;
@@ -513,12 +513,12 @@ void energy_dwrt_nuc(struct scf_context *ctx)
 
     u64 n_atoms = ctx->mol->n_atoms;
     u64 N = ctx->n_basis_funcs;
-    struct threadpool_context *tp_ctx = ctx->tp_ctx;
+    struct threadpool_context* tp_ctx = ctx->tp_ctx;
 
     for (u64 n = 0; n < n_atoms; ++n)
     {
-        struct vec3d *coord_n = ctx->mol->coords + n;
-        struct task_func_energy_dwrt_nuc_arg *arg = x_malloc(sizeof(struct task_func_energy_dwrt_nuc_arg));
+        struct vec3d* coord_n = ctx->mol->coords + n;
+        struct task_func_energy_dwrt_nuc_arg* arg = x_malloc(sizeof(struct task_func_energy_dwrt_nuc_arg));
         arg->ctx = ctx;
         arg->mgd = mgd;
         arg->coord_n = coord_n;
