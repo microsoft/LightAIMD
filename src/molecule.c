@@ -13,7 +13,7 @@
 #include "mm.h"
 #include "io.h"
 
-void free_molecule(struct molecule *mol)
+void free_molecule(struct molecule* mol)
 {
     x_free(mol->atomic_nums);
     x_free(mol->masses);
@@ -25,14 +25,14 @@ void free_molecule(struct molecule *mol)
     x_free(mol);
 }
 
-void mol_reset_forces(struct molecule *mol)
+void mol_reset_forces(struct molecule* mol)
 {
     memset(mol->forces, 0, mol->n_atoms * sizeof(struct vec3d));
 }
 
-i64 read_xyz(char const *xyz_file, struct molecule *mol)
+i64 read_xyz(char const* xyz_file, struct molecule* mol)
 {
-    FILE *fp = fopen(xyz_file, "r");
+    FILE* fp = fopen(xyz_file, "r");
     if (!fp)
     {
         fprintf(stderr, "fopen() failed in file %s at line %d", __FILE__, __LINE__);
@@ -43,7 +43,7 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
     // read atom number
     if (fgets(buff, sizeof(buff), fp))
     {
-        char *str_end;
+        char* str_end;
         mol->n_atoms = strtoull(buff, &str_end, 10);
     }
 
@@ -52,14 +52,14 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
     // read comment line
     if (fgets(buff, sizeof(buff), fp))
     {
-        char *p = buff + strlen("charge ");
-        char *str_end;
+        char* p = buff + strlen("charge ");
+        char* str_end;
         molecular_charge = strtoll(p, &str_end, 10);
         p = str_end + strlen(" multiplicity ");
         mol->multiplicity = strtoull(p, &str_end, 10);
 
         p = str_end + strlen(" unit ");
-        if (!strncmp(p, "bohr", strlen("bohr"))) // not bohr
+        if (!strncmp(p, "bohr", strlen("bohr")))  // not bohr
         {
             use_unit_angstrom = 0;
         }
@@ -77,7 +77,7 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
     u64 total_nuclear_charge = 0;
     while (fgets(buff, sizeof(buff), fp))
     {
-        char *atom_symbol = strtok(buff, " ");
+        char* atom_symbol = strtok(buff, " ");
         u64 Z = atomic_symbol_to_num(atom_symbol);
         total_nuclear_charge += Z;
         mol->atomic_nums[lc] = Z;
@@ -112,7 +112,7 @@ i64 read_xyz(char const *xyz_file, struct molecule *mol)
     return E_SUCCESS;
 }
 
-void write_trajectory(FILE *fp, struct molecule *mol, u64 step)
+void write_trajectory(FILE* fp, struct molecule* mol, u64 step)
 {
     fprintf(fp, "%lu\n", mol->n_atoms);
     fprintf(fp, "Step %lu coordinates (unit angstrom)\n", step);
@@ -122,7 +122,7 @@ void write_trajectory(FILE *fp, struct molecule *mol, u64 step)
     }
 }
 
-void write_velocities(FILE *fp, struct molecule *mol, u64 step)
+void write_velocities(FILE* fp, struct molecule* mol, u64 step)
 {
     fprintf(fp, "%lu\n", mol->n_atoms);
     fprintf(fp, "Step %lu velocity (unit angstrom/fs)\n", step);
@@ -132,7 +132,7 @@ void write_velocities(FILE *fp, struct molecule *mol, u64 step)
     }
 }
 
-void write_forces(FILE *fp, struct molecule *mol, u64 step)
+void write_forces(FILE* fp, struct molecule* mol, u64 step)
 {
     fprintf(fp, "%lu\n", mol->n_atoms);
     fprintf(fp, "Step %lu forces (unit hartree/angstrom)\n", step);
@@ -142,7 +142,7 @@ void write_forces(FILE *fp, struct molecule *mol, u64 step)
     }
 }
 
-u64 *mol_elements(struct molecule *mol)
+u64* mol_elements(struct molecule* mol)
 {
     u64 elements[128] = {0};
     for (u64 i = 0; i < mol->n_atoms; ++i)
@@ -156,7 +156,7 @@ u64 *mol_elements(struct molecule *mol)
         n_elements += elements[i];
     }
 
-    u64 *p_elements = x_malloc(sizeof(u64) * (n_elements + 1));
+    u64* p_elements = x_malloc(sizeof(u64) * (n_elements + 1));
     p_elements[0] = n_elements;
     u64 p = 1;
     for (u64 i = 0; i < 128; ++i)
@@ -170,7 +170,7 @@ u64 *mol_elements(struct molecule *mol)
     return p_elements;
 }
 
-void center_of_charge(struct molecule *mol, struct vec3d *cc)
+void center_of_charge(struct molecule* mol, struct vec3d* cc)
 {
     f64 cc_x = 0.0;
     f64 cc_y = 0.0;
@@ -193,7 +193,7 @@ void center_of_charge(struct molecule *mol, struct vec3d *cc)
     cc->z = cc_z;
 }
 
-void print_molecule(struct molecule *mol)
+void print_molecule(struct molecule* mol)
 {
     printf("--------------------------------- molecule ---------------------------------\n");
     printf("n_atoms: %lu\n", mol->n_atoms);
@@ -215,7 +215,7 @@ void print_molecule(struct molecule *mol)
 #ifdef MODULE_TEST
 int main(void)
 {
-    struct molecule *mol = x_malloc(sizeof(struct molecule));
+    struct molecule* mol = x_malloc(sizeof(struct molecule));
     read_xyz("sample/chignolin.xyz", mol);
     print_molecule(mol);
     return 0;

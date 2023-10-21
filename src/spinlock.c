@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "numeric_types.h"
 
-void spinlock_lock(volatile atomic_bool *lck)
+void spinlock_lock(volatile atomic_bool* lck)
 {
     while (1)
     {
@@ -21,7 +21,7 @@ void spinlock_lock(volatile atomic_bool *lck)
     }
 }
 
-void spinlock_unlock(volatile atomic_bool *lck)
+void spinlock_unlock(volatile atomic_bool* lck)
 {
     atomic_store_explicit(lck, 0, memory_order_release);
 }

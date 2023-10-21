@@ -8,7 +8,7 @@
 
 void print_numeric_type_sizes()
 {
-    printf("sizeof(void *): %lu\n", sizeof(void *));
+    printf("sizeof(void*): %lu\n", sizeof(void*));
     printf("\n");
 
     printf("sizeof(_Bool): %lu\n", sizeof(_Bool));

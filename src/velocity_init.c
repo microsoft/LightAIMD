@@ -13,13 +13,13 @@
 #include "thermostat.h"
 #include "vec3d.h"
 
-void maxwell_boltzmann_velocity_init(struct molecule *mol, f64 temperature_K)
+void maxwell_boltzmann_velocity_init(struct molecule* mol, f64 temperature_K)
 {
     f64 t_au = BOLTZMANN_CONSTANT_k * temperature_K * ENERGY_J_TO_ATOMIC_UNIT;
-    f64 *rnd = x_malloc(mol->n_atoms * 3 * sizeof(f64));
+    f64* rnd = x_malloc(mol->n_atoms * 3 * sizeof(f64));
     rand_standard_normal(rnd, mol->n_atoms * 3);
 
-    f64 *p_rnd = rnd;
+    f64* p_rnd = rnd;
     for (u64 i = 0; i < mol->n_atoms; ++i)
     {
         f64 v = sqrt(t_au / mol->masses[i]);
@@ -34,7 +34,7 @@ void maxwell_boltzmann_velocity_init(struct molecule *mol, f64 temperature_K)
 #ifdef MODULE_TEST
 int main(void)
 {
-    struct molecule *mol = x_malloc(sizeof(struct molecule));
+    struct molecule* mol = x_malloc(sizeof(struct molecule));
     f64 T = 300.0;
     mol->n_atoms = 1000;
     mol->masses = x_malloc(mol->n_atoms * sizeof(f64));

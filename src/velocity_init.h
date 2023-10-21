@@ -8,6 +8,6 @@
 #include "molecule.h"
 #include "numeric_types.h"
 
-void maxwell_boltzmann_velocity_init(struct molecule *mol, f64 temperature_K);
+void maxwell_boltzmann_velocity_init(struct molecule* mol, f64 temperature_K);
 
 #endif

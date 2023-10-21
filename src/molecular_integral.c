@@ -34,7 +34,7 @@ struct HermiteState
     i64 j;
     i64 t;
     f64 value;
-    f64 coefficient; // coefficient of the current term when returning to the parent
+    f64 coefficient;  // coefficient of the current term when returning to the parent
     i64 parent;
     u64 num_children;
 };
@@ -75,14 +75,14 @@ __device__ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b,
     }
 
 #ifdef __NVCC__
-    const u64 stack_size = 40; // assume amn_a + amn_b <= 20
+    const u64 stack_size = 40;  // assume amn_a + amn_b <= 20
 #else
     u64 stack_size = (amn_a + amn_b) * 2;
     stack_size = stack_size < 1 ? 1 : stack_size;
 #endif
 
     struct HermiteState stack[stack_size];
-    i64 stack_top = 0; // points to the last element pushed to the stack
+    i64 stack_top = 0;  // points to the last element pushed to the stack
     stack[stack_top] = (struct HermiteState){
         .i = amn_a,
         .j = amn_b,
@@ -96,16 +96,16 @@ __device__ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b,
     while (stack_top > -1)
     {
         i64 current_stack_top = stack_top;
-        struct HermiteState *pitem = &stack[current_stack_top];
+        struct HermiteState* pitem = &stack[current_stack_top];
         i64 t = pitem->t;
         i64 i = pitem->i;
         i64 j = pitem->j;
 
-        if (pitem->num_children == 0) // the value calculated
+        if (pitem->num_children == 0)  // the value calculated
         {
             if (pitem->parent >= 0)
             {
-                struct HermiteState *parent = &stack[pitem->parent];
+                struct HermiteState* parent = &stack[pitem->parent];
                 parent->value += pitem->coefficient * pitem->value;
                 parent->num_children--;
             }
@@ -188,11 +188,11 @@ __device__ static f64 hermite_coef(f64 gexp_a, f64 gexp_b, i64 amn_a, i64 amn_b,
             }
         }
 
-        if (pitem->num_children == 0) // the value calculated
+        if (pitem->num_children == 0)  // the value calculated
         {
             if (pitem->parent >= 0)
             {
-                struct HermiteState *parent = &stack[pitem->parent];
+                struct HermiteState* parent = &stack[pitem->parent];
                 parent->value += pitem->coefficient * pitem->value;
                 parent->num_children--;
             }
@@ -280,7 +280,7 @@ __device__ static f64 pg_overlap_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, 
  */
 __device__ static f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                                    f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                                   u64 *axis_mask, u64 center)
+                                                   u64* axis_mask, u64 center)
 {
     u64 C = (center == 1) ? 1 : 0;
     u64 D = (center == 2) ? 1 : 0;
@@ -293,7 +293,7 @@ __device__ static f64 pg_overlap_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 
 }
 
 /* Calculates overlap S between two contracted Gaussian functions */
-__device__ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
+__device__ f64 cg_overlap_integral(struct basis_func* a, struct basis_func* b)
 {
     f64 result = 0.0;
 
@@ -314,7 +314,7 @@ __device__ f64 cg_overlap_integral(struct basis_func *a, struct basis_func *b)
 /*
  * Overlap derivative integral
  */
-__device__ void cg_overlap_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
+__device__ void cg_overlap_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u64 center, f64* xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -365,7 +365,7 @@ __device__ static f64 pg_kinetic_integral(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, 
 
 __device__ static f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                                    f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
-                                                   u64 *axis_mask, u64 center)
+                                                   u64* axis_mask, u64 center)
 {
     f64 gexp_b_sq2 = 2 * gexp_b * gexp_b;
 
@@ -397,7 +397,7 @@ __device__ static f64 pg_kinetic_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 
 }
 
 /* Calculates kinetic energy between two contracted Gaussian functions */
-__device__ f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
+__device__ f64 cg_kinetic_integral(struct basis_func* a, struct basis_func* b)
 {
     f64 result = 0.0;
 
@@ -415,7 +415,7 @@ __device__ f64 cg_kinetic_integral(struct basis_func *a, struct basis_func *b)
     return result;
 }
 
-__device__ void cg_kinetic_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, u64 center, f64 *xyz)
+__device__ void cg_kinetic_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, u64 center, f64* xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -479,7 +479,7 @@ __device__ static f64 pg_nuclear_attraction_integral(f64 gexp_a, u64 amn_x_a, u6
 __device__ static f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                                               f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                                               f64 x0_c, f64 y0_c, f64 z0_c,
-                                                              u64 *axis_mask)
+                                                              u64* axis_mask)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gpc_x = (gexp_a * x0_a + gexp_b * x0_b) / gexp_a_b;
@@ -519,7 +519,7 @@ __device__ static f64 pg_nuclear_attraction_integral_dwrt_nuc(f64 gexp_a, u64 am
 __device__ static f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a, u64 amn_x_a, u64 amn_y_a, u64 amn_z_a, f64 x0_a, f64 y0_a, f64 z0_a,
                                                                      f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                                                      f64 x0_c, f64 y0_c, f64 z0_c,
-                                                                     u64 *axis_mask, u64 center)
+                                                                     u64* axis_mask, u64 center)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
     f64 gpc_x = (gexp_a * x0_a + gexp_b * x0_b) / gexp_a_b;
@@ -562,7 +562,7 @@ __device__ static f64 pg_nuclear_attraction_integral_dwrt_orb_center(f64 gexp_a,
 }
 
 /* Calculates nuclear-electron attraction V */
-__device__ f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis_func *b, f64 x0_c, f64 y0_c, f64 z0_c)
+__device__ f64 cg_nuclear_attraction_integral(struct basis_func* a, struct basis_func* b, f64 x0_c, f64 y0_c, f64 z0_c)
 {
     f64 result = 0.0;
 
@@ -581,8 +581,8 @@ __device__ f64 cg_nuclear_attraction_integral(struct basis_func *a, struct basis
     return result;
 }
 
-__device__ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b,
-                                                        f64 x0_c, f64 y0_c, f64 z0_c, f64 *xyz)
+__device__ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b,
+                                                        f64 x0_c, f64 y0_c, f64 z0_c, f64* xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -609,8 +609,8 @@ __device__ void cg_nuclear_attraction_integral_dwrt_nuc(struct basis_func *a, st
 /*
  * Calculates the derivative of nuclear attraction with respect to the orbital centers
  */
-__device__ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func *a, struct basis_func *b,
-                                                               f64 x0_c, f64 y0_c, f64 z0_c, u64 center, f64 *xyz)
+__device__ void cg_nuclear_attraction_integral_dwrt_orb_center(struct basis_func* a, struct basis_func* b,
+                                                               f64 x0_c, f64 y0_c, f64 z0_c, u64 center, f64* xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -696,7 +696,7 @@ __device__ static f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 am
                                                               f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                                               f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
                                                               f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
-                                                              u64 *axis_mask,
+                                                              u64* axis_mask,
                                                               u64 center)
 {
     f64 gexp_a_b = gexp_a + gexp_b;
@@ -758,7 +758,7 @@ __device__ static f64 pg_electron_repulsion_integral_dwrt_nuc(f64 gexp_a, u64 am
 }
 
 /* Calculates electron repulsion integrals */
-__device__ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d)
+__device__ f64 cg_electron_repulsion_integral(struct basis_func* a, struct basis_func* b, struct basis_func* c, struct basis_func* d)
 {
     f64 result = 0.0;
 
@@ -786,7 +786,7 @@ __device__ f64 cg_electron_repulsion_integral(struct basis_func *a, struct basis
     return result;
 }
 
-__device__ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func *a, struct basis_func *b, struct basis_func *c, struct basis_func *d, u64 center, f64 *xyz)
+__device__ void cg_electron_repulsion_integral_dwrt_nuc(struct basis_func* a, struct basis_func* b, struct basis_func* c, struct basis_func* d, u64 center, f64* xyz)
 {
     for (u64 axis_idx = 0; axis_idx < 3; ++axis_idx)
     {
@@ -861,7 +861,7 @@ __global__ static void pg_electron_repulsion_integral_kernel(f64 gexp_a, u64 amn
                                                              f64 gexp_b, u64 amn_x_b, u64 amn_y_b, u64 amn_z_b, f64 x0_b, f64 y0_b, f64 z0_b,
                                                              f64 gexp_c, u64 amn_x_c, u64 amn_y_c, u64 amn_z_c, f64 x0_c, f64 y0_c, f64 z0_c,
                                                              f64 gexp_d, u64 amn_x_d, u64 amn_y_d, u64 amn_z_d, f64 x0_d, f64 y0_d, f64 z0_d,
-                                                             f64 *output)
+                                                             f64* output)
 {
     *output = pg_electron_repulsion_integral(gexp_a, amn_x_a, amn_y_a, amn_z_a, x0_a, y0_a, z0_a,
                                              gexp_b, amn_x_b, amn_y_b, amn_z_b, x0_b, y0_b, z0_b,

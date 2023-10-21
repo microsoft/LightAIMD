@@ -7,18 +7,18 @@
 #include "numeric_types.h"
 
 /* measures the time during which the processor is actively working on a task */
-void get_cpu_time(struct timespec *t)
+void get_cpu_time(struct timespec* t)
 {
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, t);
 }
 
 /* measures actual wall-clock time */
-void get_wall_time(struct timespec *t)
+void get_wall_time(struct timespec* t)
 {
     clock_gettime(CLOCK_MONOTONIC, t);
 }
 
-f64 diff_time_ms(struct timespec *t1, struct timespec *t2)
+f64 diff_time_ms(struct timespec* t1, struct timespec* t2)
 {
     return (t2->tv_sec - t1->tv_sec) * 1e3 + (t2->tv_nsec - t1->tv_nsec) * 1e-6;
 }
@@ -53,7 +53,7 @@ void sleep_5ms()
 }
 
 /* Get the current time, not thread-safe */
-void current_time_str(char *s, u64 s_size)
+void current_time_str(char* s, u64 s_size)
 {
     time_t t = time(NULL);
     strftime(s, s_size, "%Y-%m-%d %H:%M:%S", localtime(&t));

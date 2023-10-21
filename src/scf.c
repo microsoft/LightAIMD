@@ -27,7 +27,7 @@ const u64 DENSITY_INIT_SOAD = 1;
 const u64 DENSITY_INIT_HCORE = 2;
 const u64 DENSITY_INIT_USER_PROVIDED = 3;
 
-void print_basis_func_struct(struct basis_func *bf)
+void print_basis_func_struct(struct basis_func* bf)
 {
     printf("l: %lu m: %lu n: %lu\n", bf->l, bf->m, bf->n);
     printf("n_exponents: %lu\n", bf->n_exponents);
@@ -43,7 +43,7 @@ void print_basis_func_struct(struct basis_func *bf)
     printf("\n");
 }
 
-void print_scf_context(struct scf_context *ctx)
+void print_scf_context(struct scf_context* ctx)
 {
     struct vec3d cc;
     center_of_charge(ctx->mol, &cc);
@@ -85,7 +85,7 @@ void print_scf_context(struct scf_context *ctx)
         }
     }
 
-    f64 *P = ctx->P;
+    f64* P = ctx->P;
     printf("P:\n");
     f64 p_ = 0.0;
     for (u64 p = 0; p < N; ++p)
@@ -102,7 +102,7 @@ void print_scf_context(struct scf_context *ctx)
     printf("SCF Energy: %.6f\n", ctx->energy);
 }
 
-static f64 calc_nuclear_repulsion_energy(struct molecule *mol)
+static f64 calc_nuclear_repulsion_energy(struct molecule* mol)
 {
     f64 nre = 0.0;
     for (u64 i = 0; i < mol->n_atoms; ++i)
@@ -115,7 +115,7 @@ static f64 calc_nuclear_repulsion_energy(struct molecule *mol)
     return nre;
 }
 
-static void initialize_density_matrix_with_H_core(struct scf_context *ctx)
+static void initialize_density_matrix_with_H_core(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     // generalized_eigh_veconly(ctx->H, ctx->S, ctx->C, N);
@@ -142,19 +142,19 @@ static void initialize_density_matrix_with_H_core(struct scf_context *ctx)
     einsum_mn_np__mp(ctx->COO, ctx->COOT, ctx->P, N, nocc, N);
 }
 
-static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_filename)
+static void build_basis_funcs(struct scf_context* ctx, char const* basis_set_filename)
 {
-    struct molecule *mol = ctx->mol;
-    u64 *p_elements = mol_elements(mol);
+    struct molecule* mol = ctx->mol;
+    u64* p_elements = mol_elements(mol);
     u64 n_elements = *p_elements;
     log_tm_println(ctx->silent, "Loading basis set %s\n", basis_set_filename);
     ctx->basis_funcs_buff = load_basis_set_from_file(basis_set_filename, n_elements, (p_elements + 1));
     x_free(p_elements);
 
-    u64 *element2basisfuncs[128] = {0};
+    u64* element2basisfuncs[128] = {0};
 
-    u64 *p = (u64 *)ctx->basis_funcs_buff;
-    ++p; // skip u64 n_elements = *p;
+    u64* p = (u64*)ctx->basis_funcs_buff;
+    ++p;  // skip u64 n_elements = *p;
     for (u64 i = 0; i < n_elements; ++i)
     {
         u64 atomic_num = *p;
@@ -192,7 +192,7 @@ static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_fil
     u64 N = 0;
     for (u64 i = 0; i < mol->n_atoms; ++i)
     {
-        u64 *pbf = element2basisfuncs[mol->atomic_nums[i]];
+        u64* pbf = element2basisfuncs[mol->atomic_nums[i]];
         u64 n_basis_funcs = *pbf;
         N += n_basis_funcs;
     }
@@ -201,16 +201,16 @@ static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_fil
 
     ctx->basis_funcs = x_calloc(N, sizeof(struct basis_func));
     ctx->atom_bf_map = x_calloc(ctx->mol->n_atoms * N, sizeof(u32));
-    u64 bf_index = 0; // basis function index
+    u64 bf_index = 0;  // basis function index
     for (u64 i = 0; i < mol->n_atoms; ++i)
     {
-        u64 *pbf = element2basisfuncs[mol->atomic_nums[i]];
+        u64* pbf = element2basisfuncs[mol->atomic_nums[i]];
         u64 n_basis_funcs = *pbf;
         ++pbf;
 
         for (u64 j = 0; j < n_basis_funcs; ++j)
         {
-            struct basis_func *bf = ctx->basis_funcs + bf_index;
+            struct basis_func* bf = ctx->basis_funcs + bf_index;
             ctx->atom_bf_map[i * N + bf_index] = 1;
             bf->l = *pbf;
             ++pbf;
@@ -224,10 +224,10 @@ static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_fil
             bf->n_exponents = *pbf;
             ++pbf;
 
-            bf->exponents = (f64 *)pbf;
+            bf->exponents = (f64*)pbf;
             pbf += bf->n_exponents;
 
-            bf->coefficients = (f64 *)pbf;
+            bf->coefficients = (f64*)pbf;
             pbf += bf->n_exponents;
 
             bf->x0 = mol->coords[i].x;
@@ -252,12 +252,12 @@ static void build_basis_funcs(struct scf_context *ctx, char const *basis_set_fil
     }
 }
 
-void free_basis(struct scf_context *ctx)
+void free_basis(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     for (u64 i = 0; i < N; ++i)
     {
-        struct basis_func *bf = ctx->basis_funcs + i;
+        struct basis_func* bf = ctx->basis_funcs + i;
         x_free(bf->normalization_factors);
     }
 
@@ -268,26 +268,26 @@ void free_basis(struct scf_context *ctx)
 
 struct task_func_stv_arg
 {
-    struct scf_context *ctx;
-    f64 *S;
-    f64 *T;
-    f64 *V;
+    struct scf_context* ctx;
+    f64* S;
+    f64* T;
+    f64* V;
     u64 i;
     u64 j;
 };
 
-static void task_func_stv(void *p_arg)
+static void task_func_stv(void* p_arg)
 {
-    struct task_func_stv_arg *arg = (struct task_func_stv_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
-    f64 *S = arg->S;
-    f64 *T = arg->T;
-    f64 *V = arg->V;
+    struct task_func_stv_arg* arg = (struct task_func_stv_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
+    f64* S = arg->S;
+    f64* T = arg->T;
+    f64* V = arg->V;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 N = ctx->n_basis_funcs;
     u64 Ni = N * i;
-    struct molecule *mol = ctx->mol;
+    struct molecule* mol = ctx->mol;
 
     /* S and T matrices are symmetric */
     f64 s = cg_overlap_integral(ctx->basis_funcs + i, ctx->basis_funcs + j);
@@ -308,7 +308,7 @@ static void task_func_stv(void *p_arg)
     x_free(p_arg);
 }
 
-static void build_one_electron_integrals(struct scf_context *ctx)
+static void build_one_electron_integrals(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -317,18 +317,18 @@ static void build_one_electron_integrals(struct scf_context *ctx)
     /* Build one-electron integrals */
     log_tm_println(ctx->silent, "Start building S T V matries.");
     /* Overlap matrix */
-    f64 *S = x_malloc(N2_f64);
+    f64* S = x_malloc(N2_f64);
     /* Kinetic energy */
-    f64 *T = x_malloc(N2_f64);
+    f64* T = x_malloc(N2_f64);
     /* Nucleus-electron attraction */
-    f64 *V = x_malloc(N2_f64);
+    f64* V = x_malloc(N2_f64);
 
     for (u64 i = 0; i < N; ++i)
     {
         u64 Ni = N * i;
         for (u64 j = 0; j < i + 1; ++j)
         {
-            struct task_func_stv_arg *arg = x_malloc(sizeof(struct task_func_stv_arg));
+            struct task_func_stv_arg* arg = x_malloc(sizeof(struct task_func_stv_arg));
             arg->ctx = ctx;
             arg->S = S;
             arg->T = T;
@@ -355,16 +355,16 @@ static void build_one_electron_integrals(struct scf_context *ctx)
 
 struct task_func_screen_arg
 {
-    struct scf_context *ctx;
+    struct scf_context* ctx;
     u64 i;
     u64 j;
     u64 ij;
 };
 
-static void task_func_screen(void *p_arg)
+static void task_func_screen(void* p_arg)
 {
-    struct task_func_screen_arg *arg = (struct task_func_screen_arg *)p_arg;
-    struct scf_context *ctx = arg->ctx;
+    struct task_func_screen_arg* arg = (struct task_func_screen_arg*)p_arg;
+    struct scf_context* ctx = arg->ctx;
     u64 i = arg->i;
     u64 j = arg->j;
     u64 ij = arg->ij;
@@ -372,7 +372,7 @@ static void task_func_screen(void *p_arg)
     x_free(p_arg);
 }
 
-static void build_two_electron_integrals(struct scf_context *ctx)
+static void build_two_electron_integrals(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     u64 N2 = N * N;
@@ -388,7 +388,7 @@ static void build_two_electron_integrals(struct scf_context *ctx)
         {
             for (u64 j = 0; j <= i; ++j)
             {
-                struct task_func_screen_arg *arg = x_malloc(sizeof(struct task_func_screen_arg));
+                struct task_func_screen_arg* arg = x_malloc(sizeof(struct task_func_screen_arg));
                 arg->ctx = ctx;
                 arg->i = i;
                 arg->j = j;
@@ -454,15 +454,15 @@ static void build_two_electron_integrals(struct scf_context *ctx)
     }
 }
 
-struct scf_context *scf_initialize(struct cmd_line_args *args, scf_config_func_pointer config_func)
+struct scf_context* scf_initialize(struct cmd_line_args* args, scf_config_func_pointer config_func)
 {
     struct timespec time_start, time_end;
     get_wall_time(&time_start);
 
-    struct molecule *mol = args->mol;
-    char const *basis_set_filename = args->basis_set;
+    struct molecule* mol = args->mol;
+    char const* basis_set_filename = args->basis_set;
 
-    struct scf_context *ctx = x_calloc(1, sizeof(struct scf_context));
+    struct scf_context* ctx = x_calloc(1, sizeof(struct scf_context));
     ctx->delta_energy = DBL_MAX;
     ctx->density_rmsd = DBL_MAX;
     config_func(ctx);
@@ -534,7 +534,7 @@ struct scf_context *scf_initialize(struct cmd_line_args *args, scf_config_func_p
     return ctx;
 }
 
-void diis_update_fock(struct scf_context *ctx)
+void diis_update_fock(struct scf_context* ctx)
 {
     u64 N = ctx->n_basis_funcs;
     einsum_mn_np__mp(ctx->F, ctx->P, ctx->NxN_1, N, N, N);
@@ -546,7 +546,7 @@ void diis_update_fock(struct scf_context *ctx)
     mat_subtract(ctx->diis_FPS, ctx->diis_SPF, ctx->NxN_2, N, N);
 
     einsum_mn_np__mp(ctx->NxN_1, ctx->NxN_2, ctx->NxN_3, N, N, N);
-    einsum_mn_np__mp(ctx->NxN_3, ctx->NxN_1, ctx->NxN_2, N, N, N); // NxN_2: error matrix in an orthonormal basis
+    einsum_mn_np__mp(ctx->NxN_3, ctx->NxN_1, ctx->NxN_2, N, N, N);  // NxN_2: error matrix in an orthonormal basis
 
     memcpy(ctx->diis_fock_matrices + ctx->N2 * ctx->diis_ring_buff_head, ctx->F, ctx->N2_f64);
     memcpy(ctx->diis_error_matrices + ctx->N2 * ctx->diis_ring_buff_head, ctx->NxN_2, ctx->N2_f64);
@@ -598,7 +598,7 @@ void diis_update_fock(struct scf_context *ctx)
     }
 }
 
-void scf_finalize(struct scf_context *ctx)
+void scf_finalize(struct scf_context* ctx)
 {
     x_free(ctx->NxN_1);
     x_free(ctx->NxN_2);
@@ -630,7 +630,7 @@ void scf_finalize(struct scf_context *ctx)
     x_free(ctx->diis_F);
 
     x_free(ctx->S);
-    x_free((void *)ctx->LOCK);
+    x_free((void*)ctx->LOCK);
     threadpool_finalize(ctx->tp_ctx);
 
     x_free(ctx->atom_bf_map);

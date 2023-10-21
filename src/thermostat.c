@@ -13,7 +13,7 @@
 #include "vec3d.h"
 #include "velocity_init.h"
 
-void enforce_temperature(struct molecule *mol, f64 temperature_K)
+void enforce_temperature(struct molecule* mol, f64 temperature_K)
 {
     f64 scaling_factor = sqrt(temperature_K / calc_temperature(mol));
 
@@ -25,13 +25,13 @@ void enforce_temperature(struct molecule *mol, f64 temperature_K)
     }
 }
 
-f64 calc_temperature(struct molecule *mol)
+f64 calc_temperature(struct molecule* mol)
 {
     f64 kinetic_energy = 0.0;
 
     for (u64 i = 0; i < mol->n_atoms; ++i)
     {
-        struct vec3d *v = mol->velocities + i;
+        struct vec3d* v = mol->velocities + i;
         f64 v_sq = v->x * v->x + v->y * v->y + v->z * v->z;
         kinetic_energy += 0.5 * mol->masses[i] * v_sq;
     }
@@ -39,7 +39,7 @@ f64 calc_temperature(struct molecule *mol)
     return temperature_K;
 }
 
-void thermostat_berendsen_nvt(struct molecule *mol, f64 temperature_K, f64 time_smoothing_factor)
+void thermostat_berendsen_nvt(struct molecule* mol, f64 temperature_K, f64 time_smoothing_factor)
 {
     f64 current_temperature = calc_temperature(mol);
     f64 scaling_factor = sqrt(1.0 + (temperature_K / current_temperature - 1.0) * time_smoothing_factor);
@@ -59,7 +59,7 @@ void thermostat_berendsen_nvt(struct molecule *mol, f64 temperature_K, f64 time_
 void test_temperature()
 {
     /* create a random molecule*/
-    struct molecule *mol = x_malloc(sizeof(struct molecule));
+    struct molecule* mol = x_malloc(sizeof(struct molecule));
     f64 T = 300.0;
     mol->n_atoms = 1000;
     mol->masses = x_malloc(mol->n_atoms * sizeof(f64));

@@ -183,15 +183,15 @@ u64 element_electron_distribution [][11] = {
 };
 
 /* Initializing the density matrix P with Superposition-Of-Atomic-Densities guess */
-void soad_initialize_density_matrix(f64 *density_matrix, u64 N, u64 *atomic_nums, u64 n_atoms)
+void soad_initialize_density_matrix(f64* density_matrix, u64 N, u64* atomic_nums, u64 n_atoms)
 {
     u64 index = 0;
     for (u64 i = 0; i < n_atoms; ++i)
     {
         u64 Z = atomic_nums[i];
         u64 shell_count = element_shell_count[Z];
-        u64 *ao_counts = element_ao_count[Z];
-        u64 *electrons_per_shell = element_electron_distribution[Z];
+        u64* ao_counts = element_ao_count[Z];
+        u64* electrons_per_shell = element_electron_distribution[Z];
         for (u64 j = 0; j < shell_count; ++j)
         {
             u64 ao_count = ao_counts[j];

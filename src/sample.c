@@ -25,9 +25,9 @@ struct vec3d h2o_coords[3] = {
 u64 h2o_charge = 0;
 u64 h2o_multiplicity = 1;
 
-struct molecule *sample_molecule_h2o()
+struct molecule* sample_molecule_h2o()
 {
-    struct molecule *h2o = x_malloc(sizeof(struct molecule));
+    struct molecule* h2o = x_malloc(sizeof(struct molecule));
     h2o->atomic_nums = x_malloc(3 * sizeof(u64));
     h2o->masses = x_malloc(3 * sizeof(f64));
     h2o->coords = x_malloc(3 * sizeof(struct vec3d));
@@ -218,7 +218,7 @@ f64 pyscf_grid_lvl6_forces_on_nuclei[][9] = {
 
 #define CC_METHODS_COUNT 7
 
-char *CC_METHODS[] = {
+char* CC_METHODS[] = {
     "HF",                                       // CC_METHOD_ID = 1
     "DFT with LDA_X, LDA_C_VWN",                // CC_METHOD_ID = 2
     "DFT with GGA_X_PBE, GGA_C_PBE",            // CC_METHOD_ID = 3
@@ -267,7 +267,7 @@ i64 check_total_energy(f64 value, u64 cc_method_id)
     return 1;
 }
 
-i64 check_forces(f64 *forces, u64 cc_method_id)
+i64 check_forces(f64* forces, u64 cc_method_id)
 {
     if (cc_method_id < 1 || cc_method_id > 6)
     {

@@ -372,7 +372,7 @@ __device__ f64 boys_func(f64 n, f64 x)
 #include "diagnostics.h"
 
 #ifdef __NVCC__
-__global__ static void boys_func_cuda_kernel(f64 *input, f64 *output, i32 count)
+__global__ static void boys_func_cuda_kernel(f64* input, f64* output, i32 count)
 {
     i32 tid = threadIdx.x;
     i32 i = blockIdx.x * blockDim.x + tid;
@@ -385,8 +385,8 @@ __global__ static void boys_func_cuda_kernel(f64 *input, f64 *output, i32 count)
 int main(void)
 {
 #ifdef __NVCC__
-    f64 *input;
-    f64 *output;
+    f64* input;
+    f64* output;
     int count = 3;
 
     cudaMallocManaged(&input, sizeof(f64) * count, cudaMemAttachGlobal);

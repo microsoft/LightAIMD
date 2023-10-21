@@ -9,10 +9,10 @@
 #include "numeric_types.h"
 
 /* enforce the given temperature */
-void enforce_temperature(struct molecule *mol, f64 temperature_K);
+void enforce_temperature(struct molecule* mol, f64 temperature_K);
 
 /* Get the temperature of the molecule in Kelvin. */
-f64 calc_temperature(struct molecule *mol);
+f64 calc_temperature(struct molecule* mol);
 
 /*
  * Berendsen velocity rescaling scheme for NVT ensemble.
@@ -21,6 +21,6 @@ f64 calc_temperature(struct molecule *mol);
  * When time_smoothing_factor < 1, the cooling down or heating up process is smoothed over time;
  * smaller the factor, slower the process.
  */
-void thermostat_berendsen_nvt(struct molecule *mol, f64 temperature_K, f64 time_smoothing_factor);
+void thermostat_berendsen_nvt(struct molecule* mol, f64 temperature_K, f64 time_smoothing_factor);
 
 #endif

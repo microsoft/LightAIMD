@@ -23,12 +23,12 @@ static u8 const three_byte_signature = 0xE0;
 static u8 const four_byte_mask = 0xF8;
 static u8 const four_byte_signature = 0xF0;
 
-u64 utf8_len(void const *buffer, u64 buffer_size)
+u64 utf8_len(void const* buffer, u64 buffer_size)
 {
     u64 len = 0;
 
-    u8 const *p = buffer;
-    u8 const *end = (u8 const *)buffer + buffer_size;
+    u8 const* p = buffer;
+    u8 const* end = (u8 const*)buffer + buffer_size;
     while (p < end)
     {
         if (one_byte_signature == (*p & one_byte_mask))
@@ -75,12 +75,12 @@ u64 utf8_len(void const *buffer, u64 buffer_size)
     return len;
 }
 
-void utf8_codepoint(void const *buffer, u64 buffer_size, u32 *codepoints, u64 codepoints_size)
+void utf8_codepoint(void const* buffer, u64 buffer_size, u32* codepoints, u64 codepoints_size)
 {
     u64 codepoint_index = 0;
 
-    u8 const *p = buffer;
-    u8 const *end = (u8 const *)buffer + buffer_size;
+    u8 const* p = buffer;
+    u8 const* end = (u8 const*)buffer + buffer_size;
     while (p < end)
     {
         if (one_byte_signature == (*p & one_byte_mask))
@@ -145,18 +145,18 @@ void utf8_codepoint(void const *buffer, u64 buffer_size, u32 *codepoints, u64 co
     }
 }
 
-void utf8tocstr(u32 *codepoints, u64 codepoints_len, char **cstr)
+void utf8tocstr(u32* codepoints, u64 codepoints_len, char** cstr)
 {
-    u8 *buffer = x_malloc(codepoints_len + 1);
+    u8* buffer = x_malloc(codepoints_len + 1);
     for (u64 i = 0; i < codepoints_len; ++i)
     {
         buffer[i] = (u8)codepoints[i];
     }
     buffer[codepoints_len] = '\0';
-    *cstr = (char *)buffer;
+    *cstr = (char*)buffer;
 }
 
-u32 cmp_utf8_codepoints(u32 const *codepoints1, u64 codepoints1_len, u32 const *codepoints2, u64 codepoints2_len)
+u32 cmp_utf8_codepoints(u32 const* codepoints1, u64 codepoints1_len, u32 const* codepoints2, u64 codepoints2_len)
 {
     if (codepoints1_len != codepoints2_len)
     {
@@ -174,7 +174,7 @@ u32 cmp_utf8_codepoints(u32 const *codepoints1, u64 codepoints1_len, u32 const *
     return 1;
 }
 
-u32 cmp_utf8_with_cstr(u32 *codepoints, u64 codepoints_len, char const *cstr)
+u32 cmp_utf8_with_cstr(u32* codepoints, u64 codepoints_len, char const* cstr)
 {
     u64 cstr_len = strlen(cstr);
     if (codepoints_len != cstr_len)
@@ -193,45 +193,45 @@ u32 cmp_utf8_with_cstr(u32 *codepoints, u64 codepoints_len, char const *cstr)
     return 1;
 }
 
-i64 utf8toi64(u32 *codepoints, u64 codepoints_len)
+i64 utf8toi64(u32* codepoints, u64 codepoints_len)
 {
-    u8 buffer[codepoints_len + 1]; // len(ULLONG_MAX) == 20
+    u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
     {
         buffer[i] = (u8)codepoints[i];
     }
     buffer[codepoints_len] = '\0';
 
-    char *end;
-    i64 value = strtoll((char *)buffer, &end, 10);
+    char* end;
+    i64 value = strtoll((char*)buffer, &end, 10);
     return value;
 }
 
-u64 utf8tou64(u32 *codepoints, u64 codepoints_len)
+u64 utf8tou64(u32* codepoints, u64 codepoints_len)
 {
-    u8 buffer[codepoints_len + 1]; // len(ULLONG_MAX) == 20
+    u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
     {
         buffer[i] = (u8)codepoints[i];
     }
     buffer[codepoints_len] = '\0';
 
-    char *end;
-    u64 value = strtoull((char *)buffer, &end, 10);
+    char* end;
+    u64 value = strtoull((char*)buffer, &end, 10);
     return value;
 }
 
-f64 utf8tof64(u32 *codepoints, u64 codepoints_len)
+f64 utf8tof64(u32* codepoints, u64 codepoints_len)
 {
-    u8 buffer[codepoints_len + 1]; // len(ULLONG_MAX) == 20
+    u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
     {
         buffer[i] = (u8)codepoints[i];
     }
     buffer[codepoints_len] = '\0';
 
-    char *end;
-    f64 value = strtod((char *)buffer, &end);
+    char* end;
+    f64 value = strtod((char*)buffer, &end);
     return value;
 }
 
