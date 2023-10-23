@@ -40,13 +40,23 @@ You can also build the release version and the debug version at the same time:
 python3 scripts/build.py --build --release --debug
 ```
 
-The supported compilers include Clang, GCC, and Intel® C/C++ compiler (icx/icpx). You can specify the compiler by using "--compiler" option, with the following choices: "clang", "gcc", and "icx". For example, to use clang:
+The supported compilers include Clang, GCC, and Intel® C compiler (icx). You can specify the compiler by using "--compiler" option, with the following choices: "clang", "gcc", and "icx". For example, to use clang:
 ```shell
 python3 scripts/build.py --build --release --compiler clang
 ```
-The default compiler is gcc. To use the icx/icpx compiler, you need to install the [Intel® oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html) and configure the local environment variables using the `setvars.sh` script, which can be found in the installation directory, for example:
+The default compiler is gcc. To use the icx compiler, you need to install the [Intel® oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html) and configure the local environment variables using the `setvars.sh` script, which can be found in the installation directory, for example:
 ```shell
 source /opt/intel/oneapi/setvars.sh
+```
+
+If Intel® oneMKL, which is included in the Intel® oneAPI Base Toolkit, is installed and the local environment is configured with the above command, you can link to the Intel® oneMKL library instead of `liblapacke` by using the `--use-mkl` option:
+```shell
+python3 scripts/build.py --build --release --use-mkl # use the default compiler gcc
+```
+
+If you want to use the Intel® oneMKL library with the icx compiler, run the following command:
+```shell
+python3 scripts/build.py --build --release --use-mkl --compiler icx # use icx compiler
 ```
 
 If the Nvidia CUDA Compiler `nvcc` is detected, the build script will compile the CUDA-enabled version of LightAIMD. To explicitly disable CUDA support, you can use the `--disable-cuda` option:
