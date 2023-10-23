@@ -4,7 +4,7 @@ import re
 from config import *
 from symbols import *
 
-__all__ = ["generate_object_targets", "ObjectTarget", "bfs"]
+__all__ = ["generate_object_targets", "ObjectTarget"]
 
 
 class ObjectTarget:
@@ -27,18 +27,6 @@ class ObjectTarget:
 header2include_dirs = {
     "xc": "-I${ext_dir}/libxc/include",
 }
-
-
-def expand_string(s):
-    if "${" in s:
-        for k, v in config.items():
-            if isinstance(v, str):
-                s = s.replace("${" + k + "}", v)
-    return s
-
-
-def expand_strings(ss):
-    return [expand_string(s) for s in ss]
 
 
 def generate_object_targets():
@@ -95,19 +83,6 @@ def generate_object_targets():
         _object_targets.append(target)
 
     return _object_targets
-
-
-def bfs(graph, node):
-    visited = set()
-    queue = []
-    queue.append(node)
-    while queue:
-        s = queue.pop(0)
-        visited.add(s)
-        for neighbor in graph.get(s, []):
-            if neighbor not in visited:
-                queue.append(neighbor)
-    return visited
 
 
 def add_to_graph(graph, fname, included_file):

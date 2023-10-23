@@ -33,6 +33,15 @@ def main():
     )
 
     parser.add_argument(
+        "--use-mkl",
+        dest="use_mkl",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Use MKL",
+    )
+
+    parser.add_argument(
         "--compiler",
         dest="compiler",
         default="gcc",
@@ -173,6 +182,13 @@ def main():
 
     if args.disable_cuda:
         config["DISABLE_CUDA"] = True
+
+    if args.use_mkl:
+        config["USE_MKL"] = True
+        config["SHARED_LIBS"].extend(["mkl_intel_lp64", "mkl_sequential", "mkl_core"])
+    else:
+        config["USE_MKL"] = False
+        config["SHARED_LIBS"].append("lapacke")
 
     if not args.debug and not args.release:
         args.release = True

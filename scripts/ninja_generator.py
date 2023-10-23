@@ -114,6 +114,7 @@ def generate_ninja_script(debug=False):
         obj2linkdeps,
         obj2libsyms,
         sym2lib,
+        lib2libs,
         sym2staticlib,
         staticlib2undefined_sym,
     ):
@@ -149,6 +150,13 @@ def generate_ninja_script(debug=False):
                     else:
                         undefined.add(uf)
 
+            extended_libs = set()
+            for lib in libs:
+                if lib in lib2libs:
+                    extended_libs |= lib2libs[lib]
+
+            libs |= extended_libs
+
             if len(static_libs) > 0:
                 input_files.extend(static_libs)
                 for staticlib in static_libs:
@@ -161,7 +169,11 @@ def generate_ninja_script(debug=False):
                         else:
                             undefined.add(uf)
 
-            extra_flags = [f"-l{lib}" for lib in libs]
+            extra_flags = (
+                ["-Wl,--start-group"]
+                + [f"-l{lib}" for lib in libs]
+                + ["-Wl,--end-group"]
+            )
 
             if target in special_treatment:
                 flags = special_treatment[target].get(config["COMPILER"], [])
@@ -193,6 +205,7 @@ def generate_ninja_script(debug=False):
         obj2linkdeps,
         obj2libsyms,
         sym2lib,
+        lib2libs,
         sym2staticlib,
         staticlib2undefined_sym,
     ):
@@ -205,6 +218,7 @@ def generate_ninja_script(debug=False):
                 obj2linkdeps,
                 obj2libsyms,
                 sym2lib,
+                lib2libs,
                 sym2staticlib,
                 staticlib2undefined_sym,
             )
@@ -256,11 +270,11 @@ def generate_ninja_script(debug=False):
         staticlib2undefined_sym[static_lib] = undefined_static_lib_funcs
 
     if config["use_cuda"]:
-        sym2lib = build_sym2lib_graph(
+        sym2lib, lib2libs = build_sym2lib_graph(
             config["SHARED_LIBS"] + config["CUDA_SHARED_LIBS"]
         )
     else:
-        sym2lib = build_sym2lib_graph(config["SHARED_LIBS"])
+        sym2lib, lib2libs = build_sym2lib_graph(config["SHARED_LIBS"])
 
     for obj, libsyms in obj2libsyms.items():
         for libsym in libsyms:
@@ -279,6 +293,7 @@ def generate_ninja_script(debug=False):
         obj2linkdeps,
         obj2libsyms,
         sym2lib,
+        lib2libs,
         sym2staticlib,
         staticlib2undefined_sym,
     )

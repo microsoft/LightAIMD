@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-__all__ = ["config", "print_config"]
+__all__ = ["config", "print_config", "expand_string", "expand_strings", "bfs"]
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.dirname(script_dir)
@@ -22,7 +22,7 @@ class Configuration:
             # library versions
             "LIBXC_VERSION": "6.2.2",
             # build system related
-            "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++", "lapacke"],
+            "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
             "RUNTIME_DEFINED_SYMS": [
                 "__dso_handle",
                 "__cudaRegisterLinkedBinary_",
@@ -37,6 +37,8 @@ class Configuration:
             "CUDA_SHARED_LIBS": ["cuda", "cudart"],
             "CUDA_INC_DIR": "/usr/local/cuda/include",
             "CUDA_LIB_DIR": "/usr/local/cuda/lib64",
+            # mkl related
+            "USE_MKL": False,
             # compiler related
             "COMPILER": "gcc",  # possible values: "clang", "gcc", "icx"
         }
@@ -90,9 +92,34 @@ class Configuration:
 config = Configuration()
 
 
+def expand_string(s):
+    if "${" in s:
+        for k, v in config.items():
+            if isinstance(v, str):
+                s = s.replace("${" + k + "}", v)
+    return s
+
+
+def expand_strings(ss):
+    return [expand_string(s) for s in ss]
+
+
 def print_config():
     for k, v in config.items():
         print(f"{k}: {v}")
+
+
+def bfs(graph, node):
+    visited = set()
+    queue = []
+    queue.append(node)
+    while queue:
+        s = queue.pop(0)
+        visited.add(s)
+        for neighbor in graph.get(s, []):
+            if neighbor not in visited:
+                queue.append(neighbor)
+    return visited
 
 
 if __name__ == "__main__":

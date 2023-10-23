@@ -73,6 +73,7 @@ def extract_dynamic_lib_symbols(lib_file):
     output_lines = output.split("\n")
     found_symbol_table = False
     dynamic_syms = set()
+    undefined_syms = set()
     for line in output_lines:
         l = line.strip()
         if l.startswith("DYNAMIC SYMBOL TABLE"):
@@ -85,11 +86,12 @@ def extract_dynamic_lib_symbols(lib_file):
             continue
 
         if "*UND*" in l:
+            undefined_syms.add(l.split()[-1])
             continue
 
         dynamic_syms.add(l.split()[-1])
 
-    return dynamic_syms
+    return dynamic_syms, undefined_syms
 
 
 def get_ld_search_dir():
@@ -109,6 +111,15 @@ def get_ld_search_dir():
                         "="
                     )  # some ld versions have an extra '='
                     search_dirs.append(search_dir)
+
+    LIBRARY_PATH = os.environ.get("LIBRARY_PATH")
+    if LIBRARY_PATH is not None:
+        search_dirs += LIBRARY_PATH.strip().split(":")
+
+    LD_LIBRARY_PATH = os.environ.get("LD_LIBRARY_PATH")
+    if LD_LIBRARY_PATH is not None:
+        search_dirs += LD_LIBRARY_PATH.strip().split(":")
+
     return search_dirs
 
 
@@ -125,15 +136,35 @@ def get_shared_lib_path(search_dirs, lib):
 def build_sym2lib_graph(libs):
     search_dirs = get_ld_search_dir()
     sym2lib = {}
+    lib2undefined = {}
     for lib in libs:
-        dynamic_syms = extract_dynamic_lib_symbols(
+        dynamic_syms, undefined_syms = extract_dynamic_lib_symbols(
             get_shared_lib_path(search_dirs, lib)
         )
+        lib2undefined[lib] = undefined_syms
         for sym in dynamic_syms:
             if sym not in sym2lib:
                 sym2lib[sym] = set()
             sym2lib[sym].add(lib)
-    return sym2lib
+
+    # a shared library itself may further depend on other shared libraries
+    lib2libs = {}
+    for lib, undefined in lib2undefined.items():
+        for u in undefined:
+            if u in sym2lib:
+                if lib not in lib2libs:
+                    lib2libs[lib] = set()
+                lib2libs[lib] |= sym2lib[u]
+
+    lib2extendedlibs = {}
+    for lib, libs in lib2libs.items():
+        if lib not in lib2extendedlibs:
+            lib2extendedlibs[lib] = set()
+
+        for _lib in libs:
+            lib2extendedlibs[lib] |= bfs(lib2libs, _lib)
+
+    return sym2lib, lib2extendedlibs
 
 
 if __name__ == "__main__":
