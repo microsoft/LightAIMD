@@ -261,6 +261,7 @@ def generate_ninja_script(debug=False):
 
     sym2staticlib = {}
     staticlib2undefined_sym = {}
+    defined_static_lib_funcs = []
     for static_lib in config["STATIC_LIBS"]:
         defined_static_lib_funcs, undefined_static_lib_funcs = extract_symbols(
             static_lib
