@@ -3,7 +3,7 @@
 We use pure C and avoid mixing C and C++ whenever possible.
 
 ## Memory management
-Use the following functions declared in mm.h to allocate and free memory buffers:
+Use the following functions declared in `src/mm.h` to allocate and free memory buffers:
 
 ```c
 void *x_malloc(u64 size)
@@ -11,10 +11,10 @@ void *x_calloc(u64 count, u64 size)
 void x_free(void *ptr)
 ```
 
-You can use print_mm_status() to check whether the number of memory allocations match that of deallocations.
+You can use `print_mm_status()` to check whether the number of memory allocations match that of deallocations at the end of your program.
 
 ## Numeric types
-Use the following types declared in numeric_types.h for numeric types:
+Use the following types declared in `src/numeric_types.h` for numeric types:
 
 | Type | Description |
 | ---- | ----------- |
