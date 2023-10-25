@@ -8,16 +8,16 @@
 #include "sample.h"
 #include "mm.h"
 
-const u64 JOB_TYPE_SPE = 1;  // Single Point Energy
-const u64 JOB_TYPE_SPF = 2;  // Single Point Forces
-const u64 JOB_TYPE_BOMD = 3; // Born-Oppenheimer Molecular Dynamics
+u64 const JOB_TYPE_SPE = 1;  // Single Point Energy
+u64 const JOB_TYPE_SPF = 2;  // Single Point Forces
+u64 const JOB_TYPE_BOMD = 3; // Born-Oppenheimer Molecular Dynamics
 
-const u64 CC_METHOD_HF = 1;  // Hartree Fock
-const u64 CC_METHOD_DFT = 2; // Density Functional Theory
+u64 const CC_METHOD_HF = 1;  // Hartree Fock
+u64 const CC_METHOD_DFT = 2; // Density Functional Theory
 
-const u64 GRID_SCHEME_FULL = 1;
-const u64 GRID_SCHEME_SG2 = 2;
-const u64 GRID_SCHEME_SG3 = 3;
+u64 const GRID_SCHEME_FULL = 1;
+u64 const GRID_SCHEME_SG2 = 2;
+u64 const GRID_SCHEME_SG3 = 3;
 
 char* get_arg_value_by_key(int argc, char* argv[], char const* key)
 {

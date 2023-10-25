@@ -7,16 +7,16 @@
 #include "numeric_types.h"
 #include "molecule.h"
 
-extern const u64 JOB_TYPE_SPE;  // Single Point Energy
-extern const u64 JOB_TYPE_SPF;  // Single Point Forces
-extern const u64 JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
+extern u64 const JOB_TYPE_SPE;  // Single Point Energy
+extern u64 const JOB_TYPE_SPF;  // Single Point Forces
+extern u64 const JOB_TYPE_BOMD; // Born-Oppenheimer Molecular Dynamics
 
-extern const u64 CC_METHOD_HF;  // Hartree Fock
-extern const u64 CC_METHOD_DFT; // Density Functional Theory
+extern u64 const CC_METHOD_HF;  // Hartree Fock
+extern u64 const CC_METHOD_DFT; // Density Functional Theory
 
-extern const u64 GRID_SCHEME_FULL;
-extern const u64 GRID_SCHEME_SG2;
-extern const u64 GRID_SCHEME_SG3;
+extern u64 const GRID_SCHEME_FULL;
+extern u64 const GRID_SCHEME_SG2;
+extern u64 const GRID_SCHEME_SG3;
 
 struct cmd_line_args
 {
