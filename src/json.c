@@ -638,14 +638,14 @@ void print_json(struct json* json)
     else if (json->type == JSON_VALUE_TYPE_LITERAL)
     {
         char* literal = NULL;
-        utf8tocstr(json->codepoints, json->length, &literal);
+        utf8codepoints_to_cstr(json->codepoints, json->length, &literal);
         printf("%s", literal);
         x_free(literal);
     }
     else if (json->type == JSON_VALUE_TYPE_NUMBER)
     {
         char* number = NULL;
-        utf8tocstr(json->codepoints, json->length, &number);
+        utf8codepoints_to_cstr(json->codepoints, json->length, &number);
         printf("%s", number);
         x_free(number);
     }
@@ -655,7 +655,7 @@ void print_json(struct json* json)
         unescape_json_string(json->codepoints, json->length, unescaped_codepoints);
 
         char* string = NULL;
-        utf8tocstr(unescaped_codepoints, json->length, &string);
+        utf8codepoints_to_cstr(unescaped_codepoints, json->length, &string);
         x_free(unescaped_codepoints);
 
         printf("\"%s\"", string);

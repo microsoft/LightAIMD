@@ -2,8 +2,11 @@
  * Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License.
  */
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <locale.h>
+
 #include "mm.h"
 #include "utf8.h"
 
@@ -145,7 +148,7 @@ void utf8_codepoint(void const* buffer, u64 buffer_size, u32* codepoints, u64 co
     }
 }
 
-void utf8tocstr(u32* codepoints, u64 codepoints_len, char** cstr)
+void utf8codepoints_to_cstr(u32* codepoints, u64 codepoints_len, char** cstr)
 {
     u8* buffer = x_malloc(codepoints_len + 1);
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -154,6 +157,18 @@ void utf8tocstr(u32* codepoints, u64 codepoints_len, char** cstr)
     }
     buffer[codepoints_len] = '\0';
     *cstr = (char*)buffer;
+}
+
+void cstr_to_utf8codepoints(char const* cstr, u32** codepoints, u64* codepoints_len)
+{
+    u64 cstr_len = strlen(cstr);
+    u32* buffer = x_malloc(cstr_len * sizeof(u32));
+    for (u64 i = 0; i < cstr_len; ++i)
+    {
+        buffer[i] = (u32)cstr[i];
+    }
+    *codepoints = buffer;
+    *codepoints_len = cstr_len;
 }
 
 u32 cmp_utf8_codepoints(u32 const* codepoints1, u64 codepoints1_len, u32 const* codepoints2, u64 codepoints2_len)
@@ -235,6 +250,48 @@ f64 utf8tof64(u32* codepoints, u64 codepoints_len)
     return value;
 }
 
+void utf8_encode(u32 codepoint, char* utf8_str)
+{
+    if (codepoint < 0x80)
+    {
+        utf8_str[0] = codepoint;
+        utf8_str[1] = '\0';
+    }
+    else if (codepoint < 0x800)
+    {
+        utf8_str[0] = 0xC0 | (codepoint >> 6);
+        utf8_str[1] = 0x80 | (codepoint & 0x3F);
+        utf8_str[2] = '\0';
+    }
+    else if (codepoint < 0x10000)
+    {
+        utf8_str[0] = 0xE0 | (codepoint >> 12);
+        utf8_str[1] = 0x80 | ((codepoint >> 6) & 0x3F);
+        utf8_str[2] = 0x80 | (codepoint & 0x3F);
+        utf8_str[3] = '\0';
+    }
+    else
+    {
+        utf8_str[0] = 0xF0 | (codepoint >> 18);
+        utf8_str[1] = 0x80 | ((codepoint >> 12) & 0x3F);
+        utf8_str[2] = 0x80 | ((codepoint >> 6) & 0x3F);
+        utf8_str[3] = 0x80 | (codepoint & 0x3F);
+        utf8_str[4] = '\0';
+    }
+}
+
+void print_utf8_codepoints(u32* codepoints, u64 codepoints_len, char* end)
+{
+    setlocale(LC_ALL, "");
+    for (u64 i = 0; i < codepoints_len; ++i)
+    {
+        char utf8_str[8];
+        utf8_encode(codepoints[i], utf8_str);
+        printf("%s", utf8_str);
+    }
+    printf("%s", end);
+}
+
 #ifdef MODULE_TEST
 #include <stdio.h>
 int main(void)
@@ -250,6 +307,9 @@ int main(void)
     {
         printf("codepoint: %04lX\n", codepoints[i]);
     }
+
+    print_utf8_codepoints(codepoints, len, "\n");
+
     return 0;
 }
 #endif
