@@ -74,6 +74,14 @@ def main():
         help="Clean the project",
     )
     parser.add_argument(
+        "--rebuild",
+        dest="rebuild",
+        default=False,
+        required=False,
+        action="store_true",
+        help="Rebuild the project",
+    )
+    parser.add_argument(
         "--reset",
         dest="reset",
         default=False,
@@ -204,6 +212,14 @@ def main():
 
     if args.build:
         setup_toolchain()
+        if args.debug:
+            build_debug()
+        if args.release:
+            build_release()
+
+    if args.rebuild:
+        setup_toolchain()
+        clean()
         if args.debug:
             build_debug()
         if args.release:
