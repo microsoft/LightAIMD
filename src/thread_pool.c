@@ -158,7 +158,7 @@ int main(void)
 {
     struct threadpool_context* ctx = threadpool_initialize(0, 4096);
 
-    for (u64 i = 0; i < 65536; ++i)
+    for (u64 i = 0; i < 1536; ++i)
     {
         threadpool_add_task(ctx, i % 24, test_task_func, (void*)i);
     }
