@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import subprocess
 
 from config import *
@@ -239,7 +240,10 @@ def main():
             return 1
 
     if args.module_test:
-        module_test()
+        if args.debug:
+            module_test_debug()
+        if args.release:
+            module_test_release()
 
     return 0
 
@@ -300,7 +304,9 @@ def build(debug=False):
 def run(args):
     if args.debug:
         config["active_build_dir"] = config["build_debug_dir"]
-        print("Running the debug version of lightaimd")
+        config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
+        print("Running the debug version:")
+        print(f"    {os.path.join(config['bin_dir'], 'lightaimd')}")
         if config["dry_run"]:
             return
 
@@ -312,7 +318,9 @@ def run(args):
 
     if args.release:
         config["active_build_dir"] = config["build_release_dir"]
-        print("Running the release version of lightaimd")
+        config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
+        print("Running the release version:")
+        print(f"    {os.path.join(config['bin_dir'], 'lightaimd')}")
         if config["dry_run"]:
             return
 
@@ -322,18 +330,41 @@ def run(args):
             check=True,
         )
 
+def module_test_debug():
+    print("Running the debug version of module tests")
+    config["active_build_dir"] = config["build_debug_dir"]
+    config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
+    module_test()
+
+def module_test_release():
+    print("Running the release version of module tests")
+    config["active_build_dir"] = config["build_release_dir"]
+    config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
+    module_test()
 
 def module_test():
     for root, dirs, files in os.walk(config["bin_dir"]):
         for f in files:
-            print(f"Running {f}")
+            print(f"Running module test: {root}/{f}")
             if config["dry_run"]:
                 continue
-            subprocess.run([os.path.join(root, f)], cwd=config["root_dir"], check=True)
+            try:
+                if (
+                    subprocess.run(
+                        [os.path.join(root, f)], cwd=config["root_dir"], check=True
+                    ).returncode
+                    != 0
+                ):
+                    print(f"Module test: {f} failed\n")
+                    sys.exit(1)
+            except:
+                print(f"Module test: {f} failed\n")
+                sys.exit(1)
+            print(f"Finished module test: {f}\n")
+
+    print("All module tests passed\n")
 
 
 if __name__ == "__main__":
-    from sys import exit
-
     exit_code = main()
-    exit(exit_code)
+    sys.exit(exit_code)
