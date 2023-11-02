@@ -926,11 +926,11 @@ int main(void)
         }
     }
 
-    for (i64 i = -10; i < 11; ++i)
+    for (i64 i = -5; i < 6; ++i)
     {
-        for (i64 j = -10; j < 11; ++j)
+        for (i64 j = -5; j < 6; ++j)
         {
-            for (i64 t = -10; t < 11; ++t)
+            for (i64 t = -5; t < 6; ++t)
             {
                 printf("i = %ld, j = %ld, t = %ld\n", i, j, t);
                 printf("%.16e\n", hermite_coef_recursive(0.623914, 1.169596, i, j, t, 1.494187));
