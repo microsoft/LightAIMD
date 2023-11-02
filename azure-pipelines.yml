@@ -35,3 +35,6 @@ steps:
 
 - script: python3 scripts/build.py --sanity-test --release --debug --assume-yes
   displayName: 'Run Sanity Test'
+
+- script: python3 scripts/build.py --module-test --release --debug --assume-yes
+  displayName: 'Run Module Test'
