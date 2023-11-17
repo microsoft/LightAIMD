@@ -111,10 +111,9 @@ def main():
     parser.add_argument(
         "--run",
         dest="run",
-        default=False,
+        default="",
         required=False,
-        action="store_true",
-        help="Run the project",
+        help="Run an executable",
     )
     #
     parser.add_argument(
@@ -302,16 +301,22 @@ def build(debug=False):
 
 
 def run(args):
+    executable = args.run.strip()
+
+    if executable == "":
+        print("No executable specified")
+        return
+
     if args.debug:
         config["active_build_dir"] = config["build_debug_dir"]
         config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
         print("Running the debug version:")
-        print(f"    {os.path.join(config['bin_dir'], 'lightaimd')}")
+        print(f"    {os.path.join(config['bin_dir'], executable)}")
         if config["dry_run"]:
             return
 
         subprocess.run(
-            [os.path.join(config["bin_dir"], "lightaimd")],
+            [os.path.join(config["bin_dir"], executable)],
             cwd=config["root_dir"],
             check=True,
         )
@@ -320,15 +325,16 @@ def run(args):
         config["active_build_dir"] = config["build_release_dir"]
         config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
         print("Running the release version:")
-        print(f"    {os.path.join(config['bin_dir'], 'lightaimd')}")
+        print(f"    {os.path.join(config['bin_dir'], executable)}")
         if config["dry_run"]:
             return
 
         subprocess.run(
-            [os.path.join(config["bin_dir"], "lightaimd")],
+            [os.path.join(config["bin_dir"], executable)],
             cwd=config["root_dir"],
             check=True,
         )
+
 
 def module_test_debug():
     print("Running the debug version of module tests")
@@ -336,11 +342,13 @@ def module_test_debug():
     config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
     module_test()
 
+
 def module_test_release():
     print("Running the release version of module tests")
     config["active_build_dir"] = config["build_release_dir"]
     config["bin_dir"] = os.path.join(config["active_build_dir"], "bin")
     module_test()
+
 
 def module_test():
     for root, dirs, files in os.walk(config["bin_dir"]):
