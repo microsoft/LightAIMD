@@ -216,7 +216,7 @@ void print_molecule(struct molecule* mol)
 int main(void)
 {
     struct molecule* mol = x_malloc(sizeof(struct molecule));
-    read_xyz("sample/chignolin.xyz", mol);
+    read_xyz("sample/h2o.xyz", mol);
     print_molecule(mol);
     return 0;
 }
