@@ -4,6 +4,7 @@
  */
 #include <float.h>
 #include <stdio.h>
+#include <math.h>
 #include "numeric_types.h"
 
 void print_numeric_type_sizes()
@@ -37,6 +38,15 @@ void print_numeric_type_sizes()
     printf("sizeof(double _Complex): %lu\n", sizeof(double _Complex));
     printf("sizeof(long double _Complex): %lu\n", sizeof(long double _Complex));
     printf("\n");
+
+    printf("sizeof integer char constant ('a'): %lu\n", sizeof('a'));
+    printf("sizeof char in string (\"a\"): %lu\n", sizeof("a"[0]));
+    printf("sizeof 1ul: %lu\n", sizeof(1ul));
+    printf("sizeof 1ull: %lu\n", sizeof(1ull));
+    printf("\n");
+
+    printf("max u64: %lu\n", U64_MAX);
+    printf("\n");
 }
 
 void print_machine_epsilon()
@@ -44,6 +54,20 @@ void print_machine_epsilon()
     printf("FLT_EPSILON: %.16e\n", FLT_EPSILON);
     printf("DBL_EPSILON: %.16e\n", DBL_EPSILON);
     printf("LDBL_EPSILON: %.16Le\n", LDBL_EPSILON);
+    printf("\n");
+}
+
+static f64 const F64_RELATIVE_TOLERANCE = 1e-14;
+static f64 const F64_ABSOLUTE_TOLERANCE = 1e-14;
+
+u64 f64_is_close(f64 a, f64 b)
+{
+    return fabs(a - b) <= fmax(F64_RELATIVE_TOLERANCE* fmax(fabs(a), fabs(b)), F64_ABSOLUTE_TOLERANCE);
+}
+
+u64 f64_is_zero(f64 a)
+{
+    return fabs(a) == 0.0;
 }
 
 #ifdef MODULE_TEST

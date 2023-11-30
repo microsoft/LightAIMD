@@ -5,6 +5,7 @@
 #ifndef NUMERIC_TYPES_H
 #define NUMERIC_TYPES_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "config.h"
@@ -41,7 +42,7 @@
 
 #endif
 
-#define U64_MAX 18446744073709551615ull
+#define U64_MAX 0xFFFFFFFFFFFFFFFF
 
 #define f32 float
 #define f64 double
@@ -116,6 +117,28 @@
 
 #endif
 
+#define B64_MEMBERS            \
+    i8 i8_value;               \
+    u8 u8_value;               \
+    i16 i16_value;             \
+    u16 u16_value;             \
+    i32 i32_value;             \
+    u32 u32_value;             \
+    i64 i64_value;             \
+    u64 u64_value;             \
+    f32 f32_value;             \
+    f64 f64_value;             \
+    i8 i8_array[sizeof(u64)];  \
+    u8 u8_array[sizeof(u64)];  \
+    void* pointer
+
+union b64
+{
+    B64_MEMBERS;
+};
+
 void print_numeric_type_sizes();
+u64 f64_is_close(f64 a, f64 b);
+u64 f64_is_zero(f64 a);
 
 #endif
