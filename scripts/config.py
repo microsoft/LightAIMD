@@ -25,6 +25,7 @@ class Configuration:
             "SHARED_LIBS": ["c", "m", "pthread", "gcc_s", "stdc++"],
             "RUNTIME_DEFINED_SYMS": [
                 "__dso_handle",
+                "__tls_get_addr",
                 "__cudaRegisterLinkedBinary_",
                 "_intel_fast_mem",
                 "__svml_",
