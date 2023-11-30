@@ -8,6 +8,7 @@
 #include "json.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // structural characters
@@ -736,7 +737,7 @@ int test_read_json_file(char* program_path)
         return 1;
     }
 
-    sprintf(json_file, "%s/../../../sample/sample.json", parent_dir_buffer);
+    sprintf(json_file, "%s/../../../samples/sample.json", parent_dir_buffer);
 
     if (realpath(json_file, json_file_abspath) == NULL)
     {

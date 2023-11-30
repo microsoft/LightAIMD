@@ -101,7 +101,7 @@ int main(void)
     ensure_dir_exists("output");
 
     char stem[256];
-    filename_stem("sample/h2o.xyz", stem);
+    filename_stem("samples/h2o.xyz", stem);
     printf("stem: %s\n", stem);
     return 0;
 }
