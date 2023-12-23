@@ -175,21 +175,32 @@ def generate_ninja_script(debug=False):
                 + ["-Wl,--end-group"]
             )
 
+            nvcc_extra_flags = (
+                ["-Xlinker --start-group"]
+                + [f"-l{lib}" for lib in libs]
+                + ["-Xlinker --end-group"]
+            )
+
             if target in special_treatment:
                 flags = special_treatment[target].get(config["COMPILER"], [])
                 extra_flags.extend(flags)
+                nvcc_extra_flags.extend(flags)
 
             if cuda_obj and config["use_cuda"]:
                 writer.write(
                     f"build {os.path.join(config['bin_dir'], target)}: nvcc_link {' '.join(input_files)}\n"
                 )
+
+                if len(nvcc_extra_flags) > 0:
+                    writer.write(f"  extra_link_flags = {' '.join(nvcc_extra_flags)}\n")
+
             else:
                 writer.write(
                     f"build {os.path.join(config['bin_dir'], target)}: link_objects {' '.join(input_files)}\n"
                 )
 
-            if len(extra_flags) > 0:
-                writer.write(f"  extra_link_flags = {' '.join(extra_flags)}\n")
+                if len(extra_flags) > 0:
+                    writer.write(f"  extra_link_flags = {' '.join(extra_flags)}\n")
 
     def write_ninja_file_obj_targets(ninja_file, object_targets):
         os.makedirs(os.path.dirname(ninja_file), exist_ok=True)
