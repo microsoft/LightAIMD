@@ -7,6 +7,10 @@
 
 LightAIMD is a lightweight AIMD (*ab initio* molecular dynamics) simulation program for simulating aperiodic molecular systems, such as biomolecules.
 
+## Features
+
+LightAIMD supports Hartree-Fock and Density Functional Theory based quantum chemistry calculations. Given a 3D molecular structure, LightAIMD can calculate single point energy, single point forces (electronic forces acting on the nuclei), or perform Born-Oppenheimer molecular dynamics simulation.
+
 ## Getting started
 You can use the `scripts/build.py` script to set up the development environment and build LightAIMD. This project provides a meta build system that automatically detects the code dependencies, generates the [Ninja](https://ninja-build.org) build scripts, and builds the project. The meta build system should work for most modern Linux systems.
 
@@ -76,20 +80,38 @@ python3 scripts/build.py --sanity-test --release --debug
 ```
 
 ### Run your first simulation
+
+#### Single point energy calculation
+You can run a Hartree-Fock (HF) based single point energy calculation:
+```shell
+./build/release/bin/lightaimd --hf --mol samples/h2o.xyz
+```
+or you can run a Density Functional Theory (DFT) based single point energy calculation:
+```shell
+./build/release/bin/lightaimd --dft --mol samples/h2o.xyz
+```
+
+#### Single point force calculation
+You can run a HF based single point force calculation:
+```shell
+./build/release/bin/lightaimd --hf --force --mol samples/h2o.xyz
+```
+or you can run a DFT based single point force calculation:
+```shell
+./build/release/bin/lightaimd --dft --force --mol samples/h2o.xyz
+```
+
+#### *Ab Initio* Molecular Dynamics (AIMD) simulation
 You can run an HF (Hartree-Fock) based simulation:
 ```shell
-./build/release/bin/lightaimd --hf --bomd --mol sample/h2o.xyz
+./build/release/bin/lightaimd --hf --bomd --mol samples/h2o.xyz
 ```
 or you can run a DFT (Density Functional Theory) based simulation:
 ```shell
-./build/release/bin/lightaimd --dft --bomd --mol sample/h2o.xyz
+./build/release/bin/lightaimd --dft --bomd --mol samples/h2o.xyz
 ```
 
-Here, *--bomd* stands for Born-Oppenheimer Molecular Dynamics.
-
-## Features
-
-LightAIMD currently supports Hartree-Fock and Density Functional Theory based quantum chemistry calculations. Given a 3D molecular structure, LightAIMD can calculate single point energy, single point forces (electronic forces acting on the nuclei), or perform Born-Oppenheimer molecular dynamics simulation.
+Here, *--bomd* stands for Born-Oppenheimer (*Ab Initio*) Molecular Dynamics.
 
 ## Design philosophy
 
