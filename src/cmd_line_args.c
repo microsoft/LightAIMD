@@ -157,7 +157,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
     {
         args->job_type = JOB_TYPE_BOMD;
     }
-    if (check_flag(argc, argv, "--spf"))
+    if (check_flag(argc, argv, "--force"))
     {
         args->job_type = JOB_TYPE_SPF;
     }
@@ -189,7 +189,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
     }
     else
     {
-        args->md_steps = 100;
+        args->md_steps = 10;
     }
 
     char* md_delta_t_fs_value = get_arg_value_by_key(argc, argv, "--md-delta-t");
