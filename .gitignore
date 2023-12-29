@@ -9,6 +9,7 @@ obj
 tmp
 build
 output
+*-out
 __pycache__
 build.ninja
 ext/eigen
