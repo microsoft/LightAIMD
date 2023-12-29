@@ -13,9 +13,9 @@ cppcompiler = {cxx}
 nvcc = {nvcc}
 compiler = $ccompiler
 
-compile_flags = -O3 -Wall -fPIC -I{src_dir}{cuda_compile_flags}{debug_flags}
+compile_flags = -O3 -Wall -fPIC -I{src_dir}{cuda_compile_flags}{debug_flags}{cmd_line_provided_compile_flags}
 extra_compile_flags =
-link_flags = -O3 -Wall{cuda_link_flags}{debug_flags}
+link_flags = -O3 -Wall{cuda_link_flags}{debug_flags}{cmd_line_provided_link_flags}
 extra_link_flags =
 nvcc_flags = {nvcc_flags}
 compile_cu_flags = {compile_cu_flags}{nvcc_debug_flags}
@@ -52,6 +52,18 @@ special_treatment = {
 }
 
 
+def cmd_line_provided_flags(cmd_flags):
+    flags = []
+    for flag in cmd_flags.strip().split(","):
+        if len(flag) > 0:
+            flags.append(f"-{flag}")
+
+    if len(flags) == 0:
+        return ""
+    else:
+        return " " + " ".join(flags)
+
+
 def generate_ninja_script(debug=False):
     def write_ninja_preamble(writer):
         nvcc_flags = f"-ccbin {config['CC']} --allow-unsupported-compiler -Xnvlink --suppress-stack-size-warning"
@@ -63,6 +75,7 @@ def generate_ninja_script(debug=False):
         cuda_link_flags = (
             f" -L{config['CUDA_LIB_DIR']} -lcudart -lcuda" if config["use_cuda"] else ""
         )
+
         writer.write(
             ninja_preamble.format(
                 cc=config["CC"],
@@ -76,6 +89,12 @@ def generate_ninja_script(debug=False):
                 nvcc_link_flags=cuda_link_flags,
                 debug_flags=debug_flags,
                 nvcc_debug_flags=nvcc_debug_flags,
+                cmd_line_provided_compile_flags=cmd_line_provided_flags(
+                    config["COMPILE_FLAGS"]
+                ),
+                cmd_line_provided_link_flags=cmd_line_provided_flags(
+                    config["LINK_FLAGS"]
+                ),
             )
         )
         writer.write("\n")

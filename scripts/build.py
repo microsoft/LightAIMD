@@ -51,6 +51,20 @@ def main():
         help="Compiler to use",
     )
     parser.add_argument(
+        "--compile-flags",
+        dest="compile_flags",
+        default="",
+        required=False,
+        help="Compile flags",
+    )
+    parser.add_argument(
+        "--link-flags",
+        dest="link_flags",
+        default="",
+        required=False,
+        help="Link flags",
+    )
+    parser.add_argument(
         "--install-build-tools",
         dest="install_build_tools",
         default=False,
@@ -184,6 +198,12 @@ def main():
 
     if args.compiler:
         config["COMPILER"] = args.compiler
+
+    if args.compile_flags:
+        config["COMPILE_FLAGS"] = args.compile_flags
+
+    if args.link_flags:
+        config["LINK_FLAGS"] = args.link_flags
 
     if args.enable_cuda:
         config["DISABLE_CUDA"] = False

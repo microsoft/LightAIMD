@@ -42,6 +42,8 @@ class Configuration:
             "USE_MKL": False,
             # compiler related
             "COMPILER": "gcc",  # possible values: "clang", "gcc", "icx"
+            "COMPILE_FLAGS": "",
+            "LINK_FLAGS": "",
         }
 
         self.runtime_settings = {
