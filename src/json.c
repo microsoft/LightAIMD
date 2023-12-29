@@ -67,7 +67,7 @@ static u64 const JSON_TOKEN_TYPE_STRING = 3;
  * unescaped_codepoints is the array for holding the unescaped UTF-8 code points, with the same size as utf8_codepoints.
  * unescaped_codepoints_len is the length of the unescaped_codepoints array.
  */
-u64 unescape_json_string(u32* utf8_codepoints, u64 utf8_codepoints_len, u32* unescaped_codepoints)
+u64 json_unescape_string(u32* utf8_codepoints, u64 utf8_codepoints_len, u32* unescaped_codepoints)
 {
     u64 escaped_cp_idx = 0;   // escaped codepoint index
     u64 unescaped_cp_idx = 0; // unescaped codepoint index
@@ -177,7 +177,7 @@ static u64 unescape_control_chars(u32* utf8_codepoints, u64 utf8_codepoints_len,
  * codepoints_len [out] is the length of the codepoints array.
  * _ot (ownership transfer) indicates that the function will transfer the ownership of the allocated buffer to the caller.
  */
-void read_json_into_codepoints_ot(char const* json_path, u32** utf8_codepoints, u64* utf8_codepoints_len)
+void json_read_into_codepoints_ot(char const* json_path, u32** utf8_codepoints, u64* utf8_codepoints_len)
 {
     void* buffer;
     u64 file_size;
@@ -392,7 +392,7 @@ static u64 token_type2value_type(u64 token_type, u32 first_codepoint)
  * returns a pointer to the JSON struct.
  * Note this is a recursive function.
  */
-struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* tokens, u64* token_idx, u64 tokens_len)
+struct json* json_decode_tokens_ot(u32* utf8_codepoints, struct json_token* tokens, u64* token_idx, u64 tokens_len)
 {
     if (*token_idx >= tokens_len)
     {
@@ -428,7 +428,7 @@ struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* toke
         struct json* next = NULL;
         do
         {
-            child = decode_json_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
+            child = json_decode_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
 
             if (NULL == child)
             {
@@ -477,7 +477,7 @@ struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* toke
 
         do
         {
-            child = decode_json_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
+            child = json_decode_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
             if (NULL == child)
             {
                 struct json_token* current_token = &tokens[*token_idx];
@@ -503,7 +503,7 @@ struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* toke
                 if (child->type == JSON_VALUE_TYPE_STRING)
                 {
                     ++(*token_idx);
-                    struct json* value = decode_json_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
+                    struct json* value = json_decode_tokens_ot(utf8_codepoints, tokens, token_idx, tokens_len);
                     if (NULL == value)
                     {
                         printf("Error: invalid json member value object.\n");
@@ -542,7 +542,7 @@ struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* toke
     return json;
 }
 
-void free_json(struct json* json)
+void json_free(struct json* json)
 {
     if (json->type == JSON_VALUE_TYPE_ARRAY || json->type == JSON_VALUE_TYPE_OBJECT)
     {
@@ -550,14 +550,14 @@ void free_json(struct json* json)
         while (child != NULL)
         {
             struct json* next = child->next;
-            free_json(child);
+            json_free(child);
             child = next;
         }
     }
     x_free(json);
 }
 
-struct json* find_json_obj_member_by_codepoints(struct json* json_obj, u32 const* codepoints, u64 codepoints_len)
+struct json* json_find_obj_member_by_codepoints(struct json* json_obj, u32 const* codepoints, u64 codepoints_len)
 {
     struct json* child = json_obj->child;
 
@@ -576,7 +576,7 @@ struct json* find_json_obj_member_by_codepoints(struct json* json_obj, u32 const
     return NULL;
 }
 
-struct json* find_json_obj_member_by_name(struct json* json_obj, char const* name)
+struct json* json_find_obj_member_by_name(struct json* json_obj, char const* name)
 {
     struct json* child = json_obj->child;
 
@@ -595,7 +595,7 @@ struct json* find_json_obj_member_by_name(struct json* json_obj, char const* nam
     return NULL;
 }
 
-void print_json(struct json* json)
+void json_print(struct json* json)
 {
     if (json->type == JSON_VALUE_TYPE_ARRAY)
     {
@@ -603,7 +603,7 @@ void print_json(struct json* json)
         struct json* child = json->child;
         while (child != NULL)
         {
-            print_json(child);
+            json_print(child);
             child = child->next;
             if (child != NULL)
             {
@@ -619,7 +619,7 @@ void print_json(struct json* json)
         u64 idx = 0;
         while (child != NULL)
         {
-            print_json(child);
+            json_print(child);
             idx++;
             child = child->next;
             if (child != NULL)
@@ -653,7 +653,7 @@ void print_json(struct json* json)
     else if (json->type == JSON_VALUE_TYPE_STRING)
     {
         u32* unescaped_codepoints = x_malloc(sizeof(u32) * json->length);
-        unescape_json_string(json->codepoints, json->length, unescaped_codepoints);
+        json_unescape_string(json->codepoints, json->length, unescaped_codepoints);
 
         char* string = NULL;
         utf8codepoints_to_cstr(unescaped_codepoints, json->length, &string);
@@ -749,7 +749,7 @@ int test_read_json_file(char* program_path)
 
     u32* codepoints;
     u64 codepoints_len;
-    read_json_into_codepoints_ot(json_file_abspath, &codepoints, &codepoints_len);
+    json_read_into_codepoints_ot(json_file_abspath, &codepoints, &codepoints_len);
     for (u64 i = 0; i < codepoints_len; ++i)
     {
         printf("%c", (char)codepoints[i]);
@@ -770,10 +770,10 @@ int test_read_json_file(char* program_path)
     printf("---------------------------------\n");
 
     u64 token_index = 0;
-    struct json* json = decode_json_tokens_ot(codepoints, tokens, &token_index, tokens_len);
-    print_json(json);
+    struct json* json = json_decode_tokens_ot(codepoints, tokens, &token_index, tokens_len);
+    json_print(json);
 
-    free_json(json);
+    json_free(json);
     x_free(tokens);
     x_free(codepoints);
     printf("\n");

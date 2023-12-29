@@ -39,13 +39,13 @@ struct json_token
     u64 end;   // exclusive: the index of the first codepoint after the token
 };
 
-u64 unescape_json_string(u32* utf8_codepoints, u64 utf8_codepoints_len, u32* unescaped_codepoints);
-void read_json_into_codepoints_ot(char const* json_path, u32** utf8_codepoints, u64* utf8_codepoints_len);
+u64 json_unescape_string(u32* utf8_codepoints, u64 utf8_codepoints_len, u32* unescaped_codepoints);
+void json_read_into_codepoints_ot(char const* json_path, u32** utf8_codepoints, u64* utf8_codepoints_len);
 u64 json_tokenize_ot(u32* utf8_codepoints, u64 utf8_codepoints_len, struct json_token** output_tokens);
-struct json* decode_json_tokens_ot(u32* utf8_codepoints, struct json_token* tokens, u64* token_idx, u64 tokens_len);
-void free_json(struct json* json);
-struct json* find_json_obj_member_by_codepoints(struct json* json_obj, u32 const* codepoints, u64 codepoints_len);
-struct json* find_json_obj_member_by_name(struct json* json_obj, char const* name);
-void print_json(struct json* json);
+struct json* json_decode_tokens_ot(u32* utf8_codepoints, struct json_token* tokens, u64* token_idx, u64 tokens_len);
+void json_free(struct json* json);
+struct json* json_find_obj_member_by_codepoints(struct json* json_obj, u32 const* codepoints, u64 codepoints_len);
+struct json* json_find_obj_member_by_name(struct json* json_obj, char const* name);
+void json_print(struct json* json);
 
 #endif

@@ -41,17 +41,17 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
 
     u32* codepoints;
     u64 codepoints_len;
-    read_json_into_codepoints_ot(sanitized_filepath, &codepoints, &codepoints_len);
+    json_read_into_codepoints_ot(sanitized_filepath, &codepoints, &codepoints_len);
     x_free(sanitized_filepath);
     struct json_token* tokens;
     u64 tokens_len = json_tokenize_ot(codepoints, codepoints_len, &tokens);
     u64 token_index = 0;
-    struct json* json = decode_json_tokens_ot(codepoints, tokens, &token_index, tokens_len);
+    struct json* json = json_decode_tokens_ot(codepoints, tokens, &token_index, tokens_len);
     x_free(tokens);
 
     u64 bc = sizeof(u64); /* byte count, initial value: space for number of elements */
     u64 n_found_elements = 0;
-    struct json* elements = find_json_obj_member_by_codepoints(json, UTF8_CODEPOINTS_ELEMENTS, sizeof(UTF8_CODEPOINTS_ELEMENTS) / sizeof(u32));
+    struct json* elements = json_find_obj_member_by_codepoints(json, UTF8_CODEPOINTS_ELEMENTS, sizeof(UTF8_CODEPOINTS_ELEMENTS) / sizeof(u32));
 
     struct json* element = elements->child;
     while (element != NULL)
@@ -72,13 +72,13 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
         {
             ++n_found_elements;
             bc += sizeof(u64) * 2;
-            struct json* electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
+            struct json* electron_shells = json_find_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
             struct json* electron_shell = electron_shells->child;
             while (electron_shell != NULL)
             {
-                struct json* exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
+                struct json* exponents = json_find_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
                 u64 n_exponents = exponents->length;
-                struct json* angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
+                struct json* angular_momentum = json_find_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
                 struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
@@ -125,15 +125,15 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
             u64* n_orbitals_p = p;
             ++p; // skip the n_orbitals as we do not know its value yet
             u64 n_orbitals = 0;
-            struct json* electron_shells = find_json_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
+            struct json* electron_shells = json_find_obj_member_by_codepoints(element->next, UTF8_CODEPOINTS_ELECTRON_SHELLS, sizeof(UTF8_CODEPOINTS_ELECTRON_SHELLS) / sizeof(u32));
             struct json* electron_shell = electron_shells->child;
             while (electron_shell != NULL)
             {
-                struct json* exponents = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
+                struct json* exponents = json_find_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_EXPONENTS, sizeof(UTF8_CODEPOINTS_EXPONENTS) / sizeof(u32));
                 u64 n_exponents = exponents->length;
-                struct json* coefficients = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_COEFFICIENTS, sizeof(UTF8_CODEPOINTS_COEFFICIENTS) / sizeof(u32));
+                struct json* coefficients = json_find_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_COEFFICIENTS, sizeof(UTF8_CODEPOINTS_COEFFICIENTS) / sizeof(u32));
                 u64 am_index = 0;
-                struct json* angular_momentum = find_json_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
+                struct json* angular_momentum = json_find_obj_member_by_codepoints(electron_shell, UTF8_CODEPOINTS_ANGULAR_MOMENTUM, sizeof(UTF8_CODEPOINTS_ANGULAR_MOMENTUM) / sizeof(u32));
                 struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
@@ -198,7 +198,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
         }
     }
 
-    free_json(json);
+    json_free(json);
     x_free(codepoints);
     return (char*)buffer;
 }
