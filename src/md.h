@@ -5,7 +5,7 @@
 #ifndef MD_H
 #define MD_H
 #include "numeric_types.h"
-#include "cmd_line_args.h"
+#include "cli_args.h"
 #include "scf.h"
 
 struct md_context;

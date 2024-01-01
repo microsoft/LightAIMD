@@ -4,7 +4,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include "cmd_line_args.h"
+#include "cli_args.h"
 #include "sample.h"
 #include "mm.h"
 
@@ -19,7 +19,7 @@ u64 const GRID_SCHEME_FULL = 1;
 u64 const GRID_SCHEME_SG2 = 2;
 u64 const GRID_SCHEME_SG3 = 3;
 
-char* get_arg_value_by_key(int argc, char* argv[], char const* key)
+char* cli_get_arg_value_by_key(int argc, char* argv[], char const* key)
 {
     /* no command-line arguments are provided */
     if (argc < 2)
@@ -40,7 +40,7 @@ char* get_arg_value_by_key(int argc, char* argv[], char const* key)
     return NULL;
 }
 
-u64 check_flag(int argc, char* argv[], char const* key)
+u64 cli_check_flag(int argc, char* argv[], char const* key)
 {
     if (argc < 2)
     {
@@ -57,12 +57,12 @@ u64 check_flag(int argc, char* argv[], char const* key)
     return 0;
 }
 
-void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
+void cli_parse_args(int argc, char* argv[], struct cmd_line_args* args)
 {
     char* xyz_file;
     struct molecule* mol;
 
-    char* mol_value = get_arg_value_by_key(argc, argv, "--mol");
+    char* mol_value = cli_get_arg_value_by_key(argc, argv, "--mol");
     if (mol_value)
     {
         xyz_file = mol_value;
@@ -75,7 +75,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
     }
     args->mol = mol;
 
-    char* basis_set_value = get_arg_value_by_key(argc, argv, "--basis-set");
+    char* basis_set_value = cli_get_arg_value_by_key(argc, argv, "--basis-set");
     if (basis_set_value)
     {
         args->basis_set = basis_set_value;
@@ -85,7 +85,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->basis_set = "basis-set/sto-3g.json";
     }
 
-    char* cc_method_value = get_arg_value_by_key(argc, argv, "--cc-method");
+    char* cc_method_value = cli_get_arg_value_by_key(argc, argv, "--cc-method");
     if (cc_method_value)
     {
         if (!strcmp(cc_method_value, "hf"))
@@ -103,19 +103,19 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->cc_method = CC_METHOD_DFT;
     }
 
-    if (check_flag(argc, argv, "--hf"))
+    if (cli_check_flag(argc, argv, "--hf"))
     {
         args->cc_method = CC_METHOD_HF;
     }
 
-    if (check_flag(argc, argv, "--dft"))
+    if (cli_check_flag(argc, argv, "--dft"))
     {
         args->cc_method = CC_METHOD_DFT;
     }
 
-    args->damping = check_flag(argc, argv, "--damping");
+    args->damping = cli_check_flag(argc, argv, "--damping");
 
-    char* diis_subspace_size_value = get_arg_value_by_key(argc, argv, "--diis-subspace-size");
+    char* diis_subspace_size_value = cli_get_arg_value_by_key(argc, argv, "--diis-subspace-size");
     if (diis_subspace_size_value)
     {
         args->diis_subspace_size = strtoull(diis_subspace_size_value, NULL, 10);
@@ -132,7 +132,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
      */
     args->x_functional_id = 0;
     args->c_functional_id = 0;
-    char* xc_functional_value = get_arg_value_by_key(argc, argv, "--xc-functional");
+    char* xc_functional_value = cli_get_arg_value_by_key(argc, argv, "--xc-functional");
     if (xc_functional_value)
     {
         char* p = xc_functional_value;
@@ -150,19 +150,19 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->c_functional_id = 236;
     }
 
-    args->silent = check_flag(argc, argv, "--silent");
+    args->silent = cli_check_flag(argc, argv, "--silent");
 
     args->job_type = JOB_TYPE_SPE; // the default job type
-    if (check_flag(argc, argv, "--bomd"))
+    if (cli_check_flag(argc, argv, "--bomd"))
     {
         args->job_type = JOB_TYPE_BOMD;
     }
-    if (check_flag(argc, argv, "--force"))
+    if (cli_check_flag(argc, argv, "--force"))
     {
         args->job_type = JOB_TYPE_SPF;
     }
 
-    char* radial_grid_level_value = get_arg_value_by_key(argc, argv, "--radial-grid-level");
+    char* radial_grid_level_value = cli_get_arg_value_by_key(argc, argv, "--radial-grid-level");
     if (radial_grid_level_value)
     {
         args->radial_grid_level = strtoull(radial_grid_level_value, NULL, 10);
@@ -172,7 +172,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->radial_grid_level = 3;
     }
 
-    char* lebedev_level_value = get_arg_value_by_key(argc, argv, "--lebedev-level");
+    char* lebedev_level_value = cli_get_arg_value_by_key(argc, argv, "--lebedev-level");
     if (lebedev_level_value)
     {
         args->lebedev_level = strtoull(lebedev_level_value, NULL, 10);
@@ -182,7 +182,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->lebedev_level = 13;
     }
 
-    char* md_steps_value = get_arg_value_by_key(argc, argv, "--md-steps");
+    char* md_steps_value = cli_get_arg_value_by_key(argc, argv, "--md-steps");
     if (md_steps_value)
     {
         args->md_steps = strtoull(md_steps_value, NULL, 10);
@@ -192,7 +192,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->md_steps = 10;
     }
 
-    char* md_delta_t_fs_value = get_arg_value_by_key(argc, argv, "--md-delta-t");
+    char* md_delta_t_fs_value = cli_get_arg_value_by_key(argc, argv, "--md-delta-t");
     if (md_delta_t_fs_value)
     {
         args->md_delta_t_fs = strtod(md_delta_t_fs_value, NULL);
@@ -202,7 +202,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->md_delta_t_fs = 1.0;
     }
 
-    char* md_temperature_K_value = get_arg_value_by_key(argc, argv, "--md-temperature");
+    char* md_temperature_K_value = cli_get_arg_value_by_key(argc, argv, "--md-temperature");
     if (md_temperature_K_value)
     {
         args->md_temperature_K = strtod(md_temperature_K_value, NULL);
@@ -212,7 +212,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->md_temperature_K = 300.0;
     }
 
-    char* md_thermostat_time_smoothing_factor_value = get_arg_value_by_key(argc, argv, "--md-thermostat-time-smoothing-factor");
+    char* md_thermostat_time_smoothing_factor_value = cli_get_arg_value_by_key(argc, argv, "--md-thermostat-time-smoothing-factor");
     if (md_thermostat_time_smoothing_factor_value)
     {
         args->md_thermostat_time_smoothing_factor = strtod(md_thermostat_time_smoothing_factor_value, NULL);
@@ -222,7 +222,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
         args->md_thermostat_time_smoothing_factor = 1e-3;
     }
 
-    char* check_results_cc_method_id = get_arg_value_by_key(argc, argv, "--check-results");
+    char* check_results_cc_method_id = cli_get_arg_value_by_key(argc, argv, "--check-results");
     if (check_results_cc_method_id)
     {
         args->check_results = strtoull(check_results_cc_method_id, NULL, 10);
@@ -241,7 +241,7 @@ void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args)
 int main(int argc, char* argv[])
 {
     struct cmd_line_args args;
-    parse_cmd_line_args(argc, argv, &args);
+    cli_parse_args(argc, argv, &args);
 
     printf("job_type: %lu\n", args.job_type);
     printf("basis_set: %s\n", args.basis_set);

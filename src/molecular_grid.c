@@ -20,7 +20,7 @@
 #include "einsum.h"
 #include "thread_pool.h"
 #include "standard_grid.h"
-#include "cmd_line_args.h"
+#include "cli_args.h"
 
 /*
  * In what follows, we use the following prefixes to indicate different types of variables:

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 #include "numeric_types.h"
-#include "cmd_line_args.h"
+#include "cli_args.h"
 
 extern u64 STANDARD_GRID_SG2[119][10];
 extern u64 STANDARD_GRID_SG3[119][18];

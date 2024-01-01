@@ -9,7 +9,7 @@
 #include "molecule.h"
 #include "thread_pool.h"
 #include "basis_func.h"
-#include "cmd_line_args.h"
+#include "cli_args.h"
 
 struct scf_context
 {

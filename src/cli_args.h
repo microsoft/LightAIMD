@@ -50,6 +50,8 @@ struct cmd_line_args
     u64 check_results;
 };
 
-void parse_cmd_line_args(int argc, char* argv[], struct cmd_line_args* args);
+u64 cli_check_flag(int argc, char* argv[], char const* key);
+char* cli_get_arg_value_by_key(int argc, char* argv[], char const* key);
+void cli_parse_args(int argc, char* argv[], struct cmd_line_args* args);
 
 #endif

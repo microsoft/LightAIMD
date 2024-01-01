@@ -20,7 +20,7 @@
 #include "dft.h"
 #include "matrix.h"
 #include "lapacke_bridge.h"
-#include "cmd_line_args.h"
+#include "cli_args.h"
 #include "libxc_bridge.h"
 #include "diagnostics.h"
 #include "mm.h"
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
     get_wall_time(&time_start);
 
     struct cmd_line_args args;
-    parse_cmd_line_args(argc, argv, &args);
+    cli_parse_args(argc, argv, &args);
 
     if (!args.silent)
     {
