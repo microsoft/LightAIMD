@@ -148,7 +148,7 @@ void utf8_codepoint(void const* buffer, u64 buffer_size, u32* codepoints, u64 co
     }
 }
 
-void utf8codepoints_to_cstr(u32* codepoints, u64 codepoints_len, char** cstr)
+void utf8_codepoints_to_cstr(u32* codepoints, u64 codepoints_len, char** cstr)
 {
     u8* buffer = x_malloc(codepoints_len + 1);
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -159,7 +159,7 @@ void utf8codepoints_to_cstr(u32* codepoints, u64 codepoints_len, char** cstr)
     *cstr = (char*)buffer;
 }
 
-void cstr_to_utf8codepoints(char const* cstr, u32** codepoints, u64* codepoints_len)
+void utf8_cstr_to_codepoints(char const* cstr, u32** codepoints, u64* codepoints_len)
 {
     u64 cstr_len = strlen(cstr);
     u32* buffer = x_malloc(cstr_len * sizeof(u32));
@@ -171,7 +171,7 @@ void cstr_to_utf8codepoints(char const* cstr, u32** codepoints, u64* codepoints_
     *codepoints_len = cstr_len;
 }
 
-u32 cmp_utf8_codepoints(u32 const* codepoints1, u64 codepoints1_len, u32 const* codepoints2, u64 codepoints2_len)
+u32 utf8_cmp_codepoints(u32 const* codepoints1, u64 codepoints1_len, u32 const* codepoints2, u64 codepoints2_len)
 {
     if (codepoints1_len != codepoints2_len)
     {
@@ -189,7 +189,7 @@ u32 cmp_utf8_codepoints(u32 const* codepoints1, u64 codepoints1_len, u32 const* 
     return 1;
 }
 
-u32 cmp_utf8_with_cstr(u32* codepoints, u64 codepoints_len, char const* cstr)
+u32 utf8_cmp_codepoints_with_cstr(u32* codepoints, u64 codepoints_len, char const* cstr)
 {
     u64 cstr_len = strlen(cstr);
     if (codepoints_len != cstr_len)
@@ -208,7 +208,7 @@ u32 cmp_utf8_with_cstr(u32* codepoints, u64 codepoints_len, char const* cstr)
     return 1;
 }
 
-i64 utf8toi64(u32* codepoints, u64 codepoints_len)
+i64 utf8_codepoints_to_i64(u32* codepoints, u64 codepoints_len)
 {
     u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -222,7 +222,7 @@ i64 utf8toi64(u32* codepoints, u64 codepoints_len)
     return value;
 }
 
-u64 utf8tou64(u32* codepoints, u64 codepoints_len)
+u64 utf8_codepoints_to_u64(u32* codepoints, u64 codepoints_len)
 {
     u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -236,7 +236,7 @@ u64 utf8tou64(u32* codepoints, u64 codepoints_len)
     return value;
 }
 
-f64 utf8tof64(u32* codepoints, u64 codepoints_len)
+f64 utf8_codepoints_to_f64(u32* codepoints, u64 codepoints_len)
 {
     u8 buffer[codepoints_len + 1];  // len(ULLONG_MAX) == 20
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -280,7 +280,7 @@ void utf8_encode(u32 codepoint, char* utf8_str)
     }
 }
 
-void print_utf8_codepoints(u32* codepoints, u64 codepoints_len, char* end)
+void utf8_print_codepoints(u32* codepoints, u64 codepoints_len, char* end)
 {
     setlocale(LC_ALL, "");
     for (u64 i = 0; i < codepoints_len; ++i)
@@ -308,7 +308,7 @@ int main(void)
         printf("codepoint: %04lX\n", codepoints[i]);
     }
 
-    print_utf8_codepoints(codepoints, len, "\n");
+    utf8_print_codepoints(codepoints, len, "\n");
 
     return 0;
 }

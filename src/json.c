@@ -563,7 +563,7 @@ struct json* json_find_obj_member_by_codepoints(struct json* json_obj, u32 const
 
     while (child != NULL)
     {
-        if (cmp_utf8_codepoints(child->codepoints, child->length, codepoints, codepoints_len))
+        if (utf8_cmp_codepoints(child->codepoints, child->length, codepoints, codepoints_len))
         {
             return child->next;
         }
@@ -582,7 +582,7 @@ struct json* json_find_obj_member_by_name(struct json* json_obj, char const* nam
 
     while (child != NULL)
     {
-        if (cmp_utf8_with_cstr(child->codepoints, child->length, name))
+        if (utf8_cmp_codepoints_with_cstr(child->codepoints, child->length, name))
         {
             return child->next;
         }
@@ -639,14 +639,14 @@ void json_print(struct json* json)
     else if (json->type == JSON_VALUE_TYPE_LITERAL)
     {
         char* literal = NULL;
-        utf8codepoints_to_cstr(json->codepoints, json->length, &literal);
+        utf8_codepoints_to_cstr(json->codepoints, json->length, &literal);
         printf("%s", literal);
         x_free(literal);
     }
     else if (json->type == JSON_VALUE_TYPE_NUMBER)
     {
         char* number = NULL;
-        utf8codepoints_to_cstr(json->codepoints, json->length, &number);
+        utf8_codepoints_to_cstr(json->codepoints, json->length, &number);
         printf("%s", number);
         x_free(number);
     }
@@ -656,7 +656,7 @@ void json_print(struct json* json)
         json_unescape_string(json->codepoints, json->length, unescaped_codepoints);
 
         char* string = NULL;
-        utf8codepoints_to_cstr(unescaped_codepoints, json->length, &string);
+        utf8_codepoints_to_cstr(unescaped_codepoints, json->length, &string);
         x_free(unescaped_codepoints);
 
         printf("\"%s\"", string);

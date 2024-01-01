@@ -56,7 +56,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
     struct json* element = elements->child;
     while (element != NULL)
     {
-        u64 Z = utf8tou64(element->codepoints, element->length);
+        u64 Z = utf8_codepoints_to_u64(element->codepoints, element->length);
         u64* s = selected_elements;
         u64 found = 0;
         for (u64 r = 0; r < n_selected_elements; ++r)
@@ -82,7 +82,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
                 struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
-                    u64 k = utf8tou64(am->codepoints, am->length);
+                    u64 k = utf8_codepoints_to_u64(am->codepoints, am->length);
                     u64 n_orbitals = ((k + 1) * (k + 2)) >> 1;
                     bc += n_orbitals * (sizeof(u64) * 4 + n_exponents * sizeof(f64) * 2);
                     am = am->next;
@@ -106,7 +106,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
     element = elements->child;
     while (element != NULL)
     {
-        u64 Z = utf8tou64(element->codepoints, element->length);
+        u64 Z = utf8_codepoints_to_u64(element->codepoints, element->length);
         u64* s = selected_elements;
         u64 found = 0;
         for (u64 r = 0; r < n_selected_elements; ++r)
@@ -137,7 +137,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
                 struct json* am = angular_momentum->child;
                 while (am != NULL)
                 {
-                    u64 k = utf8tou64(am->codepoints, am->length);
+                    u64 k = utf8_codepoints_to_u64(am->codepoints, am->length);
 
                     for (i64 l = k; l >= 0; --l)
                     {
@@ -156,7 +156,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
                             struct json* exponent = exponents->child;
                             while (exponent != NULL)
                             {
-                                *((f64*)p) = utf8tof64(exponent->codepoints, exponent->length);
+                                *((f64*)p) = utf8_codepoints_to_f64(exponent->codepoints, exponent->length);
                                 ++p;
                                 exponent = exponent->next;
                             }
@@ -170,7 +170,7 @@ char* load_basis_set_from_file(char const* basis_set_filepath, u64 n_selected_el
                                     struct json* coeff = coefficient->child;
                                     while (coeff != NULL)
                                     {
-                                        *((f64*)p) = utf8tof64(coeff->codepoints, coeff->length);
+                                        *((f64*)p) = utf8_codepoints_to_f64(coeff->codepoints, coeff->length);
                                         ++p;
                                         coeff = coeff->next;
                                     }
