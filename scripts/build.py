@@ -286,10 +286,19 @@ def clean():
     if config["dry_run"]:
         return
 
-    if os.path.exists(config["active_build_dir"]):
+    if os.path.exists(config["active_build_dir"]) and os.path.exists(
+        os.path.join(config["active_build_dir"], "build.ninja")
+    ):
         subprocess.run(
             ["ninja", "-t", "clean"], cwd=config["active_build_dir"], check=True
         )
+
+        print("Removing build.ninja")
+        os.remove(os.path.join(config["active_build_dir"], "build.ninja"))
+
+    if os.path.exists(os.path.join(config["active_build_dir"], ".ninja_log")):
+        print("Removing .ninja_log")
+        os.remove(os.path.join(config["active_build_dir"], ".ninja_log"))
 
 
 def build_release():
