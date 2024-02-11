@@ -77,7 +77,7 @@ void libxc_initialize(i32* func_ids, i32* is_polarized, u64 func_count)
         /* 0 (OK) or -1 (ERROR) */
         if (xc_func_init(func, func_id, nspin))
         {
-            fprintf(stderr, "Initializing %ld failed.\n", func_id);
+            fprintf(stderr, "Initializing %d failed.\n", func_id);
             continue;
         }
         registry.hybrid_coeffs[func_id] = xc_hyb_exx_coef(func);
@@ -96,7 +96,7 @@ void libxc_initialize(i32* func_ids, i32* is_polarized, u64 func_count)
             registry.xc_types[func_id] = XC_TYPE_MGGA;
             break;
         default:
-            fprintf(stderr, "Functional %ld: functional family is not recognized.\n", func_id);
+            fprintf(stderr, "Functional %d: functional family is not recognized.\n", func_id);
         }
         console_printf(1, "Functional %d %s has been initialized.\n", func->info->number, func->info->name);
         registry.funcs_initialized[func_id] = 1;

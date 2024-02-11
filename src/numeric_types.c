@@ -7,12 +7,16 @@
 #include <math.h>
 #include "numeric_types.h"
 
-void print_numeric_type_sizes()
+void numeric_type_print_sizes()
 {
     printf("sizeof(void*): %lu\n", sizeof(void*));
     printf("\n");
 
+#ifdef __cplusplus
+    printf("sizeof(bool): %lu\n", sizeof(bool));
+#else
     printf("sizeof(_Bool): %lu\n", sizeof(_Bool));
+#endif
 
     printf("sizeof(char): %lu\n", sizeof(char));
     printf("sizeof(signed char): %lu\n", sizeof(signed char));
@@ -74,7 +78,7 @@ u64 f64_is_zero(f64 a)
 #include <stdio.h>
 int main(void)
 {
-    print_numeric_type_sizes();
+    numeric_type_print_sizes();
     print_machine_epsilon();
     return 0;
 }

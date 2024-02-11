@@ -72,14 +72,14 @@ void print_u32_array(u32* A, u64 count, u64 col_size)
     {
         for (u64 j = 0; j < col_size; ++j)
         {
-            printf("%lu ", A[i * col_size + j]);
+            printf("%u ", A[i * col_size + j]);
         }
         printf("\n");
     }
 
     for (u64 j = 0; j < last_row; ++j)
     {
-        printf("%lu ", A[nrow * col_size + j]);
+        printf("%u ", A[nrow * col_size + j]);
     }
     printf("\n");
 

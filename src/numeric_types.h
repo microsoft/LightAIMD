@@ -8,111 +8,47 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "config.h"
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
 
-#ifndef __cplusplus
-#ifndef bool
-#define bool _Bool
-#endif
-#endif
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
-#ifdef PREFER_FAST_TYPE
+typedef float f32;
+typedef double f64;
 
-#define i8 int_fast8_t
-#define i16 int_fast16_t
-#define i32 int_fast32_t
-#define i64 int_fast64_t
-
-#define u8 uint_fast8_t
-#define u16 uint_fast16_t
-#define u32 uint_fast32_t
-#define u64 uint_fast64_t
-
-#elif PREFER_COMPACT_TYPE
-
-#define i8 int_least8_t
-#define i16 int_least16_t
-#define i32 int_least32_t
-#define i64 int_least64_t
-
-#define u8 uint_least8_t
-#define u16 uint_least16_t
-#define u32 uint_least32_t
-#define u64 uint_least64_t
-
-#endif
-
-#define U64_MAX 0xFFFFFFFFFFFFFFFF
-
-#define f32 float
-#define f64 double
-
-#define c32 float _Complex
-#define c64 double _Complex
-#define c128 long double _Complex
+typedef float _Complex c32;
+typedef double _Complex c64;
+typedef long double _Complex c128;
 
 #ifndef __STDC_NO_ATOMICS__
 
 #ifdef __cplusplus
 #include <atomic>
 #define _Atomic(X) std::atomic<X>
-
-#define atomic_bool std::atomic_bool
-
-#ifdef PREFER_FAST_TYPE
-
-#define atomic_i8 std::atomic_int_fast8_t
-#define atomic_i16 std::atomic_int_fast16_t
-#define atomic_i32 std::atomic_int_fast32_t
-#define atomic_i64 std::atomic_int_fast64_t
-
-#define atomic_u8 std::atomic_uint_fast8_t
-#define atomic_u16 std::atomic_uint_fast16_t
-#define atomic_u32 std::atomic_uint_fast32_t
-#define atomic_u64 std::atomic_uint_fast64_t
-
-#elif PREFER_COMPACT_TYPE
-
-#define atomic_i8 std::atomic_int_least8_t
-#define atomic_i16 std::atomic_int_least16_t
-#define atomic_i32 std::atomic_int_least32_t
-#define atomic_i64 std::atomic_int_least64_t
-
-#define atomic_u8 std::atomic_uint_least8_t
-#define atomic_u16 std::atomic_uint_least16_t
-#define atomic_u32 std::atomic_uint_least32_t
-#define atomic_u64 std::atomic_uint_least64_t
-
-#endif
+typedef std::atomic_bool atomic_bool;
+typedef std::atomic_int8_t atomic_i8;
+typedef std::atomic_int16_t atomic_i16;
+typedef std::atomic_int32_t atomic_i32;
+typedef std::atomic_int64_t atomic_i64;
+typedef std::atomic_uint8_t atomic_u8;
+typedef std::atomic_uint16_t atomic_u16;
+typedef std::atomic_uint32_t atomic_u32;
+typedef std::atomic_uint64_t atomic_u64;
 #else
 #include <stdatomic.h>
-
-#ifdef PREFER_FAST_TYPE
-
-#define atomic_i8 atomic_int_fast8_t
-#define atomic_i16 atomic_int_fast16_t
-#define atomic_i32 atomic_int_fast32_t
-#define atomic_i64 atomic_int_fast64_t
-
-#define atomic_u8 atomic_uint_fast8_t
-#define atomic_u16 atomic_uint_fast16_t
-#define atomic_u32 atomic_uint_fast32_t
-#define atomic_u64 atomic_uint_fast64_t
-
-#elif PREFER_COMPACT_TYPE
-
-#define atomic_i8 atomic_int_least8_t
-#define atomic_i16 atomic_int_least16_t
-#define atomic_i32 atomic_int_least32_t
-#define atomic_i64 atomic_int_least64_t
-
-#define atomic_u8 atomic_uint_least8_t
-#define atomic_u16 atomic_uint_least16_t
-#define atomic_u32 atomic_uint_least32_t
-#define atomic_u64 atomic_uint_least64_t
-
-#endif
-
+typedef _Atomic(int8_t) atomic_i8;
+typedef _Atomic(int16_t) atomic_i16;
+typedef _Atomic(int32_t) atomic_i32;
+typedef _Atomic(int64_t) atomic_i64;
+typedef _Atomic(uint8_t) atomic_u8;
+typedef _Atomic(uint16_t) atomic_u16;
+typedef _Atomic(uint32_t) atomic_u32;
+typedef _Atomic(uint64_t) atomic_u64;
 #endif
 
 #endif
@@ -128,8 +64,12 @@
     u64 u64_value;             \
     f32 f32_value;             \
     f64 f64_value;             \
-    i8 i8_array[sizeof(u64)];  \
-    u8 u8_array[sizeof(u64)];  \
+    i8 i8_array[8];            \
+    u8 u8_array[8];            \
+    i16 i16_array[4];          \
+    u16 u16_array[4];          \
+    i32 i32_array[2];          \
+    u32 u32_array[2];          \
     void* pointer
 
 union b64
@@ -137,8 +77,11 @@ union b64
     B64_MEMBERS;
 };
 
-void print_numeric_type_sizes();
+void numeric_type_print_sizes();
 u64 f64_is_close(f64 a, f64 b);
 u64 f64_is_zero(f64 a);
+
+#define U32_MAX 0xFFFFFFFF
+#define U64_MAX 0xFFFFFFFFFFFFFFFF
 
 #endif

@@ -196,12 +196,12 @@ void json_read_into_codepoints_ot(char const* json_path, u32** utf8_codepoints, 
     *utf8_codepoints_len = len;
 }
 
-static bool is_digit(u32 codepoint)
+static u64 is_digit(u32 codepoint)
 {
     return codepoint >= UTF8_ZERO && codepoint <= UTF8_ONENINE[8];
 }
 
-static bool is_sign(u32 codepoint)
+static u64 is_sign(u32 codepoint)
 {
     return codepoint == UTF8_MINUS || codepoint == UTF8_PLUS;
 }
@@ -706,7 +706,7 @@ int test_unescape_string()
     printf("unescaped_codepoints: \n");
     for (u64 i = 0; i < unescaped_codepoints_len; ++i)
     {
-        printf("%04lX ", unescaped_codepoints[i]);
+        printf("%04X ", unescaped_codepoints[i]);
     }
 
     printf("\n");

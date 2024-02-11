@@ -305,7 +305,7 @@ int main(void)
     printf("len: %lu\n", len);
     for (u64 i = 0; i < len; ++i)
     {
-        printf("codepoint: %04lX\n", codepoints[i]);
+        printf("codepoint: %04X\n", codepoints[i]);
     }
 
     utf8_print_codepoints(codepoints, len, "\n");
