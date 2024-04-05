@@ -230,7 +230,7 @@ def check_libxc(use_cuda=False):
             [
                 "curl",
                 "-fsSL",
-                f"http://www.tddft.org/programs/libxc/down.php?file={config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz",
+                f"https://gitlab.com/libxc/libxc/-/archive/{config['LIBXC_VERSION']}/libxc-{config['LIBXC_VERSION']}.tar.gz",
                 "--output",
                 downloaded_file_path,
             ],
@@ -268,7 +268,7 @@ def check_libxc(use_cuda=False):
             )
         else:
             subprocess.run(
-                [f'CC="{config["CC"]}" CFLAGS="-O3" ./configure --prefix={libxc_dir}'],
+                [f'autoreconf -i; CC="{config["CC"]}" CFLAGS="-O3" ./configure --prefix={libxc_dir}'],
                 cwd=libxc_src_dir,
                 shell=True,
                 check=True,
